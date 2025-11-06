@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Semantic Web and Ontology: The Knowledge Curator Mission</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a4d3c 0%, #1a1a1a 100%);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .presentation-container {
+            width: 960px;
+            height: 720px;
+            background: #1a1a1a;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #0a4d3c;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.6s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+
+        /* Scrollable content area */
+        .slide-header {
+            background: linear-gradient(135deg, #0a4d3c 0%, #0d6b52 100%);
+            padding: 30px 40px;
+            border-bottom: 3px solid #00ff88;
+            flex-shrink: 0;
+        }
+
+        .slide-header h1 {
+            color: #00ff88;
+            font-size: 2.2em;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .slide-header .subtitle {
+            color: #ffffff;
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .slide-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 50px;
+            background: #1a1a1a;
+        }
+
+        /* Custom Scrollbar */
+        .slide-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: #0a0a0a;
+            border-radius: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: #0a4d3c;
+            border-radius: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background: #0d6b52;
+        }
+
+        /* Slide 1 - Title Slide */
+        .slide-1 {
+            background: linear-gradient(135deg, #0a4d3c 0%, #000000 100%);
+        }
+
+        .slide-1 .slide-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px;
+            overflow: visible;
+        }
+
+        .slide-1 h1 {
+            font-size: 3em;
+            color: #00ff88;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-out;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+        }
+
+        .slide-1 h2 {
+            font-size: 1.6em;
+            color: #ffffff;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .slide-1 .context {
+            background: rgba(10, 77, 60, 0.3);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #0a4d3c;
+            backdrop-filter: blur(10px);
+            margin-top: 30px;
+            animation: fadeIn 1s ease-out 0.6s both;
+            max-width: 700px;
+        }
+
+        .slide-1 .context p {
+            margin: 12px 0;
+            font-size: 1.05em;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .slide-1 .context strong {
+            color: #00ff88;
+        }
+
+        /* Content Blocks */
+        .content-block {
+            background: rgba(10, 77, 60, 0.15);
+            border-left: 4px solid #00ff88;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #ffffff;
+        }
+
+        .content-block h3 {
+            color: #00ff88;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .content-block p, .content-block li {
+            color: #e0e0e0;
+            line-height: 1.7;
+            font-size: 1.05em;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(10, 77, 60, 0.2));
+            border: 2px solid #0a4d3c;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            color: #ffffff;
+        }
+
+        .highlight-box h3 {
+            color: #00ff88;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+        }
+
+        .highlight-box strong {
+            color: #00ff88;
+        }
+
+        /* Problem Cards */
+        .problem-card {
+            background: rgba(139, 0, 0, 0.2);
+            border-left: 4px solid #ff4444;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            transform: translateX(-50px);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+
+        .slide.active .problem-card {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .slide.active .problem-card:nth-child(2) { transition-delay: 0.2s; }
+        .slide.active .problem-card:nth-child(3) { transition-delay: 0.4s; }
+        .slide.active .problem-card:nth-child(4) { transition-delay: 0.6s; }
+        .slide.active .problem-card:nth-child(5) { transition-delay: 0.8s; }
+
+        .problem-card h3 {
+            color: #ff6b6b;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .problem-card p {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .example-box {
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px dashed #0a4d3c;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            font-style: italic;
+            color: #a0a0a0;
+        }
+
+        .example-box strong {
+            color: #00ff88;
+        }
+
+        /* Vision Grid */
+        .vision-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .vision-card {
+            background: rgba(10, 77, 60, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #0a4d3c;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+
+        .slide.active .vision-card {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .slide.active .vision-card:nth-child(1) { transition-delay: 0.2s; }
+        .slide.active .vision-card:nth-child(2) { transition-delay: 0.4s; }
+        .slide.active .vision-card:nth-child(3) { transition-delay: 0.6s; }
+        .slide.active .vision-card:nth-child(4) { transition-delay: 0.8s; }
+
+        .vision-card h3 {
+            color: #00ff88;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+        }
+
+        .vision-card p {
+            font-size: 1em;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        /* Principles Container */
+        .principles-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .principle-card {
+            background: rgba(10, 77, 60, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #0a4d3c;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transform: translateY(50px);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+
+        .slide.active .principle-card {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .slide.active .principle-card:nth-child(1) { transition-delay: 0.1s; }
+        .slide.active .principle-card:nth-child(2) { transition-delay: 0.3s; }
+        .slide.active .principle-card:nth-child(3) { transition-delay: 0.5s; }
+        .slide.active .principle-card:nth-child(4) { transition-delay: 0.7s; }
+
+        .principle-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 255, 136, 0.3);
+            border-color: #00ff88;
+        }
+
+        .principle-number {
+            position: absolute;
+            top: -20px;
+            right: 10px;
+            font-size: 5em;
+            font-weight: bold;
+            color: rgba(0, 255, 136, 0.1);
+        }
+
+        .principle-card h3 {
+            color: #00ff88;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .principle-card p {
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: #e0e0e0;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Knowledge Graph Visualization */
+        .kg-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .kg-info {
+            flex: 1;
+        }
+
+        .triple-example {
+            background: linear-gradient(135deg, #0a4d3c 0%, #000000 100%);
+            color: #00ff88;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            margin-top: 15px;
+            text-align: center;
+            border: 2px solid #00ff88;
+            line-height: 1.8;
+        }
+
+        .benefit-list {
+            margin-top: 20px;
+        }
+
+        .benefit-item {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 15px;
+            margin: 12px 0;
+            border-left: 4px solid #00ff88;
+            border-radius: 5px;
+            color: #e0e0e0;
+            transform: translateX(-30px);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+
+        .slide.active .benefit-item {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .slide.active .benefit-item:nth-child(1) { transition-delay: 0.5s; }
+        .slide.active .benefit-item:nth-child(2) { transition-delay: 0.7s; }
+
+        .benefit-item strong {
+            color: #00ff88;
+        }
+
+        /* Project Pipeline */
+        .project-goal {
+            background: rgba(10, 77, 60, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 2px solid #0a4d3c;
+        }
+
+        .project-goal h3 {
+            color: #00ff88;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .project-goal p {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .pipeline {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .pipeline-step {
+            background: rgba(10, 77, 60, 0.3);
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #0a4d3c;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+
+        .slide.active .pipeline-step {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .slide.active .pipeline-step:nth-child(1) { transition-delay: 0.2s; }
+        .slide.active .pipeline-step:nth-child(2) { transition-delay: 0.4s; }
+        .slide.active .pipeline-step:nth-child(3) { transition-delay: 0.6s; }
+        .slide.active .pipeline-step:nth-child(4) { transition-delay: 0.8s; }
+
+        .pipeline-step:hover {
+            border-color: #00ff88;
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .step-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #0a4d3c 0%, #000000 100%);
+            color: #00ff88;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            border: 2px solid #00ff88;
+        }
+
+        .pipeline-step h3 {
+            color: #00ff88;
+            font-size: 1.2em;
+            margin-bottom: 12px;
+        }
+
+        .pipeline-step p {
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        /* Setup Cards */
+        .setup-card {
+            background: rgba(10, 77, 60, 0.2);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #0a4d3c;
+            backdrop-filter: blur(10px);
+            margin: 15px 0;
+            transform: translateX(50px);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+
+        .slide.active .setup-card {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .slide.active .setup-card:nth-child(1) { transition-delay: 0.2s; }
+        .slide.active .setup-card:nth-child(2) { transition-delay: 0.4s; }
+        .slide.active .setup-card:nth-child(3) { transition-delay: 0.6s; }
+
+        .setup-card h3 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            color: #00ff88;
+        }
+
+        .setup-card p {
+            font-size: 1.05em;
+            line-height: 1.7;
+            color: #e0e0e0;
+        }
+
+        .setup-card ul {
+            margin-left: 20px;
+            margin-top: 10px;
+            color: #e0e0e0;
+        }
+
+        .setup-card li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #000000;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #0a4d3c;
+            color: #00ff88;
+            font-size: 0.95em;
+        }
+
+        /* Use Cases & Examples */
+        .use-case-card {
+            background: rgba(10, 77, 60, 0.2);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #00ff88;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .use-case-card:hover {
+            background: rgba(10, 77, 60, 0.3);
+            transform: translateX(10px);
+            border-left-width: 6px;
+        }
+
+        .use-case-card h4 {
+            color: #00ff88;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .use-case-details {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            color: #e0e0e0;
+        }
+
+        .use-case-details.show {
+            display: block;
+            animation: expandDown 0.3s ease;
+        }
+
+        /* Search Demo */
+        .search-demo {
+            background: rgba(10, 77, 60, 0.2);
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #0a4d3c;
+            margin: 20px 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            background: #000000;
+            color: #00ff88;
+            border: 2px solid #0a4d3c;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .search-btn {
+            padding: 12px 30px;
+            background: #0a4d3c;
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: #00ff88;
+            color: #000000;
+            transform: scale(1.05);
+        }
+
+        .search-results {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result-item {
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(10, 77, 60, 0.3);
+            border-radius: 5px;
+            border-left: 3px solid #00ff88;
+            color: #e0e0e0;
+        }
+
+        .result-item strong {
+            color: #00ff88;
+        }
+
+        /* Navigation Controls */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            background: rgba(10, 77, 60, 0.9);
+            color: #00ff88;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            background: #00ff88;
+            color: #000000;
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(10, 77, 60, 0.3);
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0a4d3c 0%, #00ff88 100%);
+            transition: width 0.3s ease;
+        }
+
+        /* Slide Counter */
+        .slide-counter {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(10, 77, 60, 0.9);
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            color: #00ff88;
+            font-size: 0.9em;
+            animation: bounce 2s infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 99;
+        }
+
+        .scroll-indicator.show {
+            opacity: 0.7;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes expandDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+            }
+        }
+
+        /* Interactive Hint */
+        .interactive-hint {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 255, 136, 0.2);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            backdrop-filter: blur(10px);
+            animation: pulse 2s infinite;
+            z-index: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.7;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Keyboard Info */
+        .keyboard-info {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ff88;
+            padding: 12px 25px;
+            border-radius: 20px;
+            border: 2px solid #00ff88;
+            font-size: 0.9em;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .keyboard-info.show {
+            opacity: 1;
+        }
+
+        /* Lists */
+        ul {
+            margin-left: 25px;
+        }
+
+        li {
+            margin: 10px 0;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .presentation-container {
+                width: 100vw;
+                height: 75vw;
+                max-height: 100vh;
+            }
+
+            .slide-content {
+                padding: 30px 40px;
+            }
+
+            .vision-grid,
+            .principles-container,
+            .pipeline {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="keyboard-info" id="keyboardInfo">
+        ⌨️ Use ← → arrow keys or click buttons to navigate
+    </div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Title Slide -->
+        <div class="slide slide-1 active">
+            <div class="slide-content">
+                <h1> The Semantic Web and Ontology</h1>
+                <h2>The Knowledge Curator Mission - Lecture 1</h2>
+                <h2>Eng. Dr. Tiroshan Madushanka</h2>
+                <div class="context">
+                    <p><strong>Setting the Stage:</strong> Transitioning from Traditional Web to Knowledge-Driven Systems</p>
+                    <p><strong>Reference Chapters:</strong> sw1 (Traditional vs. Semantic Web), sw2 (Search Engine Comparison)</p>
+                    <p><strong>Project Focus:</strong> Building a Resilient City Knowledge Graph capable of automated inference</p>
+                    <p><strong>Course Goal:</strong> Master RDF, RDFS, OWL, and SPARQL to create intelligent, queryable knowledge systems</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Problem with Traditional Web -->
+        <div class="slide slide-2">
+            <div class="slide-header">
+                <h1>🔍 The Web of Documents: A Machine's Dilemma</h1>
+                <p class="subtitle">Understanding the limitations of keyword-based search</p>
+            </div>
+            <div class="slide-content">
+                <div class="problem-card">
+                    <h3>🔴 Key Issue: Keyword Search vs. Meaning</h3>
+                    <p>Traditional search engines (analyzed in sw2) rely on simple keyword matching and link structure (PageRank), which lacks semantic understanding.</p>
+                </div>
+
+                <div class="problem-card">
+                    <h3>📄 Limitation 1: Human-Optimized Content</h3>
+                    <p>The existing World Wide Web (Web 2.0) is optimized for human consumption. Content is presented visually, relying on human intelligence for interpretation.</p>
+                    <p style="margin-top: 10px;">Documents only give machines instructions about <strong style="color: #ff6b6b;">PRESENTATION</strong>, not <strong style="color: #00ff88;">UNDERSTANDING</strong>.</p>
+                </div>
+
+                <div class="problem-card">
+                    <h3>🔗 Limitation 2: No Semantic Context</h3>
+                    <p>The Internet is constructed such that it is oblivious to actual information content. Web browsers, servers, and search engines cannot distinguish between different types of content.</p>
+                    <div class="example-box">
+                        <strong>Example:</strong> Search for "Python" provides no context regarding whether it is the snake 🐍, the programming language 💻, or the Monty Python group 🎭
+                    </div>
+                </div>
+
+                <div class="problem-card">
+                    <h3>⚠️ The Challenge</h3>
+                    <p>This requires human effort to disambiguate terms. Machines see the text, but cannot reliably infer the relationships or the intended meaning of the content.</p>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>🎯 The Root Problem</h3>
+                    <p>All three main Web activities (Search, Integration, Web Mining) suffer from the same underlying issue:</p>
+                    <p style="margin-top: 15px; padding: 15px; background: rgba(255, 68, 68, 0.2); border-radius: 8px; font-weight: bold;">
+                        Computers can PRESENT information but cannot UNDERSTAND information
+                    </p>
+                </div>
+
+                <div class="content-block">
+                    <h3>💭 Real-World Impact</h3>
+                    <p>Consider booking an airline ticket:</p>
+                    <ul>
+                        <li>Step 1: Check flight schedules on airline website</li>
+                        <li>Step 2: Compare prices on travel agent site</li>
+                        <li>Step 3: Process payment through payment service</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Problem:</strong> You must manually integrate these three separate Web services!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Vision of Semantic Web -->
+        <div class="slide slide-3">
+            <div class="slide-header">
+                <h1>✨ The Vision of the Semantic Web</h1>
+                <p class="subtitle">Extending the Web with machine-understandable semantics</p>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Tim Berners-Lee's Definition</h3>
+                    <blockquote style="border-left: 4px solid #00ff88; padding-left: 20px; margin: 20px 0; font-style: italic;">
+                        "The Semantic Web is an extension of the current Web in which information is given well-defined meaning, better enabling computers and people to work in cooperation."
+                    </blockquote>
+                </div>
+                
+                <div class="vision-grid">
+                    <div class="vision-card">
+                        <h3>🎯 Core Goal</h3>
+                        <p>Add machine-understandable <strong>semantics</strong> (structured meaning) to data on the Web, transforming it from documents to data.</p>
+                    </div>
+
+                    <div class="vision-card">
+                        <h3>📖 The Extension</h3>
+                        <p>An extension of the current Web where information is given well-defined meaning, enabling computer-human cooperation.</p>
+                    </div>
+
+                    <div class="vision-card">
+                        <h3>🔧 Mechanism: Metadata</h3>
+                        <p>Metadata provides the essential link between page content and content meaning (as stated in sw1), transforming unstructured data into a structured asset.</p>
+                    </div>
+
+                    <div class="vision-card">
+                        <h3>🌍 Transformation</h3>
+                        <p>From a collection of isolated documents to a coherent, queryable global database of structured knowledge.</p>
+                    </div>
+                </div>
+
+                <div class="content-block" style="margin-top: 25px;">
+                    <h3>🔑 What Makes It Different?</h3>
+                    <ul>
+                        <li><strong>Current Web:</strong> Made up of many Web documents with presentation instructions</li>
+                        <li><strong>Semantic Web:</strong> Documents enriched with structured metadata about their meaning</li>
+                        <li><strong>Result:</strong> Machines can make intelligent decisions and process data at global scale</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>💡 Key Benefit</h3>
+                    <p>By adding semantics through metadata, we enable:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Automated information integration</li>
+                        <li>Intelligent search with understanding</li>
+                        <li>Web mining at scale</li>
+                        <li>Machine reasoning and inference</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Linked Data Principles -->
+        <div class="slide slide-4">
+            <div class="slide-header">
+                <h1>🔗 Tim Berners-Lee's Linked Data Principles</h1>
+                <p class="subtitle">The foundation for publishing and connecting semantic data</p>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>Guidelines for Semantic Data Publishing</h3>
+                    <p>These principles define how to publish and connect data on the web using semantic standards, forming the foundation of the Semantic Web.</p>
+                </div>
+                
+                <div class="principles-container">
+                    <div class="principle-card">
+                        <div class="principle-number">1</div>
+                        <h3>🏷️ Naming Things</h3>
+                        <p><strong>Use URIs</strong> to denote everything—entities, concepts, and relationships. This ensures a unique, global identifier for every piece of knowledge.</p>
+                    </div>
+
+                    <div class="principle-card">
+                        <div class="principle-number">2</div>
+                        <h3>🌐 Accessibility</h3>
+                        <p><strong>Use HTTP URIs</strong> so entities can be looked up (dereferenced) by machines and humans alike, reinforcing the web nature of data.</p>
+                    </div>
+
+                    <div class="principle-card">
+                        <div class="principle-number">3</div>
+                        <h3>📋 Standard Format</h3>
+                        <p>When a URI is looked up, <strong>provide useful, structured data</strong> using W3C Standards (e.g., RDF, RDFS, OWL).</p>
+                    </div>
+
+                    <div class="principle-card">
+                        <div class="principle-number">4</div>
+                        <h3>🔗 Connections</h3>
+                        <p><strong>Include links</strong> (relationships) to other URIs to enable discovery and navigation of related data across different sources.</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 25px;">
+                    <h3>🎯 Why These Principles Matter</h3>
+                    <p>Together, these four principles create a web of data that is:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Globally accessible:</strong> Any machine can look up and understand resources</li>
+                        <li><strong>Interoperable:</strong> Standards ensure different systems can work together</li>
+                        <li><strong>Connected:</strong> Data from different sources can be integrated seamlessly</li>
+                        <li><strong>Extensible:</strong> New data can be added without breaking existing connections</li>
+                    </ul>
+                </div>
+                
+                <!-- <div class="interactive-hint">💡 Hover over cards for emphasis</div> -->
+            </div>
+        </div>
+
+        <!-- Slide 5: Knowledge Graphs -->
+        <div class="slide slide-5">
+            <div class="slide-header">
+                <h1>💡 Knowledge Graphs: Structured Reality and Reasoning</h1>
+                <p class="subtitle">Building blocks for machine-understandable knowledge</p>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>📊 What is a Knowledge Graph?</h3>
+                    <p>A Knowledge Graph (KG) is a network that models real-world entities and their relationships in a formal structure, often built upon RDF Triples.</p>
+                </div>
+
+                <div class="kg-container">
+                    <div class="kg-info">
+                        <div class="content-block">
+                            <h3>🧱 The Building Block: RDF Triple</h3>
+                            <p>The core is the Triple (Subject-Predicate-Object), which formalizes a single fact.</p>
+                            <p style="margin-top: 10px;"><strong>Structure:</strong> Every statement follows the same pattern, making it machine-readable and processable.</p>
+                        </div>
+                        
+                        <div class="triple-example">
+                            <strong>Example Triple:</strong><br><br>
+                            <span style="color: #ffffff;">Subject:</span> CityPark:CentralGreen<br>
+                            <span style="color: #ffffff;">Predicate:</span> isLocatedInZone<br>
+                            <span style="color: #ffffff;">Object:</span> Zone:ResidentialA
+                        </div>
+
+                        <div class="benefit-list">
+                            <div class="benefit-item">
+                                <strong>✅ Benefit 1: Explicit Context</strong><br>
+                                Provides explicit, queryable context and relationships, moving beyond simple data tables or unstructured documents.
+                            </div>
+                            <div class="benefit-item">
+                                <strong>✅ Benefit 2: Machine Reasoning</strong><br>
+                                Enables sophisticated machine reasoning and complex querying (via SPARQL) to infer new, non-explicit facts—key to our "Resilient City" goal.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 25px;">
+                    <h3>🔍 From RDF to Metadata to Knowledge Graphs</h3>
+                    <p>The progression:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>RDF (Resource Description Framework):</strong> The language for expressing triples</li>
+                        <li><strong>Metadata:</strong> Structured data about data, expressed in RDF</li>
+                        <li><strong>Knowledge Graphs:</strong> Collections of interconnected RDF triples forming a queryable knowledge base</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3>🎯 Why Knowledge Graphs for Resilient Cities?</h3>
+                    <p>In our project, we'll model city infrastructure using a KG to:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Track relationships between parks, sensors, and zones</li>
+                        <li>Automate risk assessment based on sensor data</li>
+                        <li>Generate maintenance alerts through logical inference</li>
+                        <li>Enable complex SPARQL queries for city management</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Project Architecture -->
+        <div class="slide slide-6">
+            <div class="slide-header">
+                <h1>🏗️ Project Architecture: The 14-Week KG Pipeline</h1>
+                <p class="subtitle">Building the Resilient City Knowledge Graph</p>
+            </div>
+            <div class="slide-content">
+                <div class="project-goal">
+                    <h3>🎯 Project Goal</h3>
+                    <p>To create an intelligent, verifiable Knowledge Graph that can execute complex business logic (e.g., automated risk assessment and maintenance alerts for city infrastructure).</p>
+                </div>
+
+                <div class="pipeline">
+                    <div class="pipeline-step">
+                        <div class="step-number">1</div>
+                        <h3>📊 DATA (Weeks 2-3)</h3>
+                        <p><strong>Model initial instance data using RDF (Triples)</strong></p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">Create the foundational facts about parks, sensors, zones, and their basic properties using RDF syntax.</p>
+                    </div>
+
+                    <div class="pipeline-step">
+                        <div class="step-number">2</div>
+                        <h3>📐 SCHEMA (Weeks 4-5)</h3>
+                        <p><strong>Define formal structure using RDFS & OWL</strong></p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">Build taxonomy (RDFS) and ontology (OWL) to express constraints, class hierarchies, and logical rules.</p>
+                    </div>
+
+                    <div class="pipeline-step">
+                        <div class="step-number">3</div>
+                        <h3>🔍 QUERYING (Weeks 6-7)</h3>
+                        <p><strong>Access data via SPARQL</strong></p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">Use W3C standard SPARQL query language via service endpoint (Fuseki/Triple Store) to extract insights.</p>
+                    </div>
+
+                    <div class="pipeline-step">
+                        <div class="step-number">4</div>
+                        <h3>🤖 AGENT (Weeks 10-11)</h3>
+                        <p><strong>Implement business logic</strong></p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">Build Python-based Semantic Agent to perform inference, generate alerts, and create actionable insights.</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 25px;">
+                    <h3>🎓 Learning Progression</h3>
+                    <p>Each phase builds on the previous:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Phase 1:</strong> Learn RDF syntax and create basic facts</li>
+                        <li><strong>Phase 2:</strong> Add semantic richness with RDFS classes and OWL axioms</li>
+                        <li><strong>Phase 3:</strong> Master querying to extract meaningful patterns</li>
+                        <li><strong>Phase 4:</strong> Combine everything to build intelligent automation</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3>💼 Business Logic Example</h3>
+                    <p><strong>Risk Assessment Rule:</strong> "If a park in a high-risk zone has no functioning sensors for 48 hours, generate a priority maintenance alert."</p>
+                    <p style="margin-top: 10px;">This type of rule combines data (sensor status), schema (park-zone relationships), and reasoning—the essence of semantic agents!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Lab Prep (Week 1) -->
+        <div class="slide slide-7">
+            <div class="slide-header">
+                <h1>🔧 Lab Prep (Week 1)</h1>
+                <p class="subtitle">Environment setup and initial project scope</p>
+            </div>
+            <div class="slide-content">
+                <div class="setup-card">
+                    <h3>💻 SETUP 1: Software Installation</h3>
+                    <p>Install Python 3 and the RDFLib library—our primary tool for interacting with RDF graphs in code.</p>
+                    <div class="code-block">
+$ pip install rdflib
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Why RDFLib?</strong> It's a pure Python library for working with RDF that allows us to:</p>
+                    <ul>
+                        <li>Create and parse RDF graphs</li>
+                        <li>Query data using SPARQL</li>
+                        <li>Serialize/deserialize various RDF formats</li>
+                        <li>Build semantic agents programmatically</li>
+                    </ul>
+                </div>
+
+                <div class="setup-card">
+                    <h3>📋 SETUP 2: Scope Definition</h3>
+                    <p>Begin outlining the project scope by identifying essential components:</p>
+                    
+                    <p style="margin-top: 15px;"><strong>Essential City Entities:</strong></p>
+                    <ul>
+                        <li><strong>Parks:</strong> Physical spaces requiring monitoring</li>
+                        <li><strong>Sensors:</strong> IoT devices collecting data</li>
+                        <li><strong>Zones:</strong> Geographical/administrative areas</li>
+                        <li><strong>Maintenance Records:</strong> Historical repair data</li>
+                    </ul>
+
+                    <p style="margin-top: 15px;"><strong>Critical Relationships:</strong></p>
+                    <ul>
+                        <li>Park → isLocatedIn → Zone</li>
+                        <li>Park → isMonitoredBy → Sensor</li>
+                        <li>Sensor → hasStatus → [Active/Inactive]</li>
+                        <li>Zone → hasRiskLevel → [Low/Medium/High]</li>
+                    </ul>
+                </div>
+
+                <div class="setup-card">
+                    <h3>📦 DELIVERABLE: GitHub Commit</h3>
+                    <div class="code-block">
+init/project-scope.md
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Task:</strong> Document the project scope and preliminary entity/relationship list.</p>
+                    
+                    <p style="margin-top: 10px;"><strong>Example Statement:</strong></p>
+                    <p style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-top: 10px; font-style: italic;">
+                        "A Park has a Location, is assigned to a Zone, and must be monitored by at least one Sensor. If a Park in a high-risk Zone loses all sensor coverage, the system must generate a maintenance alert."
+                    </p>
+                    
+                    <p style="margin-top: 15px;">This document acts as the <strong>blueprint</strong> for our RDF/OWL schema development in subsequent weeks.</p>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>🎯 Week 1 Success Criteria</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ RDFLib installed and tested</li>
+                        <li>✅ Project scope document created</li>
+                        <li>✅ Entity list identified (minimum 3 entities)</li>
+                        <li>✅ Relationship list defined (minimum 5 relationships)</li>
+                        <li>✅ At least one business rule articulated</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Interactive Search Demo -->
+        <div class="slide slide-8">
+            <div class="slide-header">
+                <h1>🔍 Interactive Demo: The Search Problem</h1>
+                <p class="subtitle">Understanding why keyword matching fails</p>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>The Classic Example: Searching for "SOAP"</h3>
+                    <p>SOAP is a W3C standard for Web services (Simple Object Access Protocol). But when you search for it using traditional keyword matching...</p>
+                </div>
+
+                <div class="search-demo">
+                    <h3 style="color: #00ff88; margin-bottom: 15px;">Try It Yourself!</h3>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Try searching for 'SOAP'" value="SOAP">
+                    <button class="search-btn" onclick="simulateSearch()">🔍 Search (Traditional Web)</button>
+                    
+                    <div class="search-results" id="searchResults">
+                        <h4 style="color: #00ff88; margin-bottom: 15px;">Search Results: ~128,000,000 results</h4>
+                        <div class="result-item">
+                            <strong>1. Buy Ivory Soap - Best Detergent Online</strong>
+                            <p>Get the best deals on dish soap and laundry detergent...</p>
+                        </div>
+                        <div class="result-item">
+                            <strong>2. Soap Opera Daily - Latest Episodes</strong>
+                            <p>Watch your favorite soap operas online...</p>
+                        </div>
+                        <div class="result-item">
+                            <strong>3. Handmade Natural Soaps - Organic Products</strong>
+                            <p>Shop our collection of artisanal soaps made with essential oils...</p>
+                        </div>
+                        <div class="result-item">
+                            <strong>4. SOAP Protocol Specification - W3C</strong>
+                            <p>Simple Object Access Protocol (SOAP) Version 1.2 - Technical Specification...</p>
+                        </div>
+                        <div class="result-item">
+                            <strong>5. Soap Making Tutorial - DIY Home Guide</strong>
+                            <p>Learn how to make your own natural soap at home with our step-by-step guide...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="problem-card" style="margin-top: 25px;">
+                    <h3>❌ The Problem</h3>
+                    <p>Search engines implement keyword matching. As long as a document contains the keyword, it's included in results—regardless of context or meaning.</p>
+                    <p style="margin-top: 10px;"><strong>Result:</strong> You get detergents, soap operas, DIY tutorials, and only after sifting through multiple pages do you find the W3C's SOAP specifications!</p>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>✅ How Semantic Web Solves This</h3>
+                    <p>With semantic markup, each document would declare its type:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Document 1:</strong> Type = "Product/Cleaning"</li>
+                        <li><strong>Document 2:</strong> Type = "Entertainment/TVShow"</li>
+                        <li><strong>Document 4:</strong> Type = "Technical/Specification/WebService"</li>
+                    </ul>
+                    <p style="margin-top: 15px;">Your search would specify: <code style="background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px;">Search for "SOAP" WHERE Type = "Technical/Specification"</code></p>
+                    <p style="margin-top: 10px; font-weight: bold; color: #00ff88;">Result: Only relevant technical documents returned!</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>💭 Discussion Point</h3>
+                    <p><strong>Question:</strong> Why can't search engines distinguish between different meanings of the same word?</p>
+                    <p style="margin-top: 10px;"><em>Hint: Think about what information is available to the search engine. Does the HTML contain semantic information about the document's subject matter?</em></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Web Usage Patterns -->
+        <div class="slide slide-9">
+            <div class="slide-header">
+                <h1>🌐 How We Use the Internet</h1>
+                <p class="subtitle">Three main activities and their challenges</p>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>🎯 Three Main Uses of the Web</h3>
+                    <p>Search, Integration, and Web Mining—all facing the same fundamental limitation</p>
+                </div>
+
+                <div class="use-case-card" onclick="toggleUseCase('useCase1')">
+                    <h4>🔍 1. SEARCH - Locating Information</h4>
+                    <p style="color: #a0a0a0;">Click to expand details...</p>
+                    <div class="use-case-details" id="useCase1">
+                        <p><strong>Goal:</strong> Locate and access information or resources on the Web</p>
+                        <p style="margin-top: 10px;"><strong>Common Examples:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Finding recipes for margaritas</li>
+                            <li>Locating a real estate agent in your area</li>
+                            <li>Looking up technical specifications for products</li>
+                            <li>Research for academic papers</li>
+                        </ul>
+                        <p style="margin-top: 15px; padding: 15px; background: rgba(139, 0, 0, 0.2); border-radius: 8px;">
+                            <strong style="color: #ff6b6b;">Problem:</strong> Search engines rely on keyword matching, leading to many irrelevant results. No understanding of context or meaning.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="use-case-card" onclick="toggleUseCase('useCase2')">
+                    <h4>🔗 2. INTEGRATION - Combining Resources</h4>
+                    <p style="color: #a0a0a0;">Click to expand details...</p>
+                    <div class="use-case-details" id="useCase2">
+                        <p><strong>Definition:</strong> Combining and aggregating resources on the Web so they can be collectively useful</p>
+                        <p style="margin-top: 10px;"><strong>Restaurant Search Example:</strong></p>
+                        <ol style="margin-left: 20px;">
+                            <li>Search for Indian restaurants in your area</li>
+                            <li>Pick a restaurant and note the address</li>
+                            <li>Open map utility (Google Maps) to get directions</li>
+                            <li>Check reviews on separate review site</li>
+                            <li>Make reservation via phone or third-party app</li>
+                        </ol>
+                        <p style="margin-top: 15px; padding: 15px; background: rgba(139, 0, 0, 0.2); border-radius: 8px;">
+                            <strong style="color: #ff6b6b;">Problem:</strong> Too much manual work across multiple services. Wouldn't it be nice to have these integrate automatically?
+                        </p>
+                    </div>
+                </div>
+
+                <div class="use-case-card" onclick="toggleUseCase('useCase3')">
+                    <h4>⛏️ 3. WEB MINING - Extracting Insights</h4>
+                    <p style="color: #a0a0a0;">Click to expand details...</p>
+                    <div class="use-case-details" id="useCase3">
+                        <p><strong>Definition:</strong> The nontrivial extraction of useful information from large distributed datasets</p>
+                        <p style="margin-top: 10px;"><strong>Professional Example: Air Traffic Control Analysis</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Gathering historical takeoff rates from multiple airports</li>
+                            <li>Analyzing weather impact patterns across regions</li>
+                            <li>Correlating maintenance schedules with incident rates</li>
+                            <li>Data exists but is scattered across many systems</li>
+                            <li>Mixed with irrelevant information</li>
+                        </ul>
+                        <p style="margin-top: 10px;"><strong>Current Solution:</strong> Build specialized crawler agents to collect and organize data</p>
+                        <p style="margin-top: 15px; padding: 15px; background: rgba(139, 0, 0, 0.2); border-radius: 8px;">
+                            <strong style="color: #ff6b6b;">Problem:</strong> Highly specialized, expensive case-by-case development required. Not scalable to global Web.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 25px;">
+                    <h3>🎯 The Common Thread</h3>
+                    <p style="font-size: 1.1em;">All three activities suffer from the <strong style="color: #ff6b6b;">same underlying problem</strong>:</p>
+                    <p style="margin-top: 15px; padding: 20px; background: rgba(255, 68, 68, 0.2); border-radius: 8px; font-weight: bold; text-align: center; font-size: 1.1em;">
+                        Documents only contain information for computers to PRESENT them,<br>not to UNDERSTAND them.
+                    </p>
+                </div>
+
+                <div class="content-block">
+                    <h3>💭 If We Had the Semantic Web...</h3>
+                    <ul style="margin-left: 20px;">
+                        <li><strong>Search:</strong> Intelligent filtering based on meaning, not just keywords</li>
+                        <li><strong>Integration:</strong> Automated service composition and data aggregation</li>
+                        <li><strong>Mining:</strong> Global-scale processing without specialized crawlers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Summary -->
+        <div class="slide slide-10">
+            <div class="slide-header">
+                <h1>🎓 Summary & Key Takeaways</h1>
+                <p class="subtitle">Consolidating our understanding</p>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>🎯 Core Concepts Review</h3>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        <li><strong>Traditional Web:</strong> Optimized for human consumption, keyword-based search</li>
+                        <li><strong>Semantic Web:</strong> Machine-readable, meaning-based processing</li>
+                        <li><strong>Metadata:</strong> Structured data that machines can understand</li>
+                        <li><strong>RDF Triples:</strong> Subject-Predicate-Object statements forming knowledge graphs</li>
+                        <li><strong>Linked Data:</strong> Four principles for publishing semantic data</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3>📊 The Semantic Web Stack</h3>
+                    <p>Our 14-week journey through the layers:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Layer 1 - Data:</strong> RDF for expressing facts as triples</li>
+                        <li><strong>Layer 2 - Schema:</strong> RDFS & OWL for structure and logic</li>
+                        <li><strong>Layer 3 - Query:</strong> SPARQL for extracting insights</li>
+                        <li><strong>Layer 4 - Agent:</strong> Python automation for business logic</li>
+                    </ul>
+                </div>
+
+                <div class="project-goal" style="margin-top: 25px;">
+                    <h3>🏗️ Your Mission: The Resilient City KG</h3>
+                    <p>By the end of this course, you will have built a complete Knowledge Graph system that:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ Models city infrastructure using RDF triples</li>
+                        <li>✅ Defines semantic relationships using RDFS & OWL</li>
+                        <li>✅ Enables complex queries via SPARQL</li>
+                        <li>✅ Performs automated reasoning and generates alerts</li>
+                        <li>✅ Demonstrates real-world business value</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>🔜 Next Steps</h3>
+                    <p><strong>Week 1 Action Items:</strong></p>
+                    <ol style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                        <li>Install Python 3 and RDFLib (<code style="background: rgba(0,0,0,0.5); padding: 3px 8px; border-radius: 4px;">pip install rdflib</code>)</li>
+                        <!-- <li>Create your project scope document (<code style="background: rgba(0,0,0,0.5); padding: 3px 8px; border-radius: 4px;">init/project-scope.md</code>)</li> -->
+                        <li>Identify minimum 3 entities and 5 relationships</li>
+                        <li>Articulate at least one business rule for automation</li>
+                        <li>Review Chapter sw1 & sw2 for deeper understanding</li>
+                    </ol>
+                </div>
+
+                <div class="content-block">
+                    <h3>💭 Reflection Questions</h3>
+                    <ol style="margin-left: 20px; line-height: 1.8;">
+                        <li>How might the Semantic Web change your daily internet activities?</li>
+                        <li>What challenges do you foresee in implementing semantic systems?</li>
+                        <li>Can you identify a domain where semantic understanding would be crucial?</li>
+                        <li>How can we add metadata to existing pages we don't own?</li>
+                    </ol>
+                </div>
+
+                <div class="highlight-box" style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(10, 77, 60, 0.3)); border-color: #00ff88;">
+                    <h3 style="text-align: center; font-size: 1.5em; margin-bottom: 15px;">🚀 Let's Build the Semantic Web!</h3>
+                    <p style="text-align: center; font-size: 1.1em;">From documents to data. From presentation to understanding.<br>From manual integration to intelligent automation.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator" id="scrollIndicator">
+            ↓ Scroll for more ↓
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" title="Previous Slide">←</button>
+            <button class="control-btn" id="nextBtn" title="Next Slide">→</button>
+        </div>
+
+        <!-- Slide Counter -->
+        <div class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">10</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <script>
+        // Presentation Logic
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const currentSlideDisplay = document.getElementById('currentSlide');
+        const progressFill = document.getElementById('progressFill');
+        const keyboardInfo = document.getElementById('keyboardInfo');
+        const scrollIndicator = document.getElementById('scrollIndicator');
+
+        // Show keyboard info on load
+        setTimeout(() => {
+            keyboardInfo.classList.add('show');
+            setTimeout(() => {
+                keyboardInfo.classList.remove('show');
+            }, 3000);
+        }, 500);
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else if (index < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            currentSlideDisplay.textContent = currentSlide + 1;
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+
+            // Update button states
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+
+            // Check if current slide has scrollable content
+            checkScrollable();
+        }
+
+        function checkScrollable() {
+            const activeSlide = slides[currentSlide];
+            const slideContent = activeSlide.querySelector('.slide-content');
+            
+            if (slideContent) {
+                const isScrollable = slideContent.scrollHeight > slideContent.clientHeight;
+                if (isScrollable) {
+                    scrollIndicator.classList.add('show');
+                    
+                    // Hide indicator when scrolled to bottom
+                    slideContent.addEventListener('scroll', function() {
+                        const isAtBottom = this.scrollHeight - this.scrollTop <= this.clientHeight + 50;
+                        if (isAtBottom) {
+                            scrollIndicator.classList.remove('show');
+                        }
+                    });
+                } else {
+                    scrollIndicator.classList.remove('show');
+                }
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        // Event Listeners
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                currentSlide = 0;
+                updateSlide();
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                currentSlide = totalSlides - 1;
+                updateSlide();
+            }
+        });
+
+        // Touch/Swipe Support
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                prevSlide();
+            }
+        }
+
+        // Interactive Functions
+        function toggleUseCase(id) {
+            const element = document.getElementById(id);
+            element.classList.toggle('show');
+        }
+
+        function simulateSearch() {
+            const results = document.getElementById('searchResults');
+            results.style.display = 'block';
+            setTimeout(() => {
+                results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        // Initialize
+        updateSlide();
+
+        // Add interactive card effects
+        document.querySelectorAll('.principle-card, .vision-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(1.05) rotate(1deg)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>

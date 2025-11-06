@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 2: The Problem with the Traditional Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a4d3c 0%, #1a1a1a 100%);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .presentation-container {
+            width: 960px;
+            height: 720px;
+            background: #1a1a1a;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #0a4d3c;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.6s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+
+        .slide-header {
+            background: linear-gradient(135deg, #0a4d3c 0%, #0d6b52 100%);
+            padding: 30px 40px;
+            border-bottom: 3px solid #00ff88;
+            flex-shrink: 0;
+        }
+
+        .slide-header h1 {
+            color: #00ff88;
+            font-size: 2.2em;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .slide-header .subtitle {
+            color: #ffffff;
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .slide-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 50px;
+            background: #1a1a1a;
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: #0a0a0a;
+            border-radius: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: #0a4d3c;
+            border-radius: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background: #0d6b52;
+        }
+
+        /* Title Slide */
+        .slide-1 {
+            background: linear-gradient(135deg, #0a4d3c 0%, #000000 100%);
+        }
+
+        .slide-1 .slide-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px;
+            overflow: visible;
+        }
+
+        .slide-1 h1 {
+            font-size: 3em;
+            color: #00ff88;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-out;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+        }
+
+        .slide-1 h2 {
+            font-size: 1.6em;
+            color: #ffffff;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .slide-1 .context {
+            background: rgba(10, 77, 60, 0.3);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #0a4d3c;
+            backdrop-filter: blur(10px);
+            margin-top: 30px;
+            animation: fadeIn 1s ease-out 0.6s both;
+            max-width: 700px;
+        }
+
+        .slide-1 .context p {
+            margin: 12px 0;
+            font-size: 1.05em;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .slide-1 .context strong {
+            color: #00ff88;
+        }
+
+        /* Content Blocks */
+        .content-block {
+            background: rgba(10, 77, 60, 0.15);
+            border-left: 4px solid #00ff88;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #ffffff;
+        }
+
+        .content-block h3 {
+            color: #00ff88;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .content-block p, .content-block li {
+            color: #e0e0e0;
+            line-height: 1.7;
+            font-size: 1.05em;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(10, 77, 60, 0.2));
+            border: 2px solid #0a4d3c;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            color: #ffffff;
+        }
+
+        .highlight-box h3 {
+            color: #00ff88;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+        }
+
+        .highlight-box strong {
+            color: #00ff88;
+        }
+
+        /* Problem Cards */
+        .problem-card {
+            background: rgba(139, 0, 0, 0.2);
+            border-left: 4px solid #ff4444;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            transform: translateX(-50px);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+
+        .slide.active .problem-card {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .slide.active .problem-card:nth-child(2) { transition-delay: 0.2s; }
+        .slide.active .problem-card:nth-child(3) { transition-delay: 0.4s; }
+        .slide.active .problem-card:nth-child(4) { transition-delay: 0.6s; }
+        .slide.active .problem-card:nth-child(5) { transition-delay: 0.8s; }
+
+        .problem-card h3 {
+            color: #ff6b6b;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .problem-card p {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .example-box {
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px dashed #0a4d3c;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            font-style: italic;
+            color: #a0a0a0;
+        }
+
+        .example-box strong {
+            color: #00ff88;
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .comparison-card {
+            background: rgba(10, 77, 60, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #0a4d3c;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+
+        .comparison-card.negative {
+            background: rgba(139, 0, 0, 0.2);
+            border-color: #ff4444;
+        }
+
+        .slide.active .comparison-card {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .slide.active .comparison-card:nth-child(1) { transition-delay: 0.2s; }
+        .slide.active .comparison-card:nth-child(2) { transition-delay: 0.4s; }
+
+        .comparison-card h3 {
+            color: #00ff88;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+        }
+
+        .comparison-card.negative h3 {
+            color: #ff6b6b;
+        }
+
+        .comparison-card p, .comparison-card ul {
+            font-size: 1em;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .comparison-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comparison-card li {
+            margin: 8px 0;
+        }
+
+        /* Interactive Demo */
+        .interactive-demo {
+            background: rgba(10, 77, 60, 0.2);
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #0a4d3c;
+            margin: 20px 0;
+        }
+
+        .demo-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            background: #000000;
+            color: #00ff88;
+            border: 2px solid #0a4d3c;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .demo-btn {
+            padding: 12px 30px;
+            background: #0a4d3c;
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .demo-btn:hover {
+            background: #00ff88;
+            color: #000000;
+            transform: scale(1.05);
+        }
+
+        .demo-results {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .demo-results::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .demo-results::-webkit-scrollbar-thumb {
+            background: #0a4d3c;
+            border-radius: 10px;
+        }
+
+        .result-item {
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(10, 77, 60, 0.3);
+            border-radius: 5px;
+            border-left: 3px solid;
+            color: #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateX(5px);
+        }
+
+        .result-item.irrelevant {
+            border-left-color: #ff4444;
+            opacity: 0.7;
+        }
+
+        .result-item.relevant {
+            border-left-color: #00ff88;
+        }
+
+        .result-item strong {
+            color: #00ff88;
+        }
+
+        /* Meaning Cards */
+        .meaning-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .meaning-card {
+            background: rgba(10, 77, 60, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #0a4d3c;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: scale(0.9);
+            opacity: 0;
+        }
+
+        .slide.active .meaning-card {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .slide.active .meaning-card:nth-child(1) { transition-delay: 0.2s; }
+        .slide.active .meaning-card:nth-child(2) { transition-delay: 0.4s; }
+        .slide.active .meaning-card:nth-child(3) { transition-delay: 0.6s; }
+
+        .meaning-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+            border-color: #00ff88;
+        }
+
+        .meaning-card.selected {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.6);
+        }
+
+        .meaning-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .meaning-card h4 {
+            color: #00ff88;
+            margin: 10px 0;
+        }
+
+        .meaning-card p {
+            color: #a0a0a0;
+            font-size: 0.9em;
+        }
+
+        /* Navigation Controls */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            background: rgba(10, 77, 60, 0.9);
+            color: #00ff88;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            background: #00ff88;
+            color: #000000;
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(10, 77, 60, 0.3);
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0a4d3c 0%, #00ff88 100%);
+            transition: width 0.3s ease;
+        }
+
+        /* Slide Counter */
+        .slide-counter {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(10, 77, 60, 0.9);
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            color: #00ff88;
+            font-size: 0.9em;
+            animation: bounce 2s infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 99;
+        }
+
+        .scroll-indicator.show {
+            opacity: 0.7;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Keyboard Info */
+        .keyboard-info {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ff88;
+            padding: 12px 25px;
+            border-radius: 20px;
+            border: 2px solid #00ff88;
+            font-size: 0.9em;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .keyboard-info.show {
+            opacity: 1;
+        }
+
+        /* Lists */
+        ul {
+            margin-left: 25px;
+        }
+
+        li {
+            margin: 10px 0;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .presentation-container {
+                width: 100vw;
+                height: 75vw;
+                max-height: 100vh;
+            }
+
+            .comparison-grid,
+            .meaning-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="keyboard-info" id="keyboardInfo">
+        ⌨️ Use ← → arrow keys or click buttons to navigate
+    </div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide slide-1 active">
+            <div class="slide-content">
+                <h1>The Problem with the Traditional Web</h1>
+                <h2>Understanding the Machine's Dilemma - Lecture 2</h2>
+                <h2>Eng. Dr. Tiroshan Madushanka</h2>
+                <div class="context">
+                    <p><strong>Recap:</strong> Lecture 1 analyzed traditional vs. semantic search engines</p>
+                    <p><strong>Today's Focus:</strong> Deep dive into fundamental web limitations</p>
+                    <p><strong>Key Question:</strong> Why can't machines understand meaning?</p>
+                    <p><strong>Goal:</strong> Connect problems to Semantic Web solutions</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: The Web of Documents -->
+        <div class="slide slide-2">
+            <div class="slide-header">
+                <h1>🔍 The Web of Documents: A Machine's Dilemma</h1>
+                <p class="subtitle">Understanding what machines see vs. what humans understand</p>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>The Current State: Web 2.0</h3>
+                    <p style="font-size: 1.1em;">The existing World Wide Web (Web 2.0) is fundamentally designed and <strong>optimized for human consumption</strong>.</p>
+                </div>
+
+                <div class="comparison-grid">
+                    <div class="comparison-card">
+                        <h3>👁️ What Humans See</h3>
+                        <ul style="list-style: none;">
+                            <li>✓ Rich visual layouts</li>
+                            <li>✓ Images and graphics</li>
+                            <li>✓ Contextual understanding</li>
+                            <li>✓ Implied relationships</li>
+                            <li>✓ Common sense reasoning</li>
+                            <li>✓ Cultural references</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="comparison-card negative">
+                        <h3>🤖 What Machines See</h3>
+                        <ul style="list-style: none;">
+                            <li>❌ Plain text strings</li>
+                            <li>❌ HTML markup tags</li>
+                            <li>❌ No inherent meaning</li>
+                            <li>❌ Isolated data points</li>
+                            <li>❌ No context</li>
+                            <li>❌ No understanding</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="problem-card">
+                    <h3>🔴 The Core Problem</h3>
+                    <p>Content is presented <strong>visually</strong>, relying entirely on <strong>human intelligence</strong> for interpretation. Machines can <em>read</em> the text, but cannot <em>understand</em> the relationships, context, or intended meaning.</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>💡 Example: A Simple Web Page</h3>
+                    <div style="background: #000; padding: 15px; border-radius: 8px; margin-top: 10px; font-family: monospace; color: #00ff88;">
+                        &lt;p&gt;Dr. Smith works at Stanford&lt;/p&gt;
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Human understands:</strong> Dr. Smith is a person who is employed at Stanford University</p>
+                    <p style="margin-top: 10px;"><strong>Machine sees:</strong> Five separate text strings with no relationships</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Keyword Search Limitations -->
+        <div class="slide slide-3">
+            <div class="slide-header">
+                <h1>🔍 Keyword Search vs. Meaning and Context</h1>
+                <p class="subtitle">The fundamental limitation of traditional search</p>
+            </div>
+            <div class="slide-content">
+                <div class="problem-card">
+                    <h3>🔴 Key Issue: Keyword Search vs. Meaning</h3>
+                    <p>Traditional search engines (analyzed in Lecture 1) rely on <strong>simple keyword matching</strong> and link structure (PageRank), which completely lacks <strong>semantic understanding</strong>.</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>The Search Process</h3>
+                    <ol style="margin-left: 20px; line-height: 1.8;">
+                        <li>User enters keywords</li>
+                        <li>Engine matches keywords in index</li>
+                        <li>Returns ALL pages with those keywords</li>
+                        <li>Ranks by frequency and links</li>
+                    </ol>
+                </div>
+
+                <div class="problem-card">
+                    <h3>❌ What's Missing?</h3>
+                    <ul style="margin-left: 20px;">
+                        <li><strong>Context:</strong> Is this about learning? A job posting? A research paper?</li>
+                        <li><strong>Intent:</strong> Does the user want tutorials? Documentation? News?</li>
+                        <li><strong>Relationships:</strong> Connection between words in the query</li>
+                        <li><strong>Semantics:</strong> Meaning of the words in this specific combination</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>📊 From Lecture 1: The SLR Camera Problem</h3>
+                    <p>Remember searching for "SLR" cameras:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Got vendor sites (high keyword frequency)</li>
+                        <li>Missed "single lens reflex" pages (different words)</li>
+                        <li>Missed pages about "shutter speed" (related property)</li>
+                        <li>No way to filter by intent (buying vs. learning)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Interactive Ambiguity Demo -->
+        <div class="slide slide-4">
+            <div class="slide-header">
+                <h1>🎭 The Challenge of Ambiguity</h1>
+                <p class="subtitle">Why machines need human help to disambiguate</p>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>The Disambiguation Problem</h3>
+                    <p style="font-size: 1.1em;">A search for "<strong>Python</strong>" provides <strong>no context</strong> to a machine regarding whether it is the snake 🐍, the programming language 💻, or the Monty Python group 🎭</p>
+                </div>
+
+                <div class="interactive-demo">
+                    <h3 style="color: #00ff88; margin-bottom: 15px;">Try It: Search Without Context</h3>
+                    <input type="text" class="demo-input" id="searchInput" placeholder="Search term: Python" value="Python">
+                    <button class="demo-btn" onclick="showSearchResults()">🔍 Search Traditional Web</button>
+                    
+                    <div class="demo-results" id="searchResults">
+                        <h4 style="color: #00ff88; margin-bottom: 15px;">Results (Machine sees all as equally relevant):</h4>
+                        <div class="result-item irrelevant">
+                            <strong>1. Python Snake Care Guide</strong>
+                            <p>Everything about keeping pythons as pets...</p>
+                            <small style="color: #ff6b6b;">🐍 About snakes - but machine doesn't know!</small>
+                        </div>
+                        <div class="result-item irrelevant">
+                            <strong>2. Python.org - Official Site</strong>
+                            <p>The Python Programming Language official home...</p>
+                            <small style="color: #00ff88;">💻 About programming - but machine doesn't know!</small>
+                        </div>
+                        <div class="result-item irrelevant">
+                            <strong>3. Monty Python's Flying Circus</strong>
+                            <p>British comedy series by Monty Python...</p>
+                            <small style="color: #ff6b6b;">🎭 About comedy - but machine doesn't know!</small>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 30px; color: #00ff88;">Which Meaning Do YOU Want?</h3>
+                <div class="meaning-grid">
+                    <div class="meaning-card" onclick="selectMeaning(this, 'snake')">
+                        <div class="meaning-icon">🐍</div>
+                        <h4>The Snake</h4>
+                        <p>Reptile, wildlife, zoology</p>
+                    </div>
+                    
+                    <div class="meaning-card" onclick="selectMeaning(this, 'programming')">
+                        <div class="meaning-icon">💻</div>
+                        <h4>Programming Language</h4>
+                        <p>Code, software, development</p>
+                    </div>
+                    
+                    <div class="meaning-card" onclick="selectMeaning(this, 'comedy')">
+                        <div class="meaning-icon">🎭</div>
+                        <h4>Monty Python</h4>
+                        <p>Comedy, entertainment, TV</p>
+                    </div>
+                </div>
+
+                <div class="demo-results" id="contextResults"></div>
+
+                <div class="problem-card" style="margin-top: 20px;">
+                    <h3>⚠️ The Human Burden</h3>
+                    <p>YOU had to click to tell the system what you meant. This requires <strong>human effort</strong> to disambiguate terms. This is the <strong>disambiguation burden</strong> placed on users.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Machines See Text Not Meaning -->
+        <div class="slide slide-5">
+            <div class="slide-header">
+                <h1>🤖 Machines See Text, Not Meaning</h1>
+                <p class="subtitle">The fundamental conclusion about machine understanding</p>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>The Fundamental Conclusion</h3>
+                    <p style="font-size: 1.2em; font-weight: bold;">Machines see the text, but <span style="color: #ff6b6b;">cannot reliably infer</span> the relationships or the intended meaning of the content.</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>💡 Example Analysis</h3>
+                    <div style="background: #000; padding: 15px; border-radius: 8px; margin: 15px 0; font-family: monospace; color: #00ff88;">
+                        "Dr. Smith works at Stanford researching AI"
+                    </div>
+                </div>
+
+                <div class="comparison-grid">
+                    <div class="comparison-card">
+                        <h3>👤 Human Processing</h3>
+                        <ul style="list-style-type: none; padding: 0;">
+                            <li style="margin: 15px 0;">✓ "Dr." → Has doctorate degree</li>
+                            <li style="margin: 15px 0;">✓ "Smith" → Person's name</li>
+                            <li style="margin: 15px 0;">✓ "works at" → Employment relationship</li>
+                            <li style="margin: 15px 0;">✓ "Stanford" → University</li>
+                            <li style="margin: 15px 0;">✓ "researching" → Academic role</li>
+                            <li style="margin: 15px 0;">✓ "AI" → Artificial Intelligence field</li>
+                        </ul>
+                        <p style="margin-top: 20px; padding: 15px; background: rgba(0, 255, 136, 0.2); border-radius: 8px; font-weight: bold;">
+                            Understanding: Dr. Smith is a researcher at Stanford University in AI
+                        </p>
+                    </div>
+                    
+                    <div class="comparison-card negative">
+                        <h3>🤖 Machine Processing</h3>
+                        <ul style="list-style-type: none; padding: 0;">
+                            <li style="margin: 15px 0;">• "Dr" → String (2 chars)</li>
+                            <li style="margin: 15px 0;">• "Smith" → String (5 chars)</li>
+                            <li style="margin: 15px 0;">• "works" → String (5 chars)</li>
+                            <li style="margin: 15px 0;">• "at" → String (2 chars)</li>
+                            <li style="margin: 15px 0;">• "Stanford" → String (8 chars)</li>
+                            <li style="margin: 15px 0;">• "researching" → String (11 chars)</li>
+                            <li style="margin: 15px 0;">• "AI" → String (2 chars)</li>
+                        </ul>
+                        <p style="margin-top: 20px; padding: 15px; background: rgba(255, 68, 68, 0.2); border-radius: 8px; font-weight: bold;">
+                            Understanding: Seven separate strings, no connections
+                        </p>
+                    </div>
+                </div>
+
+                <div class="problem-card">
+                    <h3>❌ Why This Matters</h3>
+                    <ul style="margin-left: 20px;">
+                        <li><strong>No Entity Recognition:</strong> Can't identify "Stanford" as a university vs. a person's name</li>
+                        <li><strong>No Relationship Detection:</strong> Can't connect "works at" to employment</li>
+                        <li><strong>No Context Understanding:</strong> Can't infer "AI" means Artificial Intelligence</li>
+                        <li><strong>No Type Classification:</strong> Can't determine "Dr. Smith" is a person</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: The Semantic Web Solution -->
+        <div class="slide slide-6">
+            <div class="slide-header">
+                <h1>💡 The Semantic Web Solution Revisited</h1>
+                <p class="subtitle">Connecting problems to Lecture 1's solution</p>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>🔗 From Lecture 1: The Three-Part Solution</h3>
+                    <p>Now that we deeply understand the problems, let's revisit HOW the Semantic Web solves them:</p>
+                </div>
+
+                <div class="problem-card" style="border-left-color: #00ff88; background: rgba(0, 255, 136, 0.1);">
+                    <h3 style="color: #00ff88;">✅ Solution 1: Common Vocabularies (Ontologies)</h3>
+                    <p>Create structured, machine-readable definitions of concepts and their relationships.</p>
+                    <div class="example-box">
+                        <strong>Photography Domain Example:</strong><br>
+                        • Defines: SLR ≡ SingleLensReflex<br>
+                        • Relates: ShutterSpeed is property of SLR<br>
+                        • Hierarchies: SLR is type of Camera
+                    </div>
+                </div>
+
+                <div class="problem-card" style="border-left-color: #00ff88; background: rgba(0, 255, 136, 0.1);">
+                    <h3 style="color: #00ff88;">✅ Solution 2: Semantic Markup (Metadata)</h3>
+                    <p>Page owners explicitly link their content to ontology concepts.</p>
+                    <div style="background: #000; padding: 15px; border-radius: 8px; margin-top: 10px; font-family: monospace; color: #00ff88; font-size: 0.9em;">
+                        &lt;link rel="help" href="photography-ontology.owl"&gt;
+                    </div>
+                    <p style="margin-top: 10px;">This tells machines: "My page about 'single lens reflex' means SLR in the photography ontology"</p>
+                </div>
+
+                <div class="problem-card" style="border-left-color: #00ff88; background: rgba(0, 255, 136, 0.1);">
+                    <h3 style="color: #00ff88;">✅ Solution 3: Smart Agents/Crawlers</h3>
+                    <p>Crawlers that can read ontologies and make inferences.</p>
+                    <div class="example-box">
+                        <strong>Inference Example:</strong><br>
+                        1. Page discusses "shutter speed"<br>
+                        2. Markup links to photography ontology<br>
+                        3. Ontology: ShutterSpeed is property of SLR<br>
+                        4. <strong>Crawler infers:</strong> Page is about SLR cameras!<br>
+                        5. Indexes under "SLR" even though word never appears
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>🎯 Solving the Ambiguity Problem</h3>
+                    <p>With ontologies, users specify WHICH "Python" they mean:</p>
+                    <div style="background: #000; padding: 15px; border-radius: 8px; margin-top: 10px; color: #00ff88;">
+                        Search: "Python"<br>
+                        Context: programming-languages.owl<br><br>
+                        → Returns ONLY pages with programming ontology<br>
+                        → Excludes snake and comedy results automatically
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Summary -->
+        <div class="slide slide-7">
+            <div class="slide-header">
+                <h1>🎓 Lecture 2 Summary & Key Takeaways</h1>
+                <p class="subtitle">Consolidating our understanding</p>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>🎯 Core Problems Identified</h3>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        <li><strong>Limitation 1:</strong> Web optimized for human visual consumption</li>
+                        <li><strong>Limitation 2:</strong> Keyword search lacks semantic understanding</li>
+                        <li><strong>Challenge:</strong> Ambiguity requires human disambiguation effort</li>
+                        <li><strong>Conclusion:</strong> Machines see text but can't infer meaning</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3>✅ Solutions from Semantic Web</h3>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Ontologies:</strong> Define concepts and relationships formally</li>
+                        <li><strong>Metadata/Markup:</strong> Link content to ontology concepts</li>
+                        <li><strong>Smart Agents:</strong> Reason and infer using ontologies</li>
+                        <li><strong>Result:</strong> Machines can understand and process meaning</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-grid">
+                    <div class="comparison-card negative">
+                        <h3>❌ Traditional Web</h3>
+                        <ul style="list-style: none;">
+                            <li>• Keyword matching only</li>
+                            <li>• No understanding</li>
+                            <li>• Irrelevant results</li>
+                            <li>• Missed content</li>
+                            <li>• Manual filtering</li>
+                            <li>• Human burden</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="comparison-card">
+                        <h3>✅ Semantic Web</h3>
+                        <ul style="list-style: none;">
+                            <li>• Meaning-based</li>
+                            <li>• Machine understanding</li>
+                            <li>• Relevant results only</li>
+                            <li>• Finds all related</li>
+                            <li>• Automatic filtering</li>
+                            <li>• Machine automation</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 25px;">
+                    <h3>🔜 Looking Ahead: Part 2</h3>
+                    <p>In upcoming chapters, we'll learn the technical foundations:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                        <li><strong>RDF:</strong> Resource Description Framework - expressing triples</li>
+                        <li><strong>RDFS:</strong> RDF Schema - defining vocabularies</li>
+                        <li><strong>OWL:</strong> Web Ontology Language - rich ontologies</li>
+                        <li><strong>SPARQL:</strong> Query language for semantic data</li>
+                        <li><strong>Tools:</strong> Build your own semantic applications</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3>💭 Final Thought</h3>
+                    <p style="font-size: 1.1em; line-height: 1.8;">
+                        The problems we've identified—the machine's inability to understand meaning, the burden of disambiguation on users, the limitations of keyword search—represent billions of wasted hours and missed opportunities. The Semantic Web isn't just about better search; it's about fundamentally transforming how machines interact with human knowledge.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator" id="scrollIndicator">
+            ↓ Scroll for more ↓
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" title="Previous Slide">←</button>
+            <button class="control-btn" id="nextBtn" title="Next Slide">→</button>
+        </div>
+
+        <!-- Slide Counter -->
+        <div class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">7</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const currentSlideDisplay = document.getElementById('currentSlide');
+        const progressFill = document.getElementById('progressFill');
+        const keyboardInfo = document.getElementById('keyboardInfo');
+        const scrollIndicator = document.getElementById('scrollIndicator');
+
+        setTimeout(() => {
+            keyboardInfo.classList.add('show');
+            setTimeout(() => keyboardInfo.classList.remove('show'), 3000);
+        }, 500);
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else if (index < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            currentSlideDisplay.textContent = currentSlide + 1;
+            progressFill.style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            checkScrollable();
+        }
+
+        function checkScrollable() {
+            const activeSlide = slides[currentSlide];
+            const slideContent = activeSlide.querySelector('.slide-content');
+            
+            if (slideContent) {
+                const isScrollable = slideContent.scrollHeight > slideContent.clientHeight;
+                if (isScrollable) {
+                    scrollIndicator.classList.add('show');
+                    slideContent.addEventListener('scroll', function() {
+                        if (this.scrollHeight - this.scrollTop <= this.clientHeight + 50) {
+                            scrollIndicator.classList.remove('show');
+                        }
+                    });
+                } else {
+                    scrollIndicator.classList.remove('show');
+                }
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                currentSlide = 0;
+                updateSlide();
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                currentSlide = totalSlides - 1;
+                updateSlide();
+            }
+        });
+
+        // Touch support
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchEndX < touchStartX - 50) nextSlide();
+            if (touchEndX > touchStartX + 50) prevSlide();
+        });
+
+        // Interactive functions
+        function showSearchResults() {
+            document.getElementById('searchResults').style.display = 'block';
+        }
+
+        function selectMeaning(element, meaning) {
+            document.querySelectorAll('.meaning-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            const contextResults = document.getElementById('contextResults');
+            contextResults.style.display = 'block';
+            
+            let html = '<h4 style="color: #00ff88; margin-bottom: 15px;">Filtered Results for "Python" - ';
+            
+            if (meaning === 'snake') {
+                html += 'Animal Context</h4>';
+                html += `
+                    <div class="result-item relevant">
+                        <strong>1. Python Species Guide</strong>
+                        <p>Comprehensive guide to python species...</p>
+                        <small style="color: #00ff88;">✓ Marked with zoology.owl</small>
+                    </div>
+                    <div class="result-item relevant">
+                        <strong>2. Python Care Manual</strong>
+                        <p>Expert care guide for pet pythons...</p>
+                        <small style="color: #00ff88;">✓ Marked with animals.owl</small>
+                    </div>
+                `;
+            } else if (meaning === 'programming') {
+                html += 'Programming Context</h4>';
+                html += `
+                    <div class="result-item relevant">
+                        <strong>1. Python.org Official</strong>
+                        <p>The Python Programming Language...</p>
+                        <small style="color: #00ff88;">✓ Marked with programming-languages.owl</small>
+                    </div>
+                    <div class="result-item relevant">
+                        <strong>2. Learn Python</strong>
+                        <p>Free Python tutorials for beginners...</p>
+                        <small style="color: #00ff88;">✓ Marked with programming-languages.owl</small>
+                    </div>
+                `;
+            } else {
+                html += 'Entertainment Context</h4>';
+                html += `
+                    <div class="result-item relevant">
+                        <strong>1. Monty Python Official</strong>
+                        <p>Official Monty Python site...</p>
+                        <small style="color: #00ff88;">✓ Marked with entertainment.owl</small>
+                    </div>
+                    <div class="result-item relevant">
+                        <strong>2. Monty Python History</strong>
+                        <p>Complete history of the comedy troupe...</p>
+                        <small style="color: #00ff88;">✓ Marked with entertainment.owl</small>
+                    </div>
+                `;
+            }
+            
+            html += '<div style="margin-top: 20px; padding: 15px; background: rgba(0, 255, 136, 0.2); border-radius: 8px; font-weight: bold;">✅ You selected the context, so semantic search knows exactly what you want!</div>';
+            contextResults.innerHTML = html;
+        }
+
+        updateSlide();
+    </script>
+</body>
+</html>
