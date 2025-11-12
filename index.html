@@ -12,63 +12,180 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a4d3c 0%, #1a1a1a 100%);
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
             min-height: 100vh;
-            padding: 20px;
             color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(138, 43, 226, 0.06) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 15s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(0, 255, 136, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 20px;
         }
 
+        /* Glassmorphism Header */
         header {
             text-align: center;
-            padding: 60px 20px;
-            background: rgba(10, 77, 60, 0.3);
-            border-radius: 20px;
-            border: 3px solid #0a4d3c;
-            margin-bottom: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            padding: 80px 40px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 60px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         header h1 {
-            font-size: 3em;
-            color: #00ff88;
-            margin-bottom: 15px;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            font-size: 4em;
+            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            animation: gradientShift 8s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         header p {
-            font-size: 1.3em;
-            color: #e0e0e0;
-            margin-bottom: 10px;
+            font-size: 1.4em;
+            color: #b4b4b4;
+            margin-bottom: 15px;
+            font-weight: 300;
         }
 
         .instructor {
-            font-size: 1.1em;
+            font-size: 1.2em;
             color: #00ff88;
-            margin-top: 20px;
+            margin-top: 25px;
+            font-weight: 500;
         }
 
+        /* Modern Badge Design */
+        .badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 25px;
+            font-size: 0.9em;
+            color: #00ff88;
+            margin: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .badge:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Lectures Grid */
         .lectures-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
             gap: 30px;
-            margin-bottom: 40px;
+            margin-bottom: 60px;
         }
 
         .lecture-card {
-            background: rgba(10, 77, 60, 0.3);
-            border: 2px solid #0a4d3c;
-            border-radius: 15px;
-            padding: 30px;
-            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 35px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         .lecture-card::before {
@@ -77,195 +194,381 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, #0a4d3c, #00ff88);
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(0, 212, 255, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .lecture-card:hover::before {
+            opacity: 1;
         }
 
         .lecture-card:hover {
-            transform: translateY(-10px);
-            border-color: #00ff88;
-            box-shadow: 0 15px 40px rgba(0, 255, 136, 0.3);
+            transform: translateY(-15px) scale(1.02);
+            border-color: rgba(0, 255, 136, 0.5);
+            box-shadow: 
+                0 20px 60px rgba(0, 255, 136, 0.2),
+                0 0 40px rgba(0, 212, 255, 0.1);
         }
 
+        /* Holographic number effect */
         .lecture-number {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 3em;
-            font-weight: bold;
-            color: rgba(0, 255, 136, 0.1);
+            top: 25px;
+            right: 25px;
+            font-size: 4em;
+            font-weight: 900;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+
+        .lecture-card:hover .lecture-number {
+            opacity: 0.6;
+            transform: scale(1.1);
         }
 
         .lecture-card h2 {
-            color: #00ff88;
-            font-size: 1.8em;
+            color: #ffffff;
+            font-size: 1.6em;
             margin-bottom: 15px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .lecture-card h2::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #00ff88, #00d4ff);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .lecture-card:hover h2::after {
+            width: 100px;
         }
 
         .lecture-card p {
-            color: #e0e0e0;
-            line-height: 1.6;
-            margin-bottom: 20px;
+            color: #a0a0a0;
+            line-height: 1.7;
+            margin-bottom: 25px;
+            font-size: 0.95em;
         }
 
         .topics {
             list-style: none;
             padding: 0;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .topics li {
-            padding: 8px 0;
-            padding-left: 25px;
+            padding: 10px 0;
+            padding-left: 30px;
             position: relative;
-            color: #e0e0e0;
+            color: #c0c0c0;
+            font-size: 0.92em;
+            transition: all 0.3s ease;
         }
 
         .topics li::before {
-            content: "→";
+            content: "▸";
             position: absolute;
             left: 0;
             color: #00ff88;
             font-weight: bold;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
         }
 
+        .topics li:hover {
+            color: #ffffff;
+            padding-left: 35px;
+        }
+
+        .topics li:hover::before {
+            color: #00d4ff;
+            transform: translateX(3px);
+        }
+
+        /* Futuristic Buttons */
         .slide-links {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 25px;
         }
 
         .slide-btn {
-            padding: 12px 24px;
-            background: #0a4d3c;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
             color: #00ff88;
             text-decoration: none;
-            border-radius: 8px;
-            border: 2px solid #00ff88;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
             font-weight: 600;
+            font-size: 0.95em;
             transition: all 0.3s ease;
             display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 255, 136, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .slide-btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .slide-btn:hover {
-            background: #00ff88;
-            color: #000000;
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
+            border-color: #00ff88;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .slide-btn span {
+            position: relative;
+            z-index: 1;
         }
 
         .slide-btn.primary {
-            background: #00ff88;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
             color: #000000;
+            border: none;
         }
 
         .slide-btn.primary:hover {
-            background: #0a4d3c;
-            color: #00ff88;
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
         }
 
-        .badge {
-            display: inline-block;
-            padding: 5px 12px;
-            background: rgba(0, 255, 136, 0.2);
-            border: 1px solid #00ff88;
-            border-radius: 15px;
-            font-size: 0.85em;
-            color: #00ff88;
-            margin-left: 10px;
-        }
-
+        /* Info Sections */
         .info-section {
-            background: rgba(10, 77, 60, 0.2);
-            border: 2px solid #0a4d3c;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #00ff88, #00d4ff, #a855f7);
         }
 
         .info-section h2 {
-            color: #00ff88;
-            font-size: 2em;
-            margin-bottom: 20px;
+            color: #ffffff;
+            font-size: 2.2em;
+            margin-bottom: 25px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .info-section p {
-            color: #e0e0e0;
-            line-height: 1.8;
-            margin-bottom: 15px;
+            color: #b0b0b0;
+            line-height: 1.9;
+            margin-bottom: 20px;
+            font-size: 1.05em;
         }
 
+        .info-section strong {
+            color: #00ff88;
+            font-weight: 600;
+        }
+
+        /* Resources Grid */
         .resources-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            gap: 25px;
+            margin-top: 30px;
         }
 
         .resource-card {
-            background: rgba(10, 77, 60, 0.3);
-            border: 2px solid #0a4d3c;
-            border-radius: 10px;
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .resource-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent,
+                rgba(0, 255, 136, 0.1),
+                transparent 30%
+            );
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(1turn); }
+        }
+
+        .resource-card::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: #0a0e27;
+            border-radius: 18px;
+            z-index: 1;
         }
 
         .resource-card:hover {
-            border-color: #00ff88;
-            transform: translateY(-5px);
+            transform: translateY(-10px);
+            border-color: rgba(0, 255, 136, 0.5);
+            box-shadow: 0 15px 40px rgba(0, 255, 136, 0.2);
         }
 
         .resource-icon {
-            font-size: 2.5em;
-            margin-bottom: 15px;
+            font-size: 3em;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.5));
         }
 
         .resource-card h3 {
             color: #00ff88;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
         }
 
         .resource-card p {
-            color: #a0a0a0;
+            color: #909090;
             font-size: 0.95em;
+            position: relative;
+            z-index: 2;
         }
 
+        /* Section Titles */
+        .section-title {
+            color: #ffffff;
+            font-size: 2.8em;
+            margin-bottom: 40px;
+            text-align: center;
+            font-weight: 800;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            border-radius: 2px;
+        }
+
+        /* Coming Soon Effect */
+        .coming-soon {
+            opacity: 0.5;
+            position: relative;
+        }
+
+        .coming-soon::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            border-radius: 25px;
+            pointer-events: none;
+        }
+
+        .coming-soon .lecture-card {
+            border-color: rgba(100, 100, 100, 0.3);
+        }
+
+        /* Footer */
         footer {
             text-align: center;
-            padding: 40px 20px;
-            color: #a0a0a0;
-            border-top: 2px solid #0a4d3c;
-            margin-top: 60px;
+            padding: 60px 40px;
+            color: #707070;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 80px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
         }
 
         footer a {
             color: #00ff88;
             text-decoration: none;
+            transition: all 0.3s ease;
         }
 
         footer a:hover {
-            text-decoration: underline;
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
         }
 
-        .coming-soon {
-            opacity: 0.6;
-            pointer-events: none;
+        /* Scroll Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00ff88, #00d4ff, #a855f7);
+            z-index: 1000;
+            transition: width 0.1s ease;
         }
 
-        .coming-soon .lecture-card {
-            background: rgba(50, 50, 50, 0.3);
-            border-color: #333;
-        }
-
-        .coming-soon h2 {
-            color: #666;
-        }
-
+        /* Responsive Design */
         @media (max-width: 768px) {
             header h1 {
-                font-size: 2em;
+                font-size: 2.5em;
             }
 
             .lectures-grid {
@@ -273,34 +576,64 @@
             }
 
             .lecture-number {
+                font-size: 3em;
+            }
+
+            .section-title {
                 font-size: 2em;
             }
+
+            .info-section {
+                padding: 25px;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
         }
     </style>
 </head>
 <body>
+    <!-- Animated particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Scroll Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
     <div class="container">
-        <header>
+        <header class="fade-in">
             <h1>Semantic Web & Ontology</h1>
             <p>Building Knowledge-Driven Systems</p>
             <p class="instructor">Eng. Dr. Tiroshan Madushanka</p>
-            <div style="margin-top: 20px;">
+            <div style="margin-top: 25px;">
                 <span class="badge">14-Week Course</span>
                 <span class="badge">RDF • RDFS • OWL • SPARQL</span>
             </div>
         </header>
 
-        <div class="info-section">
+        <div class="info-section fade-in" style="animation-delay: 0.1s">
             <h2>📚 Course Overview</h2>
             <p>This course explores the Semantic Web stack, from fundamental concepts to practical implementation. Through hands-on projects, you'll master RDF, RDFS, OWL, and SPARQL to create intelligent, queryable knowledge systems.</p>
-            <p><strong>Project Focus:</strong> Building a Resilient City Knowledge Graph capable of automated inference and intelligent decision-making.</p>
+            <!-- <p><strong>Project Focus:</strong> Building a Resilient City Knowledge Graph capable of automated inference and intelligent decision-making.</p> -->
         </div>
 
-        <h2 style="color: #00ff88; font-size: 2.5em; margin-bottom: 30px; text-align: center;">📖 Lecture Slides</h2>
+        <h2 class="section-title fade-in" style="animation-delay: 0.2s">📖 Lecture Slides</h2>
 
         <div class="lectures-grid">
             <!-- Week 1 -->
-            <div class="lecture-card">
+            <div class="lecture-card fade-in" style="animation-delay: 0.3s">
                 <div class="lecture-number">1</div>
                 <h2>Week 1: Introduction & Project Mission</h2>
                 <p>Transitioning from Traditional Web to Knowledge-Driven Systems</p>
@@ -312,12 +645,12 @@
                     <li>Lab Setup & Environment</li>
                 </ul>
                 <div class="slide-links">
-                    <a href="docs/ch1.html" class="slide-btn primary">View Slides</a>
+                    <a href="docs/ch1.html" class="slide-btn primary"><span>View Slides</span></a>
                 </div>
             </div>
 
             <!-- Week 2 -->
-            <div class="lecture-card">
+            <div class="lecture-card fade-in" style="animation-delay: 0.4s">
                 <div class="lecture-number">2</div>
                 <h2>Week 2: The Problem with Traditional Web</h2>
                 <p>Understanding the Machine's Dilemma in the Web of Documents</p>
@@ -329,14 +662,14 @@
                     <li>Semantic Web Solutions</li>
                 </ul>
                 <div class="slide-links">
-                    <a href="docs/ch2.html" class="slide-btn primary">View Slides</a>
+                    <a href="docs/ch2.html" class="slide-btn primary"><span>View Slides</span></a>
                 </div>
             </div>
 
             <!-- Week 3 -->
-            <div class="lecture-card">
+            <div class="lecture-card fade-in" style="animation-delay: 0.5s">
                 <div class="lecture-number">3</div>
-                <h2>Week 3: RDF Fundamentals </h2>
+                <h2>Week 3: RDF Fundamentals</h2>
                 <p>Resource Description Framework & Triple Structure</p>
                 <ul class="topics">
                     <li>RDF Syntax & Serialization</li>
@@ -346,14 +679,14 @@
                     <li>Creating Your First RDF Graph</li>
                 </ul>
                 <div class="slide-links">
-                    <a href="docs/ch3.html" class="slide-btn primary">View Slides</a>
+                    <a href="docs/ch3.html" class="slide-btn primary"><span>View Slides</span></a>
                 </div>
             </div>
 
-            <!-- Week 4  -->
-            <div class="lecture-card">
+            <!-- Week 4 -->
+            <div class="lecture-card fade-in" style="animation-delay: 0.6s">
                 <div class="lecture-number">4</div>
-                <h2>Week 4: RDF Schema (RDFS) </h2>
+                <h2>Week 4: RDF Schema (RDFS)</h2>
                 <p>Building Taxonomies and Class Hierarchies</p>
                 <ul class="topics">
                     <li>RDFS Classes & Properties</li>
@@ -363,12 +696,12 @@
                     <li>City Infrastructure Schema</li>
                 </ul>
                 <div class="slide-links">
-                    <a href="docs/ch4.html" class="slide-btn primary">View Slides</a>
+                    <a href="docs/ch4.html" class="slide-btn primary"><span>View Slides</span></a>
                 </div>
             </div>
 
             <!-- Week 5 - Coming Soon -->
-            <div class="lecture-card coming-soon">
+            <div class="lecture-card coming-soon fade-in" style="animation-delay: 0.7s">
                 <div class="lecture-number">5</div>
                 <h2>Week 5: OWL - Web Ontology Language <span class="badge">Coming Soon</span></h2>
                 <p>Advanced Semantic Modeling & Reasoning</p>
@@ -382,7 +715,7 @@
             </div>
 
             <!-- Week 6 - Coming Soon -->
-            <div class="lecture-card coming-soon">
+            <div class="lecture-card coming-soon fade-in" style="animation-delay: 0.8s">
                 <div class="lecture-number">6</div>
                 <h2>Week 6: SPARQL Query Language <span class="badge">Coming Soon</span></h2>
                 <p>Querying Knowledge Graphs</p>
@@ -396,7 +729,7 @@
             </div>
 
             <!-- Week 7 - Coming Soon -->
-            <div class="lecture-card coming-soon">
+            <div class="lecture-card coming-soon fade-in" style="animation-delay: 0.9s">
                 <div class="lecture-number">7</div>
                 <h2>Week 7: Advanced SPARQL <span class="badge">Coming Soon</span></h2>
                 <p>Advanced Query Patterns & Optimization</p>
@@ -410,7 +743,7 @@
             </div>
 
             <!-- Week 8 - Coming Soon -->
-            <div class="lecture-card coming-soon">
+            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1s">
                 <div class="lecture-number">8</div>
                 <h2>Week 8: Semantic Agents & Validation <span class="badge">Coming Soon</span></h2>
                 <p>Building Intelligent Automation & Ontology Validation</p>
@@ -424,7 +757,7 @@
             </div>
 
             <!-- Week 9 - Coming Soon -->
-            <div class="lecture-card coming-soon">
+            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.1s">
                 <div class="lecture-number">9</div>
                 <h2>Week 9: Semantic Markup & FOAF <span class="badge">Coming Soon</span></h2>
                 <p>Connecting Documents to the Semantic Web</p>
@@ -438,7 +771,7 @@
             </div>
 
             <!-- Week 10 - Coming Soon -->
-            <div class="lecture-card coming-soon">
+            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.2s">
                 <div class="lecture-number">10</div>
                 <h2>Week 10: Semantic Search Engines <span class="badge">Coming Soon</span></h2>
                 <p>Beyond Keyword-Based Search</p>
@@ -452,7 +785,7 @@
             </div>
 
             <!-- Week 11 - Coming Soon -->
-            <div class="lecture-card coming-soon">
+            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.3s">
                 <div class="lecture-number">11</div>
                 <h2>Week 11: Web Services Fundamentals <span class="badge">Coming Soon</span></h2>
                 <p>From Traditional to Semantic Web Services</p>
@@ -466,7 +799,7 @@
             </div>
 
             <!-- Week 12 - Coming Soon -->
-            <div class="lecture-card coming-soon">
+            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.4s">
                 <div class="lecture-number">12</div>
                 <h2>Week 12: OWL-S & Semantic Services <span class="badge">Coming Soon</span></h2>
                 <p>Ontology-Based Service Description</p>
@@ -480,7 +813,7 @@
             </div>
 
             <!-- Week 13 - Coming Soon -->
-            <div class="lecture-card coming-soon">
+            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.5s">
                 <div class="lecture-number">13</div>
                 <h2>Week 13: Semantic Service Description <span class="badge">Coming Soon</span></h2>
                 <p>WSDL-S and Service Annotation</p>
@@ -494,7 +827,7 @@
             </div>
 
             <!-- Week 14 - Coming Soon -->
-            <div class="lecture-card coming-soon">
+            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.6s">
                 <div class="lecture-number">14</div>
                 <h2>Week 14: Semantic Service Search Engine <span class="badge">Coming Soon</span></h2>
                 <p>Building Intelligent Service Discovery Systems</p>
@@ -508,7 +841,7 @@
             </div>
         </div>
 
-        <div class="info-section">
+        <div class="info-section fade-in" style="animation-delay: 1.7s">
             <h2>🛠️ Additional Resources</h2>
             <div class="resources-grid">
                 <div class="resource-card">
@@ -534,7 +867,7 @@
             </div>
         </div>
 
-        <div class="info-section">
+        <div class="info-section fade-in" style="animation-delay: 1.8s">
             <h2>🎯 Learning Path</h2>
             <p><strong>Phase 1 (Weeks 1-4):</strong> Foundation - Understanding semantic web concepts, RDF basics, and RDFS schemas</p>
             <p><strong>Phase 2 (Weeks 5-7):</strong> Advanced Modeling - Mastering OWL ontologies and SPARQL queries</p>
@@ -542,7 +875,7 @@
             <p><strong>Phase 4 (Weeks 11-14):</strong> Semantic Web Services - From traditional web services to semantic service discovery and composition</p>
         </div>
 
-        <div class="info-section">
+        <div class="info-section fade-in" style="animation-delay: 1.9s">
             <h2>📋 Course Structure</h2>
             <p><strong>Part 1: Foundations (Weeks 1-2)</strong> - Traditional Web limitations and Semantic Web vision</p>
             <p><strong>Part 2: Core Technologies (Weeks 3-8)</strong> - RDF, RDFS, OWL, SPARQL, and validation tools</p>
@@ -550,7 +883,7 @@
             <p><strong>Part 4: Semantic Web Services (Weeks 11-14)</strong> - Web services, OWL-S, service description, and discovery</p>
         </div>
 
-        <footer>
+        <footer class="fade-in" style="animation-delay: 2s">
             <p>🌐 Semantic Web & Ontology Course</p>
             <p>Built with modern web technologies • No external dependencies</p>
             <p style="margin-top: 20px;">
@@ -558,28 +891,47 @@
                 <a href="README.md">Documentation</a> •
                 <a href="PRESENTATION_GUIDE.md">Presentation Guide</a>
             </p>
-            <p style="margin-top: 30px; color: #666;">
+            <p style="margin-top: 30px; color: #505050;">
                 © 2024 Semantic Web Course • All presentations are self-contained HTML files
             </p>
         </footer>
     </div>
 
     <script>
-        // Add smooth scroll behavior
+        // Generate floating particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Scroll progress bar
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        });
+
+        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             });
         });
 
-        // Add animation on scroll
+        // Intersection Observer for animations
         const observerOptions = {
             threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
+            rootMargin: '0px 0px -50px 0px'
         };
 
         const observer = new IntersectionObserver((entries) => {
@@ -591,21 +943,40 @@
             });
         }, observerOptions);
 
-        // Initially hide cards for animation
-        document.querySelectorAll('.lecture-card, .info-section').forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            card.style.transition = `all 0.6s ease ${index * 0.1}s`;
-            observer.observe(card);
+        // Observe all animated elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
         });
 
-        // Trigger initial animation
-        setTimeout(() => {
-            document.querySelectorAll('.lecture-card, .info-section').forEach(card => {
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
+        // Add ripple effect to buttons
+        document.querySelectorAll('.slide-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 600);
             });
-        }, 100);
+        });
+
+        // Parallax effect for header
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const header = document.querySelector('header');
+            if (header) {
+                header.style.transform = `translateY(${scrolled * 0.5}px)`;
+                header.style.opacity = 1 - scrolled / 500;
+            }
+        });
     </script>
 </body>
 </html>
