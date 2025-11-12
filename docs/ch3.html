@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDF: The Building Block of the Semantic Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a4d3c 0%, #1a1a1a 100%);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .presentation-container {
+            width: 960px;
+            height: 720px;
+            background: #1a1a1a;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #0a4d3c;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.6s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+
+        .slide-header {
+            background: linear-gradient(135deg, #0a4d3c 0%, #0d6b52 100%);
+            padding: 30px 40px;
+            border-bottom: 3px solid #00ff88;
+            flex-shrink: 0;
+        }
+
+        .slide-header h1 {
+            color: #00ff88;
+            font-size: 2.2em;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .slide-header .subtitle {
+            color: #ffffff;
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .slide-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 50px;
+            background: #1a1a1a;
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: #0a0a0a;
+            border-radius: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: #0a4d3c;
+            border-radius: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background: #0d6b52;
+        }
+
+        /* Title Slide */
+        .slide-1 {
+            background: linear-gradient(135deg, #0a4d3c 0%, #000000 100%);
+        }
+
+        .slide-1 .slide-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px;
+            overflow: visible;
+        }
+
+        .slide-1 h1 {
+            font-size: 3em;
+            color: #00ff88;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-out;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+        }
+
+        .slide-1 h2 {
+            font-size: 1.6em;
+            color: #ffffff;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .slide-1 .intro-text {
+            font-size: 1.2em;
+            color: #e0e0e0;
+            max-width: 700px;
+            line-height: 1.8;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .content-block {
+            background: rgba(10, 77, 60, 0.15);
+            border-left: 4px solid #00ff88;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #ffffff;
+        }
+
+        .content-block h3 {
+            color: #00ff88;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .content-block p, .content-block li {
+            color: #e0e0e0;
+            line-height: 1.7;
+            font-size: 1.05em;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(10, 77, 60, 0.2));
+            border: 2px solid #0a4d3c;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            color: #ffffff;
+        }
+
+        .highlight-box h3 {
+            color: #00ff88;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+        }
+
+        .highlight-box strong {
+            color: #00ff88;
+        }
+
+        .key-points {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(10, 77, 60, 0.25));
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #0a4d3c;
+        }
+
+        .key-points h3 {
+            color: #00ff88;
+            margin-bottom: 15px;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #e0e0e0;
+        }
+
+        .key-points li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #00ff88;
+        }
+
+        .code-block {
+            background: #000000;
+            color: #00ff88;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            border: 1px solid #0a4d3c;
+            font-size: 0.9em;
+        }
+
+        .code-block::before {
+            content: "RDF/XML";
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            color: #00ff88;
+            font-size: 12px;
+            opacity: 0.5;
+        }
+
+        .example-box {
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px dashed #0a4d3c;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            position: relative;
+            color: #e0e0e0;
+        }
+
+        .example-box::before {
+            content: "💡 Example";
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #1a1a1a;
+            padding: 0 10px;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .triple-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(10, 77, 60, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .triple-table th {
+            background: #0a4d3c;
+            color: #00ff88;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .triple-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+            color: #e0e0e0;
+        }
+
+        .triple-table tr:hover {
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .interactive-demo {
+            background: rgba(10, 77, 60, 0.2);
+            border: 2px solid #0a4d3c;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .demo-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            background: #000000;
+            color: #00ff88;
+            border: 2px solid #0a4d3c;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .demo-btn {
+            padding: 12px 30px;
+            background: #0a4d3c;
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .demo-btn:hover {
+            background: #00ff88;
+            color: #000000;
+            transform: scale(1.05);
+        }
+
+        .demo-output {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            display: none;
+            color: #e0e0e0;
+        }
+
+        .demo-output.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-card {
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #0a4d3c;
+        }
+
+        .comparison-card.traditional {
+            background: rgba(139, 0, 0, 0.2);
+            border-color: #ff4444;
+        }
+
+        .comparison-card.traditional h3 {
+            color: #ff6b6b;
+        }
+
+        .comparison-card.semantic {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: #00ff88;
+        }
+
+        .comparison-card.semantic h3 {
+            color: #00ff88;
+        }
+
+        .comparison-card p {
+            color: #e0e0e0;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .rule-box {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(10, 77, 60, 0.3));
+            border-left: 5px solid #00ff88;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .rule-box h4 {
+            color: #00ff88;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .rule-box p {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            background: rgba(10, 77, 60, 0.9);
+            color: #00ff88;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+            background: #00ff88;
+            color: #000000;
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(10, 77, 60, 0.3);
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0a4d3c 0%, #00ff88 100%);
+            transition: width 0.3s ease;
+        }
+
+        .slide-counter {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(10, 77, 60, 0.9);
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        ul {
+            margin-left: 25px;
+        }
+
+        li {
+            margin: 10px 0;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .vocab-list {
+            background: rgba(0, 255, 136, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .vocab-category {
+            margin-bottom: 15px;
+        }
+
+        .vocab-category h4 {
+            color: #00ff88;
+            margin-bottom: 8px;
+        }
+
+        .vocab-category code {
+            background: #000000;
+            color: #00ff88;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 0 5px;
+            font-size: 0.9em;
+        }
+
+        .diagram {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #0a4d3c;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .diagram svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .node {
+            fill: #0a4d3c;
+            stroke: #00ff88;
+            stroke-width: 2;
+        }
+
+        .node-text {
+            fill: #00ff88;
+            font-size: 12px;
+            text-anchor: middle;
+        }
+
+        .edge {
+            stroke: #00ff88;
+            stroke-width: 2;
+            marker-end: url(#arrowhead);
+        }
+
+        .edge-label {
+            fill: #00ff88;
+            font-size: 11px;
+            text-anchor: middle;
+        }
+
+        @media (max-width: 1024px) {
+            .presentation-container {
+                width: 100vw;
+                height: 75vw;
+                max-height: 100vh;
+            }
+
+            .slide-content {
+                padding: 30px 40px;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide slide-1 active">
+            <div class="slide-content">
+                <h1>RDF: The Building Block of the Semantic Web</h1>
+                <h2>Resource Description Framework</h2>
+                <p class="intro-text">
+                    Understanding how to express machine-understandable metadata 
+                    and enable distributed information aggregation on the Web
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 2: What is RDF? -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>What is RDF?</h1>
+                <div class="subtitle">Understanding the Foundation</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>RDF in the Semantic Web Context</h3>
+                    <p>RDF is an XML-based language for describing information contained in a Web resource. It is the special "markup file" that enables smart agents to understand and process Web content.</p>
+                </div>
+
+                <div class="key-points">
+                    <h3>Key Facts About RDF</h3>
+                    <ul>
+                        <li>RDF is the <strong>basic building block</strong> for supporting the Semantic Web</li>
+                        <li>RDF is to the Semantic Web what <strong>HTML has been to the Web</strong></li>
+                        <li>RDF is a <strong>W3C recommended standard</strong> for metadata</li>
+                        <li>RDF is <strong>domain-independent</strong> - can describe any fact or resource</li>
+                        <li>RDF is <strong>machine-understandable</strong> - enables automated reasoning</li>
+                        <li>RDF enables <strong>interoperability</strong> among applications on the Web</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3>The Vision</h3>
+                    <p>RDF provides a basis for <strong>coding, exchanging, and reusing</strong> structured metadata, making the vision of the Semantic Web a reality.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Basic Elements - Resource -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Basic Elements: Resource</h1>
+                <div class="subtitle">Everything is a Resource</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>What is a Resource?</h3>
+                    <p>A resource is <strong>anything</strong> that is being described by RDF expressions:</p>
+                    <ul>
+                        <li>A Web page or part of a Web page</li>
+                        <li>An entire Web site</li>
+                        <li>A real-world object (book, camera, person, dog)</li>
+                        <li>An abstract concept</li>
+                    </ul>
+                </div>
+
+                <div class="rule-box">
+                    <h4>Rule #1: Global Naming</h4>
+                    <p>The name of a resource must be <strong>global</strong>. If you have a doubt that someone else might use the same name to refer to something else, then you cannot use that name.</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>Resource URI Example</h4>
+                    <div class="code-block">http://www.yuchen.net/photography/SLR#Nikon-D70</div>
+                    <p><strong>Breakdown:</strong></p>
+                    <ul>
+                        <li><strong>Namespace:</strong> http://www.yuchen.net/photography/SLR</li>
+                        <li><strong>Fragment identifier:</strong> #</li>
+                        <li><strong>Local name:</strong> Nikon-D70</li>
+                    </ul>
+                    <p>This URI uniquely identifies a Nikon D70 camera globally.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Basic Elements - Property -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Basic Elements: Property</h1>
+                <div class="subtitle">Describing Resources</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>What is a Property?</h3>
+                    <p>A <strong>property</strong> is a resource that has a name and can be used to describe some specific aspect, characteristic, attribute, or relation of another resource.</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>Property Example</h4>
+                    <div class="code-block">http://www.yuchen.net/photography/SLR#weight</div>
+                    <p>This property describes the weight of a camera.</p>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Properties are Resources Too!</h3>
+                    <p>Since properties are also resources, they follow the same naming conventions and must be globally unique using URIs.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Basic Elements - Statement -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Basic Elements: Statement</h1>
+                <div class="subtitle">The RDF Triple</div>
+            </div>
+            <div class="slide-content">
+                <div class="rule-box">
+                    <h4>Rule #2: The Statement Structure</h4>
+                    <p>Knowledge (or information) is expressed as a statement in the form of <strong>subject-predicate-object</strong>, and this order should never be changed.</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>RDF Statement Format</h3>
+                    <div class="code-block" style="background: rgba(10, 77, 60, 0.2); color: #e0e0e0;">
+resource (subject) + property (predicate) + property value (object)
+                    </div>
+                    <p style="margin-top: 15px;">Can be interpreted as:</p>
+                    <div class="code-block" style="background: rgba(10, 77, 60, 0.2); color: #e0e0e0;">
+&lt;subject&gt; has a property &lt;predicate&gt;, whose value is &lt;object&gt;
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>Example Statement</h4>
+                    <p><strong>Full form:</strong></p>
+                    <div class="code-block" style="font-size: 0.8em;">
+http://www.yuchen.net/photography/SLR#Nikon-D70 has a 
+http://www.yuchen.net/photography/SLR#weight whose value is 1.4 lb
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Using namespace abbreviation:</strong></p>
+                    <div class="code-block">
+mySLR:Nikon-D70 has a mySLR:weight whose value is 1.4 lb
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Triple Representation</h3>
+                    <table class="triple-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Predicate</th>
+                                <th>Object</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>mySLR:Nikon-D70</td>
+                                <td>mySLR:weight</td>
+                                <td>1.4 lb</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Knowledge Machines Can Use -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>RDF Triples: Knowledge That Machines Can Use</h1>
+                <div class="subtitle">Machine Reasoning with RDF</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>Example RDF Statements</h3>
+                    <table class="triple-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Predicate</th>
+                                <th>Object</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>mySLR:Nikon-D70</td>
+                                <td>mySLR:weight</td>
+                                <td>1.4 lb</td>
+                            </tr>
+                            <tr>
+                                <td>mySLR:Nikon-D70</td>
+                                <td>mySLR:pixel</td>
+                                <td>6.1 M</td>
+                            </tr>
+                            <tr>
+                                <td>mySLR:Nikon-D50</td>
+                                <td>mySLR:weight</td>
+                                <td>1.3 lb</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="interactive-demo">
+                    <h3>Interactive Query Demo</h3>
+                    <p style="color: #e0e0e0; margin-bottom: 15px;">Question: What properties did we define for Nikon D70?</p>
+                    <button class="demo-btn" onclick="runQuery()">Execute Query</button>
+                    <div class="demo-output" id="queryOutput">
+                        <h4 style="color: #00ff88; margin-bottom: 10px;">Query Results:</h4>
+                        <div style="padding: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; margin-top: 10px;">
+                            <p><strong style="color: #00ff88;">Properties found:</strong></p>
+                            <ul>
+                                <li>mySLR:weight</li>
+                                <li>mySLR:pixel</li>
+                            </ul>
+                        </div>
+                        <p style="margin-top: 15px; font-style: italic;">The machine can perform useful work based on the RDF statements!</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 20px;">
+                    <h3>The Power of Structured Data</h3>
+                    <p>Even with simple statements, machines can draw inferences and answer questions without understanding the specific meaning of the content.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: RDF Vocabulary -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>RDF Vocabulary</h1>
+                <div class="subtitle">A Small but Powerful Set</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>The Complete RDF Vocabulary</h3>
+                    <p>RDF has an extremely small vocabulary set:</p>
+                </div>
+
+                <div class="vocab-list">
+                    <div class="vocab-category">
+                        <h4>Syntax Names:</h4>
+                        <p>
+                            <code>RDF</code>
+                            <code>Description</code>
+                            <code>ID</code>
+                            <code>about</code>
+                            <code>parseType</code>
+                            <code>resource</code>
+                            <code>nodeID</code>
+                            <code>datatype</code>
+                        </p>
+                    </div>
+
+                    <div class="vocab-category">
+                        <h4>Class Names:</h4>
+                        <p>
+                            <code>Seq</code>
+                            <code>Bag</code>
+                            <code>Alt</code>
+                            <code>Statement</code>
+                            <code>Property</code>
+                            <code>XMLLiteral</code>
+                            <code>List</code>
+                        </p>
+                    </div>
+
+                    <div class="vocab-category">
+                        <h4>Property Names:</h4>
+                        <p>
+                            <code>subject</code>
+                            <code>predicate</code>
+                            <code>object</code>
+                            <code>type</code>
+                            <code>value</code>
+                            <code>first</code>
+                            <code>rest</code>
+                            <code>_n</code>
+                        </p>
+                    </div>
+
+                    <div class="vocab-category">
+                        <h4>Resource Names:</h4>
+                        <p>
+                            <code>nil</code>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <p><strong>Key Insight:</strong> The small vocabulary size makes RDF easy to learn and implement, while still being powerful enough to express any knowledge.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Basic RDF Syntax -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Basic RDF Syntax</h1>
+                <div class="subtitle">Your First RDF Document</div>
+            </div>
+            <div class="slide-content">
+                <div class="example-box">
+                    <h4>Simple RDF Document</h4>
+                    <div class="code-block" style="font-size: 0.85em;">
+&lt;?xml version="1.0"?&gt;
+&lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns="http://www.yuchen.net/photography/Camera#"&gt;
+    &lt;SLR rdf:ID="Nikon-D70"&gt;
+        &lt;weight&gt;1.4 lbs&lt;/weight&gt;
+    &lt;/SLR&gt;
+&lt;/rdf:RDF&gt;
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Understanding the Document</h3>
+                    <ul>
+                        <li><strong>Line 1:</strong> XML declaration</li>
+                        <li><strong>Line 2:</strong> RDF namespace declaration</li>
+                        <li><strong>Line 3:</strong> Default namespace (our vocabulary)</li>
+                        <li><strong>Line 4:</strong> Resource type (SLR) and identifier (Nikon-D70)</li>
+                        <li><strong>Line 5:</strong> Property (weight) with literal value</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Resource URI Construction</h3>
+                    <p>The complete URI for the subject is constructed as:</p>
+                    <div class="code-block" style="background: rgba(10, 77, 60, 0.2); color: #e0e0e0;">
+document-location + "#" + rdf:ID value
+                    </div>
+                    <p style="margin-top: 15px;">Result: <code>http://www.yuchen.net/rdf/NikonD70.rdf#Nikon-D70</code></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Long Form vs Short Form -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>RDF Syntax: Long Form</h1>
+                <div class="subtitle">Using rdf:Description, rdf:type, and rdf:resource</div>
+            </div>
+            <div class="slide-content">
+                <div class="comparison-grid">
+                    <div class="comparison-card traditional">
+                        <h3>Short Form (Abbreviated)</h3>
+                        <div class="code-block" style="font-size: 0.75em;">
+&lt;SLR rdf:about="...#Nikon-D70"&gt;
+    &lt;weight&gt;1.4 lbs&lt;/weight&gt;
+&lt;/SLR&gt;
+                        </div>
+                    </div>
+
+                    <div class="comparison-card semantic">
+                        <h3>Long Form (Full)</h3>
+                        <div class="code-block" style="font-size: 0.75em;">
+&lt;rdf:Description 
+    rdf:about="...#Nikon-D70"&gt;
+    &lt;rdf:type 
+        rdf:resource="...#SLR"/&gt;
+    &lt;weight&gt;1.4 lbs&lt;/weight&gt;
+&lt;/rdf:Description&gt;
+                        </div>
+                    </div>
+                </div>
+
+                <div class="key-points">
+                    <h3>Key RDF Keywords</h3>
+                    <ul>
+                        <li><code>rdf:Description</code> - Generic element for describing any resource</li>
+                        <li><code>rdf:about</code> - Specifies the URI of the resource being described</li>
+                        <li><code>rdf:type</code> - Indicates the class/type of the resource</li>
+                        <li><code>rdf:resource</code> - Points to another resource as a property value</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Best Practice</h3>
+                    <p>Always use <code>rdf:about</code> with absolute URIs to ensure resources are uniquely identified regardless of document location.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Blank Nodes -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Anonymous Resources (Blank Nodes)</h1>
+                <div class="subtitle">When Names Don't Matter</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>What are Blank Nodes?</h3>
+                    <p>Anonymous resources that serve as containers for properties but don't need their own identity. They exist only to provide structure.</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>Using Blank Nodes for Structured Values</h4>
+                    <div class="code-block" style="font-size: 0.8em;">
+&lt;weight&gt;
+    &lt;rdf:Description&gt;
+        &lt;rdf:value&gt;1.4&lt;/rdf:value&gt;
+        &lt;uom:units rdf:resource="...#lbs"/&gt;
+    &lt;/rdf:Description&gt;
+&lt;/weight&gt;
+                    </div>
+                    <p style="margin-top: 15px;">The inner <code>&lt;rdf:Description&gt;</code> has no <code>rdf:about</code> - it's a blank node!</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>Three Ways to Create Blank Nodes</h3>
+                    <ul>
+                        <li><strong>Implicit:</strong> Nested <code>&lt;rdf:Description&gt;</code> without ID</li>
+                        <li><strong>parseType:</strong> <code>&lt;weight rdf:parseType="Resource"&gt;</code></li>
+                        <li><strong>nodeID:</strong> <code>&lt;rdf:Description rdf:nodeID="node1"&gt;</code></li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Important Note</h3>
+                    <p><strong>Anonymous resources cannot be aggregated</strong> because there's no way to identify them across different documents.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Typed Literals -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Typed Literals</h1>
+                <div class="subtitle">Adding Data Type Information</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>The Problem with Untyped Literals</h3>
+                    <p>Without explicit type information, we can't be sure how to interpret values:</p>
+                    <div class="code-block">&lt;rdf:value&gt;1.4&lt;/rdf:value&gt;</div>
+                    <p style="margin-top: 10px;">Is this a decimal? A string? An integer with a typo?</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>Using rdf:datatype</h4>
+                    <div class="code-block" style="font-size: 0.85em;">
+&lt;rdf:value rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal"&gt;
+    1.4
+&lt;/rdf:value&gt;
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Better with XML entities:</strong></p>
+                    <div class="code-block" style="font-size: 0.85em;">
+&lt;!DOCTYPE rdf:RDF [
+    &lt;!ENTITY xsd "http://www.w3.org/2001/XMLSchema#"&gt;
+]&gt;
+
+&lt;rdf:value rdf:datatype="&amp;xsd;decimal"&gt;1.4&lt;/rdf:value&gt;
+                    </div>
+                </div>
+
+                <div class="key-points">
+                    <h3>XML Schema Data Types</h3>
+                    <ul>
+                        <li>RDF borrows data types from XML Schema</li>
+                        <li>Common types: <code>xsd:integer</code>, <code>xsd:decimal</code>, <code>xsd:string</code>, <code>xsd:date</code></li>
+                        <li>Ensures interoperability between different systems</li>
+                        <li>Enables proper validation and processing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: The Three Fundamental Rules -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>The Three Fundamental Rules of RDF</h1>
+                <div class="subtitle">Principles That Make the Semantic Web Work</div>
+            </div>
+            <div class="slide-content">
+                <div class="rule-box">
+                    <h4>Rule #1: Global Naming</h4>
+                    <p>The name of a resource must be <strong>global</strong>. If you have a doubt that someone else might use the same name to refer to something else, then you cannot use that name.</p>
+                    <p style="margin-top: 10px;"><em>This ensures that the same URI always refers to the same concept everywhere.</em></p>
+                </div>
+
+                <div class="rule-box">
+                    <h4>Rule #2: Statement Structure</h4>
+                    <p>Knowledge is expressed as a statement in the form of <strong>subject-predicate-object</strong>, and this order should never be changed.</p>
+                    <p style="margin-top: 10px;"><em>This fixed structure enables machines to process and understand RDF statements.</em></p>
+                </div>
+
+                <div class="rule-box">
+                    <h4>Rule #3: Open World - Anyone Can Say Anything</h4>
+                    <p>I can talk about <strong>any resource</strong> at my will. If I choose to use an existing URI to identify the resource I am talking about, then:</p>
+                    <ul style="margin-top: 10px;">
+                        <li>The resource I'm describing and the existing resource represent <strong>exactly the same concept</strong></li>
+                        <li>Everything I say about this resource is considered <strong>additional knowledge</strong></li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>The Power of Rule #3</h3>
+                    <p>This rule enables <strong>distributed information aggregation</strong> - the key feature that makes the Semantic Web possible!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Aggregation Example -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>RDF Aggregation in Action</h1>
+                <div class="subtitle">Combining Distributed Information</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>Scenario: Camera Shopping Decision</h3>
+                    <p>You want to compare Nikon D70 vs Canon 20D using information from:</p>
+                    <ul>
+                        <li>3 Nikon vendors (sales data)</li>
+                        <li>2 Canon vendors (sales data)</li>
+                        <li>Online discussion group (reviews)</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>Step 1: Define Common URIs</h4>
+                    <div class="code-block" style="font-size: 0.85em;">
+http://www.yuchen.net/rdf/NikonD70.rdf#Nikon-D70
+http://www.yuchen.net/rdf/Canon20D.rdf#Canon-20D
+                    </div>
+                    <p style="margin-top: 10px;">Share these URIs with all vendors and reviewers</p>
+                </div>
+
+                <div class="comparison-grid">
+                    <div class="comparison-card semantic">
+                        <h3>Vendor RDF</h3>
+                        <div class="code-block" style="font-size: 0.7em;">
+&lt;rdf:Description 
+  rdf:about="...#Nikon-D70"&gt;
+  &lt;itemSold&gt;12&lt;/itemSold&gt;
+&lt;/rdf:Description&gt;
+                        </div>
+                    </div>
+
+                    <div class="comparison-card semantic">
+                        <h3>Reviewer RDF</h3>
+                        <div class="code-block" style="font-size: 0.7em;">
+&lt;rdf:Description 
+  rdf:about="...#Nikon-D70"&gt;
+  &lt;review&gt;Excellent!&lt;/review&gt;
+&lt;/rdf:Description&gt;
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Result: Aggregated Knowledge</h3>
+                    <p>Your crawler collects all RDF statements and aggregates them by URI, giving you a complete picture with sales data from multiple vendors and multiple reviews - all without a centralized database!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: RDF vs XML -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>RDF vs XML</h1>
+                <div class="subtitle">Why RDF When We Have XML?</div>
+            </div>
+            <div class="slide-content">
+                <div class="comparison-grid">
+                    <div class="comparison-card traditional">
+                        <h3>XML Limitations</h3>
+                        <ul>
+                            <li>Multiple ways to express the same information</li>
+                            <li>No standard meaning for structure</li>
+                            <li>Tree-based parsing is complex</li>
+                            <li>No built-in support for semantic relationships</li>
+                            <li>Difficult to merge from multiple sources</li>
+                        </ul>
+                    </div>
+
+                    <div class="comparison-card semantic">
+                        <h3>RDF Advantages</h3>
+                        <ul>
+                            <li>Single, standardized statement structure</li>
+                            <li>Clear subject-predicate-object semantics</li>
+                            <li>Simple graph-based model</li>
+                            <li>Built for expressing relationships</li>
+                            <li>Easy to aggregate from multiple sources</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>XML Ambiguity Example</h4>
+                    <div class="code-block" style="font-size: 0.75em;">
+&lt;!-- Three different ways in XML --&gt;
+&lt;author&gt;
+  &lt;firstName&gt;Liyang&lt;/firstName&gt;
+  &lt;lastName&gt;Yu&lt;/lastName&gt;
+  &lt;book&gt;&lt;title&gt;Intro to Semantic Web&lt;/title&gt;&lt;/book&gt;
+&lt;/author&gt;
+
+&lt;author&gt;
+  &lt;name&gt;Liyang Yu&lt;/name&gt;
+  &lt;book&gt;Intro to Semantic Web&lt;/book&gt;
+&lt;/author&gt;
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>RDF: One Clear Way</h4>
+                    <div class="code-block" style="font-size: 0.75em;">
+&lt;rdf:Description rdf:about="http://...#semanticweb"&gt;
+    &lt;dc:title&gt;Introduction to the Semantic Web&lt;/dc:title&gt;
+    &lt;dc:creator&gt;Liyang Yu&lt;/dc:creator&gt;
+&lt;/rdf:Description&gt;
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>The Bottom Line</h3>
+                    <p>XML is excellent for data exchange, but RDF provides the <strong>semantic structure</strong> needed for machine understanding and reasoning.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Dublin Core Integration -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>RDF and Dublin Core</h1>
+                <div class="subtitle">Reusing Standard Vocabularies</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>What is Dublin Core?</h3>
+                    <p>Dublin Core is a <strong>standardized set of metadata elements</strong> for describing documents and resources on the Web.</p>
+                </div>
+
+                <div class="key-points">
+                    <h3>Common Dublin Core Elements</h3>
+                    <ul>
+                        <li><code>dc:title</code> - The name of the resource</li>
+                        <li><code>dc:creator</code> - The person or organization responsible for creating the content</li>
+                        <li><code>dc:subject</code> - The topic of the resource</li>
+                        <li><code>dc:description</code> - An account of the resource</li>
+                        <li><code>dc:date</code> - A date associated with the resource</li>
+                        <li><code>dc:type</code> - The nature or genre of the resource</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>Using Dublin Core in RDF</h4>
+                    <div class="code-block" style="font-size: 0.8em;">
+&lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;
+    
+    &lt;rdf:Description rdf:about="http://...#Nikon-D70"&gt;
+        &lt;dc:creator&gt;Liyang Yu&lt;/dc:creator&gt;
+        &lt;dc:date&gt;2005-06-21&lt;/dc:date&gt;
+        &lt;dc:title&gt;Nikon D70 Camera Information&lt;/dc:title&gt;
+    &lt;/rdf:Description&gt;
+    
+&lt;/rdf:RDF&gt;
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Best Practice: Reuse, Don't Reinvent</h3>
+                    <p>Always search for existing vocabularies before creating your own. Using standard vocabularies like Dublin Core ensures your data can be understood by existing tools and applications.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Summary -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Summary: Why RDF Matters</h1>
+                <div class="subtitle">The Foundation of the Semantic Web</div>
+            </div>
+            <div class="slide-content">
+                <div class="key-points">
+                    <h3>Key Takeaways</h3>
+                    <ul>
+                        <li>RDF provides a <strong>standard way</strong> to express metadata about resources</li>
+                        <li>The <strong>triple structure</strong> (subject-predicate-object) is simple yet powerful</li>
+                        <li><strong>Global URIs</strong> ensure resources are uniquely identified everywhere</li>
+                        <li><strong>Anyone can say anything</strong> about any resource - enabling distributed information</li>
+                        <li>RDF is <strong>machine-understandable</strong> - enabling automated reasoning</li>
+                        <li><strong>Standard vocabularies</strong> promote interoperability and reuse</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3>The Semantic Web Vision</h3>
+                    <p>RDF enables a Web where:</p>
+                    <ul>
+                        <li>Information is <strong>machine-readable</strong> and processable</li>
+                        <li>Data from multiple sources can be <strong>automatically integrated</strong></li>
+                        <li>Smart agents can <strong>reason</strong> and make inferences</li>
+                        <li>Knowledge is <strong>distributed</strong> but accessible as if centralized</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Next Steps</h3>
+                    <p>To fully realize the Semantic Web vision, we need to add <strong>vocabularies and schemas</strong> that define the meaning of classes and properties. This is where <strong>RDFS (RDF Schema)</strong> and <strong>OWL (Web Ontology Language)</strong> come in!</p>
+                </div>
+
+                <div class="content-block" style="text-align: center; margin-top: 30px;">
+                    <h3 style="color: #00ff88;">Thank you!</h3>
+                    <p style="font-size: 1.1em; margin-top: 15px;">RDF is the foundation - now you're ready to build on it.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" onclick="changeSlide(-1)">◄</button>
+            <button class="control-btn" id="nextBtn" onclick="changeSlide(1)">►</button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Slide Counter -->
+        <div class="slide-counter" id="slideCounter">1 / 16</div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function updateSlideCounter() {
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add('prev');
+            
+            currentSlide = n;
+            
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            if (currentSlide < 0) currentSlide = 0;
+            
+            slides[currentSlide].classList.remove('prev');
+            slides[currentSlide].classList.add('active');
+            
+            updateSlideCounter();
+            updateProgressBar();
+            updateNavigationButtons();
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowLeft') {
+                changeSlide(-1);
+            } else if (event.key === 'ArrowRight' || event.key === ' ') {
+                event.preventDefault();
+                changeSlide(1);
+            }
+        });
+
+        // Interactive demo function
+        function runQuery() {
+            const output = document.getElementById('queryOutput');
+            output.classList.add('show');
+        }
+
+        // Initialize
+        updateSlideCounter();
+        updateProgressBar();
+        updateNavigationButtons();
+    </script>
+</body>
+</html>
