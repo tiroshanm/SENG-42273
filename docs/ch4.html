@@ -12,23 +12,87 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a4d3c 0%, #1a1a1a 100%);
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
             overflow: hidden;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(138, 43, 226, 0.06) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 15s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(0, 255, 136, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
         }
 
         .presentation-container {
             width: 960px;
             height: 720px;
-            background: #1a1a1a;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.5),
+                0 0 40px rgba(0, 255, 136, 0.1);
             position: relative;
             overflow: hidden;
-            border: 3px solid #0a4d3c;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            z-index: 10;
         }
 
         .slide {
@@ -39,7 +103,7 @@
             left: 0;
             opacity: 0;
             transform: translateX(100%);
-            transition: all 0.6s ease-in-out;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             flex-direction: column;
         }
@@ -55,30 +119,51 @@
         }
 
         .slide-header {
-            background: linear-gradient(135deg, #0a4d3c 0%, #0d6b52 100%);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.15));
             padding: 30px 40px;
-            border-bottom: 3px solid #00ff88;
+            border-bottom: 2px solid rgba(0, 255, 136, 0.5);
             flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         .slide-header h1 {
             color: #00ff88;
             font-size: 2.2em;
             margin-bottom: 5px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .slide-header .subtitle {
-            color: #ffffff;
+            color: #b4b4b4;
             font-size: 1em;
             opacity: 0.9;
+            font-weight: 300;
         }
 
         .slide-content {
             flex: 1;
             overflow-y: auto;
             padding: 40px 50px;
-            background: #1a1a1a;
+            background: rgba(10, 14, 39, 0.5);
         }
 
         .slide-content::-webkit-scrollbar {
@@ -86,22 +171,24 @@
         }
 
         .slide-content::-webkit-scrollbar-track {
-            background: #0a0a0a;
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
         }
 
         .slide-content::-webkit-scrollbar-thumb {
-            background: #0a4d3c;
+            background: linear-gradient(180deg, #00ff88, #00d4ff);
             border-radius: 10px;
         }
 
         .slide-content::-webkit-scrollbar-thumb:hover {
-            background: #0d6b52;
+            background: linear-gradient(180deg, #00d4ff, #00ff88);
         }
 
         /* Title Slide */
         .slide-1 {
-            background: linear-gradient(135deg, #0a4d3c 0%, #000000 100%);
+            background: 
+                radial-gradient(circle at 30% 40%, rgba(0, 255, 136, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 70% 60%, rgba(0, 212, 255, 0.1) 0%, transparent 60%);
         }
 
         .slide-1 .slide-content {
@@ -116,33 +203,61 @@
 
         .slide-1 h1 {
             font-size: 3em;
-            color: #00ff88;
+            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 20px;
-            animation: fadeInDown 1s ease-out;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+            animation: fadeInDown 1s ease-out, gradientShift 8s ease infinite;
+            background-size: 200% 200%;
+            font-weight: 800;
+            letter-spacing: -2px;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .slide-1 h2 {
             font-size: 1.6em;
             color: #ffffff;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             opacity: 0.95;
             animation: fadeInUp 1s ease-out 0.3s both;
+            font-weight: 300;
+        }
+
+        .slide-1 h3 {
+            font-size: 1.3em;
+            color: #00ff88;
+            animation: fadeInUp 1s ease-out 0.6s both;
+            font-weight: 500;
         }
 
         .content-block {
-            background: rgba(10, 77, 60, 0.15);
+            background: rgba(0, 255, 136, 0.05);
+            backdrop-filter: blur(10px);
             border-left: 4px solid #00ff88;
             padding: 20px;
             margin: 20px 0;
-            border-radius: 8px;
+            border-radius: 12px;
             color: #ffffff;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .content-block:hover {
+            background: rgba(0, 255, 136, 0.08);
+            border-left-width: 6px;
+            transform: translateX(5px);
         }
 
         .content-block h3 {
             color: #00ff88;
             font-size: 1.4em;
             margin-bottom: 15px;
+            font-weight: 600;
         }
 
         .content-block p, .content-block li {
@@ -152,18 +267,45 @@
         }
 
         .highlight-box {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(10, 77, 60, 0.2));
-            border: 2px solid #0a4d3c;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
+            border: 2px solid rgba(0, 255, 136, 0.3);
             padding: 25px;
             margin: 20px 0;
-            border-radius: 10px;
+            border-radius: 15px;
             color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .highlight-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent,
+                rgba(0, 255, 136, 0.05),
+                transparent 30%
+            );
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(1turn); }
+        }
+
+        .highlight-box > * {
+            position: relative;
+            z-index: 1;
         }
 
         .highlight-box h3 {
             color: #00ff88;
             font-size: 1.3em;
             margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .highlight-box strong {
@@ -171,17 +313,19 @@
         }
 
         .key-points {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(10, 77, 60, 0.25));
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(0, 212, 255, 0.08));
+            backdrop-filter: blur(10px);
             color: white;
             padding: 25px;
-            border-radius: 10px;
+            border-radius: 15px;
             margin: 20px 0;
-            border: 2px solid #0a4d3c;
+            border: 2px solid rgba(0, 255, 136, 0.3);
         }
 
         .key-points h3 {
             color: #00ff88;
             margin-bottom: 15px;
+            font-weight: 600;
         }
 
         .key-points ul {
@@ -194,28 +338,40 @@
             padding-left: 30px;
             position: relative;
             color: #e0e0e0;
+            transition: all 0.3s ease;
         }
 
         .key-points li::before {
-            content: "✓";
+            content: "▸";
             position: absolute;
             left: 0;
             font-weight: bold;
             font-size: 1.2em;
             color: #00ff88;
+            transition: all 0.3s ease;
+        }
+
+        .key-points li:hover {
+            padding-left: 35px;
+            color: #ffffff;
+        }
+
+        .key-points li:hover::before {
+            color: #00d4ff;
+            transform: translateX(3px);
         }
 
         .code-block {
-            background: #000000;
+            background: rgba(0, 0, 0, 0.7);
             color: #00ff88;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow-x: auto;
             margin: 20px 0;
             font-family: 'Courier New', monospace;
             position: relative;
-            border: 1px solid #0a4d3c;
-            font-size: 0.9em;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            font-size: 0.85em;
         }
 
         .code-block::before {
@@ -237,13 +393,20 @@
 
         .comparison-box {
             padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #0a4d3c;
+            border-radius: 15px;
+            border: 2px solid;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .comparison-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .rdf-box {
-            background: rgba(139, 0, 0, 0.2);
-            border-color: #ff4444;
+            background: rgba(255, 68, 68, 0.1);
+            border-color: rgba(255, 107, 107, 0.5);
             color: white;
         }
 
@@ -253,7 +416,7 @@
 
         .rdfs-box {
             background: rgba(0, 255, 136, 0.1);
-            border-color: #00ff88;
+            border-color: rgba(0, 255, 136, 0.5);
             color: white;
         }
 
@@ -261,29 +424,105 @@
             color: #00ff88;
         }
 
+        .ontology-diagram {
+            background: rgba(0, 255, 136, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px dashed rgba(0, 255, 136, 0.3);
+            text-align: center;
+        }
+
+        .ontology-node {
+            display: inline-block;
+            padding: 15px 25px;
+            background: rgba(0, 255, 136, 0.15);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            margin: 10px;
+            color: #00ff88;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ontology-node::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 255, 136, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .ontology-node:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .ontology-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
         .interactive-demo {
-            background: rgba(10, 77, 60, 0.2);
-            border: 2px solid #0a4d3c;
+            background: rgba(0, 255, 136, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 136, 0.3);
             padding: 25px;
             margin: 20px 0;
-            border-radius: 10px;
+            border-radius: 15px;
         }
 
         .reveal-btn {
-            background: #0a4d3c;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
             color: #00ff88;
-            border: 2px solid #00ff88;
-            padding: 10px 20px;
-            border-radius: 5px;
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            padding: 12px 25px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
             margin: 10px 0;
             transition: all 0.3s ease;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reveal-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 255, 136, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .reveal-btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .reveal-btn:hover {
-            background: #00ff88;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
             color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 136, 0.3);
+        }
+
+        .reveal-btn span {
+            position: relative;
+            z-index: 1;
         }
 
         .reveal-content {
@@ -294,26 +533,6 @@
 
         .reveal-content.expanded {
             max-height: 1000px;
-        }
-
-        .ontology-diagram {
-            background: rgba(0, 255, 136, 0.05);
-            padding: 30px;
-            border-radius: 15px;
-            margin: 20px 0;
-            border: 2px dashed #0a4d3c;
-            text-align: center;
-        }
-
-        .ontology-node {
-            display: inline-block;
-            padding: 15px 25px;
-            background: rgba(10, 77, 60, 0.3);
-            border: 2px solid #00ff88;
-            border-radius: 8px;
-            margin: 10px;
-            color: #00ff88;
-            font-weight: bold;
         }
 
         .controls {
@@ -330,7 +549,8 @@
             height: 50px;
             border: 2px solid #00ff88;
             border-radius: 50%;
-            background: rgba(10, 77, 60, 0.9);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
+            backdrop-filter: blur(10px);
             color: #00ff88;
             font-size: 1.5em;
             cursor: pointer;
@@ -340,14 +560,21 @@
 
         .control-btn:hover {
             transform: scale(1.1);
-            background: #00ff88;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
             color: #000000;
-            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
         }
 
         .control-btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .control-btn:disabled:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
+            color: #00ff88;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
         .progress-bar {
@@ -356,26 +583,28 @@
             left: 0;
             width: 100%;
             height: 5px;
-            background: rgba(10, 77, 60, 0.3);
+            background: rgba(0, 0, 0, 0.3);
             z-index: 100;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #0a4d3c 0%, #00ff88 100%);
+            background: linear-gradient(90deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
             transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
         }
 
         .slide-counter {
             position: absolute;
             bottom: 30px;
             left: 30px;
-            background: rgba(10, 77, 60, 0.9);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
+            backdrop-filter: blur(10px);
             padding: 12px 25px;
             border-radius: 25px;
             font-weight: bold;
             color: #00ff88;
-            border: 2px solid #00ff88;
+            border: 2px solid rgba(0, 255, 136, 0.5);
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             z-index: 100;
         }
@@ -411,17 +640,36 @@
             color: #e0e0e0;
             line-height: 1.6;
         }
+
+        @media (max-width: 1024px) {
+            .presentation-container {
+                width: 100vw;
+                height: 75vw;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .slide-content {
+                padding: 30px 40px;
+            }
+
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
     <div class="presentation-container">
         <!-- Slide 1: Title -->
         <div class="slide slide-1 active">
             <div class="slide-content">
                 <h1>RDFS, Taxonomy, and Ontology</h1>
                 <h2>Building the Foundation of the Semantic Web</h2>
-                <h2>Eng. Dr. Tiroshan Madushanka</h2>
-                
+                <h3>Eng. Dr. Tiroshan Madushanka</h3>
             </div>
         </div>
 
@@ -509,7 +757,7 @@
                 <div class="interactive-demo">
                     <h3 style="color: #00ff88; margin-bottom: 15px;">Interactive Reasoning Example</h3>
                     <button class="reveal-btn" onclick="toggleReveal('reasoning1')">
-                        Show Reasoning Power
+                        <span>Show Reasoning Power</span>
                     </button>
                     <div id="reasoning1" class="reveal-content">
                         <div class="content-block" style="margin-top: 15px;">
@@ -733,7 +981,7 @@
 
                 <div class="interactive-demo">
                     <button class="reveal-btn" onclick="toggleReveal('ontology-example')">
-                        Show Camera Ontology Example
+                        <span>Show Camera Ontology Example</span>
                     </button>
                     <div id="ontology-example" class="reveal-content">
                         <div class="content-block" style="margin-top: 15px;">
@@ -812,7 +1060,7 @@
                 <div class="interactive-demo">
                     <h3 style="color: #00ff88; margin-bottom: 15px;">Interactive Example</h3>
                     <button class="reveal-btn" onclick="toggleReveal('reasoning-example')">
-                        Show Reasoning Chain
+                        <span>Show Reasoning Chain</span>
                     </button>
                     <div id="reasoning-example" class="reveal-content">
                         <div class="content-block" style="margin-top: 15px;">
@@ -988,6 +1236,23 @@
     </div>
 
     <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
         const totalSlides = slides.length;
@@ -1032,11 +1297,12 @@
             const element = document.getElementById(id);
             element.classList.toggle('expanded');
             
-            const btn = event.target;
+            const btn = event.target.closest('.reveal-btn');
+            const span = btn.querySelector('span');
             if (element.classList.contains('expanded')) {
-                btn.textContent = 'Hide Details';
+                span.textContent = span.textContent.replace('Show', 'Hide');
             } else {
-                btn.textContent = btn.textContent.replace('Hide', 'Show');
+                span.textContent = span.textContent.replace('Hide', 'Show');
             }
         }
 
