@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2: Search Engines in Traditional and Semantic Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            background: #667eea;
+            color: white;
+        }
+
+        .slide {
+            display: none;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            animation: slideIn 0.5s ease;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin: 25px 0 15px 0;
+            font-size: 1.5em;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .example-box {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .example-box::before {
+            content: "💡 Example";
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: white;
+            padding: 0 10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-box {
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .traditional-web {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+        }
+
+        .semantic-web {
+            background: linear-gradient(135deg, #51cf66, #37b24d);
+            color: white;
+        }
+
+        .crawler-visualization {
+            background: white;
+            border: 3px solid #667eea;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            min-height: 300px;
+        }
+
+        .web-page {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .web-page.visited {
+            background: #51cf66;
+            color: white;
+            border-color: #37b24d;
+        }
+
+        .web-page.current {
+            background: #ffd93d;
+            border-color: #ffa94d;
+            transform: scale(1.1);
+        }
+
+        .index-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .index-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .index-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .index-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .vocabulary-diagram {
+            background: linear-gradient(135deg, #fff5f5 0%, #f0f9ff 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px dashed #667eea;
+        }
+
+        .vocab-node {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .vocab-node.root {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .vocab-node.child {
+            background: #51cf66;
+            color: white;
+        }
+
+        .vocab-node.property {
+            background: #ffd93d;
+            border-color: #ffa94d;
+        }
+
+        .interactive-search {
+            background: white;
+            border: 3px solid #667eea;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .search-input-box {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .search-btn {
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .search-btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .search-results-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .result-item.vendor {
+            border-left-color: #ff6b6b;
+        }
+
+        .result-item.informational {
+            border-left-color: #51cf66;
+        }
+
+        .result-item.missed {
+            border-left-color: #ffa94d;
+            opacity: 0.5;
+        }
+
+        .crawler-animation {
+            position: relative;
+            height: 400px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .crawler-icon {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: all 0.5s ease;
+            z-index: 10;
+        }
+
+        .page-node {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .page-node.crawled {
+            background: #51cf66;
+            color: white;
+            border-color: #37b24d;
+        }
+
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: #667eea;
+            transform-origin: left center;
+        }
+
+        .quiz-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .quiz-question {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .quiz-option {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: #667eea;
+            background: #667eea15;
+            transform: translateX(5px);
+        }
+
+        .quiz-option.correct {
+            border-color: #51cf66;
+            background: #51cf6615;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #ff6b6b;
+            background: #ff6b6b15;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #51cf6615;
+            color: #2b8a3e;
+            border-left: 4px solid #51cf66;
+        }
+
+        .feedback.incorrect {
+            background: #ff6b6b15;
+            color: #c92a2a;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .key-points {
+            background: linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .key-points li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            z-index: 1000;
+        }
+
+        .discussion-prompt {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 3px solid #667eea;
+        }
+
+        .discussion-prompt h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .step-box {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .animated-icon {
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .slide-counter {
+            text-align: center;
+            color: #666;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .control-panel {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #764ba2;
+        }
+
+        .control-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .timer {
+                position: static;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="timer" id="timer">⏱️ 1:30:00</div>
+    
+    <div class="container">
+        <header>
+            <h1>🔍 Search Engines in Traditional and Semantic Web</h1>
+            <p class="subtitle">Chapter 2: Understanding How Search Works</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <div class="slide-counter" id="slideCounter">Slide 1 of 10</div>
+        </header>
+
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="previousSlide()">⬅️ Previous</button>
+            <button class="nav-btn" onclick="nextSlide()">Next ➡️</button>
+            <button class="nav-btn" onclick="resetPresentation()">🔄 Restart</button>
+            <button class="nav-btn" onclick="toggleTimer()">⏸️ Pause Timer</button>
+        </div>
+
+        <!-- Slide 1: Introduction -->
+        <div class="slide active" id="slide1">
+            <h2>Chapter 2 Overview 📚</h2>
+            
+            <div class="highlight-box">
+                <h3>What We'll Learn</h3>
+                <p>Before diving into the technical nuts and bolts of the Semantic Web, we'll understand how search engines work in both environments.</p>
+                <p><strong>Goal:</strong> By comparing traditional and semantic search engines, we'll see the clear benefits and identify vital components of the Semantic Web.</p>
+            </div>
+
+            <div class="key-points">
+                <h3>Today's Journey</h3>
+                <ul>
+                    <li>How traditional search engines build index tables</li>
+                    <li>How crawlers work (depth-first vs breadth-first)</li>
+                    <li>The role of metadata in search</li>
+                    <li>Building a hypothetical Semantic Web search engine</li>
+                    <li>Real-world example: Searching for digital SLR cameras</li>
+                    <li>Identifying key components needed for the Semantic Web</li>
+                </ul>
+            </div>
+
+            <div class="discussion-prompt">
+                <h4>🤔 Opening Question (5 min)</h4>
+                <p><strong>Think about your last frustrating search experience:</strong></p>
+                <p>What made it frustrating? Too many results? Wrong results? Having to try multiple search terms?</p>
+            </div>
+
+            <div class="example-box">
+                <h4>The Central Question</h4>
+                <p>Remember searching for "SOAP" in Chapter 1? We got dish detergent, soap operas, and everything except the W3C protocol we wanted.</p>
+                <p><strong>Today we'll understand WHY this happens and HOW the Semantic Web can fix it.</strong></p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Traditional Search Engine - The Basics -->
+        <div class="slide" id="slide2">
+            <h2>2.1 Traditional Search Engines 🔍</h2>
+            
+            <div class="highlight-box">
+                <h3>The Current Reality</h3>
+                <p>The Web has <strong>hundreds of millions of pages</strong>, and search engines (Google, Yahoo, etc.) are how we find information.</p>
+                <p><strong>Key Fact:</strong> All search engines are essentially <em>keyword matchers</em>.</p>
+            </div>
+
+            <h3>How It Works: The Indexation Process</h3>
+            
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <div style="display: inline-block; vertical-align: top; width: calc(100% - 60px);">
+                    <strong>Before the search engine launches:</strong> It prepares a huge index table
+                    <p>This is done by a special software called a <strong>crawler</strong> or <strong>spider</strong></p>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <div style="display: inline-block; vertical-align: top; width: calc(100% - 60px);">
+                    <strong>The crawler starts with seed URLs:</strong> Given by the main control component
+                    <p>Example: Start at www.example.com</p>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <div style="display: inline-block; vertical-align: top; width: calc(100% - 60px);">
+                    <strong>Build index for every word:</strong> Create entries mapping words to URLs
+                    <p>Also track how many times each word appears (for ranking)</p>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <div style="display: inline-block; vertical-align: top; width: calc(100% - 60px);">
+                    <strong>Follow links and repeat:</strong> Move to the next page and continue
+                    <p>This continues until resources are exhausted</p>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <h4>Staggering Scale</h4>
+                <p>Google can index about 4-5 billion web pages.</p>
+                <p><strong>That's only 1% of the entire World Wide Web!</strong></p>
+            </div>
+        </div>
+
+        <!-- Slide 3: Interactive Crawler Visualization -->
+        <div class="slide" id="slide3">
+            <h2>How a Crawler Works: Interactive Demo 🕷️</h2>
+            
+            <div class="crawler-animation" id="crawlerVis">
+                <div class="control-panel">
+                    <button class="control-btn" onclick="startCrawler()">▶️ Start Crawling</button>
+                    <button class="control-btn" onclick="resetCrawler()">🔄 Reset</button>
+                    <span style="margin-left: 10px; font-weight: 600;">Status: <span id="crawlerStatus">Ready</span></span>
+                </div>
+                
+                <!-- Seed page -->
+                <div class="page-node" id="page0" style="top: 20px; left: 50%; transform: translateX(-50%);">
+                    Seed<br>Page
+                </div>
+                
+                <!-- Level 1 pages -->
+                <div class="page-node" id="page1" style="top: 130px; left: 15%;">
+                    Page 1
+                </div>
+                <div class="page-node" id="page2" style="top: 130px; left: 40%;">
+                    Page 2
+                </div>
+                <div class="page-node" id="page3" style="top: 130px; left: 65%;">
+                    Page 3
+                </div>
+                
+                <!-- Level 2 pages -->
+                <div class="page-node" id="page4" style="top: 240px; left: 5%;">
+                    Page 4
+                </div>
+                <div class="page-node" id="page5" style="top: 240px; left: 25%;">
+                    Page 5
+                </div>
+                <div class="page-node" id="page6" style="top: 240px; left: 75%;">
+                    Page 6
+                </div>
+                
+                <div class="crawler-icon" id="crawler" style="top: 20px; left: 50%; transform: translate(-50%, -50%);">
+                    🕷️
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>What You're Seeing: Depth-First Search</h3>
+                <p>The crawler starts at the seed, processes the entire first page, then follows the FIRST link completely before coming back to other links.</p>
+                <p><strong>Alternative:</strong> Breadth-first search would visit all pages at one level before going deeper.</p>
+            </div>
+
+            <div class="discussion-prompt">
+                <h4>💭 Think About It (3 min)</h4>
+                <p>Which search strategy do you think is better: depth-first or breadth-first? Why?</p>
+                <p><em>Consider: freshness of content, memory usage, likelihood of finding popular pages</em></p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Index Table Structure -->
+        <div class="slide" id="slide4">
+            <h2>The Index Table: The Heart of Search 📊</h2>
+            
+            <div class="highlight-box">
+                <h3>What Gets Stored</h3>
+                <p>For each word found, the crawler stores:</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Word/Term:</strong> The keyword itself</li>
+                    <li><strong>Document Location:</strong> URL where it appears</li>
+                    <li><strong>Number of Appearances:</strong> How many times (for ranking)</li>
+                </ul>
+            </div>
+
+            <h3>Evolution of the Index Table</h3>
+            
+            <div style="margin: 20px 0;">
+                <h4>Initial Table (First Page):</h4>
+                <table class="index-table">
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Document Location</th>
+                            <th>Appearances</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>camera</td>
+                            <td>www.example.com/page1</td>
+                            <td>5</td>
+                        </tr>
+                        <tr>
+                            <td>digital</td>
+                            <td>www.example.com/page1</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>photography</td>
+                            <td>www.example.com/page1</td>
+                            <td>2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h4>After Multiple Pages:</h4>
+                <table class="index-table">
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Document Locations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>camera</td>
+                            <td>
+                                page1 (5 times) → page2 (3 times) → page5 (7 times)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>digital</td>
+                            <td>
+                                page1 (3 times) → page3 (4 times)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SLR</td>
+                            <td>
+                                page2 (8 times) → page4 (2 times) → page6 (5 times)
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example-box">
+                <h4>How Search Works</h4>
+                <ol style="margin-left: 20px;">
+                    <li>User enters keyword "SLR"</li>
+                    <li>Engine looks up "SLR" in index table</li>
+                    <li>Retrieves all document records</li>
+                    <li>Sorts by number of appearances (ranking)</li>
+                    <li>Returns URLs in ranked order</li>
+                </ol>
+                <p><strong>Problem:</strong> If "SLR" isn't in the index, you get "no results found" - even if relevant pages exist!</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: The Problem - SOAP Example Interactive -->
+        <div class="slide" id="slide5">
+            <h2>The Problem: A Real Example 🎯</h2>
+            
+            <div class="example-box">
+                <h4>The Photography Scenario</h4>
+                <p>You're an amateur photographer interested in buying a digital SLR camera. You want to learn about their performance characteristics.</p>
+                <p><strong>Your search term:</strong> "SLR"</p>
+            </div>
+
+            <div class="interactive-search">
+                <h3>Traditional Search Engine Demo</h3>
+                <input type="text" class="search-input-box" id="traditionalSearch" placeholder="Enter search term: SLR" value="SLR">
+                <button class="search-btn" onclick="doTraditionalSearch()">🔍 Search (Traditional)</button>
+                
+                <div class="search-results-box" id="traditionalResults">
+                    <h4>Search Results for "SLR" - 128,000,000 results</h4>
+                    
+                    <div class="result-item vendor">
+                        <strong>1. www.cheapCameras.com - Buy SLR Cameras Today!</strong>
+                        <p>Best deals on SLR cameras. Shop now for lowest prices on digital SLR...</p>
+                        <small style="color: #ff6b6b;">❌ Vendor site - not what you want</small>
+                    </div>
+                    
+                    <div class="result-item vendor">
+                        <strong>2. www.buyItHere.com - SLR Camera Sale</strong>
+                        <p>Huge SLR camera sale! Canon, Nikon, Sony SLR cameras in stock...</p>
+                        <small style="color: #ff6b6b;">❌ Another vendor site</small>
+                    </div>
+                    
+                    <div class="result-item vendor">
+                        <strong>3. www.photoStore.com - Professional SLR Equipment</strong>
+                        <p>Professional SLR cameras and lenses. Free shipping on SLR orders...</p>
+                        <small style="color: #ff6b6b;">❌ More selling, not information</small>
+                    </div>
+                    
+                    <div class="result-item informational">
+                        <strong>47. www.goodPhoto.com - Understanding SLR Performance</strong>
+                        <p>Learn about SLR camera shutter speed, aperture, and performance metrics...</p>
+                        <small style="color: #51cf66;">✅ This is what you want! (But you have to scroll through 46 vendor sites first)</small>
+                    </div>
+                    
+                    <div class="result-item missed">
+                        <strong>❓ www.digcamhelp.com - Camera Shutter Speed and Aperture</strong>
+                        <p>Detailed guide to understanding shutter speed and aperture in digital cameras...</p>
+                        <small style="color: #ffa94d;">⚠️ NEVER FOUND - doesn't use "SLR", says "single lens reflex"</small>
+                    </div>
+                    
+                    <div class="result-item missed">
+                        <strong>❓ www.ehow.com - How Single Lens Reflex Cameras Work</strong>
+                        <p>Complete guide to single lens reflex camera technology and features...</p>
+                        <small style="color: #ffa94d;">⚠️ NEVER FOUND - uses "single lens reflex" instead of "SLR"</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box" style="margin-top: 20px;">
+                <h3>The Core Problem</h3>
+                <p style="font-size: 1.2em; font-weight: bold; color: #ff6b6b;">
+                    The search engine can ONLY match keywords. It cannot understand MEANING.
+                </p>
+                <ul style="margin-top: 15px; margin-left: 20px;">
+                    <li>Vendor sites rank high because they use "SLR" many times</li>
+                    <li>Informational sites rank low (fewer keyword occurrences)</li>
+                    <li>Excellent sites are COMPLETELY MISSED (different terminology)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 6: Semantic Web Solution - Step 1 Vocabulary -->
+        <div class="slide" id="slide6">
+            <h2>2.2 Semantic Web Search: Step 1 - Build a Common Vocabulary 📚</h2>
+            
+            <div class="highlight-box">
+                <h3>The Key Insight</h3>
+                <p><strong>Semantics means MEANING.</strong> To add meaning to the Web, we need a way to EXPRESS meaning.</p>
+                <p>Solution: Build a <strong>vocabulary</strong> with meaning/knowledge coded into its terms.</p>
+            </div>
+
+            <h3>Photography Domain Vocabulary</h3>
+            
+            <div class="vocabulary-diagram">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div class="vocab-node root">Camera</div>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div class="vocab-node child">Digital</div>
+                    <span style="margin: 0 20px;">|</span>
+                    <div class="vocab-node child">Film</div>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div class="vocab-node child">SLR</div>
+                    <span style="margin: 0 20px;">|</span>
+                    <div class="vocab-node child">Point-And-Shoot</div>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0; padding: 20px; background: white; border-radius: 8px;">
+                    <p style="color: #667eea; font-weight: bold; margin-bottom: 10px;">Equivalence Relations:</p>
+                    <div class="vocab-node">SingleLensReflex</div>
+                    <span style="margin: 0 10px;">≡</span>
+                    <div class="vocab-node">SLR</div>
+                    <span style="margin: 0 10px;">≡</span>
+                    <div class="vocab-node">SLR-Camera</div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <p style="color: #667eea; font-weight: bold; margin-bottom: 10px;">SLR has properties:</p>
+                    <div class="vocab-node property">ShutterSpeed</div>
+                    <div class="vocab-node property">Aperture</div>
+                </div>
+            </div>
+
+            <div class="key-points">
+                <h3>Benefits of This Vocabulary</h3>
+                <ul>
+                    <li>Standard way to express meaning/knowledge in the photography domain</li>
+                    <li>Common understanding shared by different parties on the Web</li>
+                    <li>Machine-readable (structured data)</li>
+                    <li>Captures relationships and equivalences</li>
+                </ul>
+            </div>
+
+            <div class="discussion-prompt">
+                <h4>💡 Key Insight (3 min)</h4>
+                <p>Now the computer "knows" that:</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>SLR = SingleLensReflex = SLR-Camera (same concept)</li>
+                    <li>ShutterSpeed and Aperture are PROPERTIES of SLR</li>
+                    <li>If a page discusses ShutterSpeed, it's likely about SLR cameras</li>
+                </ul>
+                <p><strong>This is structured knowledge that machines can process!</strong></p>
+            </div>
+        </div>
+
+        <!-- Slide 7: Step 2 - Markup -->
+        <div class="slide" id="slide7">
+            <h2>Step 2: Markup the Pages 🏷️</h2>
+            
+            <div class="highlight-box">
+                <h3>Connecting Pages to Vocabulary</h3>
+                <p>Once we have a common vocabulary (let's call it <code>mySimpleCamera.owl</code>), page owners need to <strong>explicitly indicate</strong> that words on their pages have the same semantics as concepts in the vocabulary.</p>
+            </div>
+
+            <h3>The Markup Process</h3>
+            
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <div style="display: inline-block; vertical-align: top; width: calc(100% - 60px);">
+                    <strong>Create a special description file</strong>
+                    <p>This file says: "The word SLR on my pages means the same as SLR in mySimpleCamera.owl"</p>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <div style="display: inline-block; vertical-align: top; width: calc(100% - 60px);">
+                    <strong>Link pages to the description file</strong>
+                    <p>Add a link in the page's metadata section</p>
+                </div>
+            </div>
+
+            <div class="code-block">
+&lt;HTML&gt;
+&lt;HEAD&gt;
+  &lt;TITLE&gt;The Performance of a Digital Camera&lt;/TITLE&gt;
+  
+  &lt;!-- This link connects the page to semantic markup --&gt;
+  &lt;LINK rel="help" href="http://example.com/slr-markup.rdf"&gt;
+  
+  ...other stuff
+&lt;/HEAD&gt;
+&lt;BODY&gt;
+  ...content about SLR cameras...
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+            </div>
+
+            <div class="example-box">
+                <h4>Real-World Examples</h4>
+                
+                <p><strong>www.goodPhoto.com markup says:</strong></p>
+                <p style="background: #f0f9ff; padding: 10px; border-left: 3px solid #667eea; margin: 10px 0;">
+                    "The word 'SLR' on my pages = SLR concept in mySimpleCamera.owl"
+                </p>
+                
+                <p><strong>www.digcamhelp.com markup says:</strong></p>
+                <p style="background: #f0f9ff; padding: 10px; border-left: 3px solid #667eea; margin: 10px 0;">
+                    "'shutter speed' on my pages = ShutterSpeed property in mySimpleCamera.owl<br>
+                    'aperture' on my pages = Aperture property in mySimpleCamera.owl"
+                </p>
+                
+                <p><strong>www.ehow.com markup says:</strong></p>
+                <p style="background: #f0f9ff; padding: 10px; border-left: 3px solid #667eea; margin: 10px 0;">
+                    "'single lens reflex' on my pages = SingleLensReflex in mySimpleCamera.owl"
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <h3>⚠️ Important Note</h3>
+                <p><strong>Vendor sites (cheapCameras.com, buyItHere.com) do NOT markup their pages</strong> because their semantics are about SELLING, not the technical concepts in the photography vocabulary.</p>
+            </div>
+        </div>
+
+        <!-- Slide 8: Step 3 - Smart Crawler -->
+        <div class="slide" id="slide8">
+            <h2>Step 3: The Smart Crawler 🧠</h2>
+            
+            <div class="highlight-box">
+                <h3>Enhanced Crawling Process</h3>
+                <p>Now the crawler can <strong>understand and reason</strong> about page content!</p>
+            </div>
+
+            <h3>How the Smart Crawler Works</h3>
+            
+            <div class="comparison-container">
+                <div class="comparison-box traditional-web">
+                    <h3>❌ Traditional Crawler</h3>
+                    <p><strong>At www.cheapCameras.com:</strong></p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Sees word "SLR"</li>
+                        <li>Adds to index table</li>
+                        <li>No metadata? No problem!</li>
+                        <li>Just keyword matching</li>
+                    </ol>
+                </div>
+                
+                <div class="comparison-box semantic-web">
+                    <h3>✓ Smart Crawler</h3>
+                    <p><strong>At www.cheapCameras.com:</strong></p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Sees word "SLR"</li>
+                        <li>Checks: Any markup link? NO</li>
+                        <li>Adds to index: markupURL=none</li>
+                        <li>Flags as non-semantic</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <h4>Smart Crawler Intelligence</h4>
+                
+                <p><strong>At www.goodPhoto.com:</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>Sees markup link → Downloads markup file</li>
+                    <li>Learns: "SLR" = SLR in mySimpleCamera.owl</li>
+                    <li>Downloads mySimpleCamera.owl for reference</li>
+                    <li>When finds "SLR", adds to index with markupURL=mySimpleCamera.owl</li>
+                </ol>
+
+                <p><strong>At www.digcamhelp.com (DOESN'T contain "SLR"):</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>Sees markup link → Downloads markup file</li>
+                    <li>Learns: "shutter speed" = ShutterSpeed in mySimpleCamera.owl</li>
+                    <li>Recalls from vocabulary: ShutterSpeed is a property of SLR</li>
+                    <li><strong>Infers: This page is about SLR!</strong></li>
+                    <li>Adds entry under "SLR" in index table even though word doesn't appear!</li>
+                </ol>
+
+                <p><strong>At www.ehow.com (uses "single lens reflex"):</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>Sees markup link → Downloads markup file</li>
+                    <li>Learns: "single lens reflex" = SingleLensReflex in mySimpleCamera.owl</li>
+                    <li>Recalls from vocabulary: SingleLensReflex ≡ SLR</li>
+                    <li><strong>Infers: This page is ALSO about SLR!</strong></li>
+                    <li>Adds entry under "SLR" in index table</li>
+                </ol>
+            </div>
+
+            <div class="key-points">
+                <h3>🎯 The Magic</h3>
+                <ul>
+                    <li>Crawler can REASON using the vocabulary</li>
+                    <li>Understands equivalences (SLR = SingleLensReflex)</li>
+                    <li>Understands relationships (ShutterSpeed is property of SLR)</li>
+                    <li>Makes intelligent inferences</li>
+                    <li>Finds relevant pages even without exact keywords!</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 9: Semantic Search Results -->
+        <div class="slide" id="slide9">
+            <h2>Using the Semantic Search Engine 🎉</h2>
+            
+            <div class="interactive-search">
+                <h3>Semantic Search Engine Demo</h3>
+                <input type="text" class="search-input-box" id="semanticSearch" placeholder="Enter search term: SLR" value="SLR">
+                
+                <div style="margin: 15px 0;">
+                    <label style="font-weight: 600; display: block; margin-bottom: 10px;">
+                        Select Vocabulary (Semantics):
+                    </label>
+                    <select id="vocabSelect" style="width: 100%; padding: 10px; border: 2px solid #667eea; border-radius: 8px; font-size: 16px;">
+                        <option value="mySimpleCamera.owl">mySimpleCamera.owl (Photography)</option>
+                        <option value="other1.owl">medicalTerms.owl (Medicine)</option>
+                        <option value="other2.owl">proteinBiology.owl (Biology)</option>
+                    </select>
+                    <p style="margin-top: 10px; color: #666; font-size: 14px;">
+                        <em>This tells the engine which MEANING of "SLR" you want</em>
+                    </p>
+                </div>
+                
+                <button class="search-btn" onclick="doSemanticSearch()">🧠 Semantic Search</button>
+                
+                <div class="search-results-box" id="semanticResults">
+                    <h4>Semantic Search Results for "SLR" (Photography context)</h4>
+                    <p style="background: #51cf6615; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                        ✅ Only returning pages with markup pointing to mySimpleCamera.owl
+                    </p>
+                    
+                    <div class="result-item informational">
+                        <strong>1. www.goodPhoto.com - Understanding SLR Performance</strong>
+                        <p>Learn about SLR camera shutter speed, aperture, and performance metrics...</p>
+                        <small style="color: #51cf66;">✅ Contains "SLR" + Marked up with mySimpleCamera.owl</small>
+                    </div>
+                    
+                    <div class="result-item informational">
+                        <strong>2. www.digcamhelp.com - Camera Shutter Speed and Aperture</strong>
+                        <p>Detailed guide to understanding shutter speed and aperture in digital cameras...</p>
+                        <small style="color: #51cf66;">✅ Doesn't contain "SLR" but marked up as discussing SLR properties!</small>
+                    </div>
+                    
+                    <div class="result-item informational">
+                        <strong>3. www.ehow.com - How Single Lens Reflex Cameras Work</strong>
+                        <p>Complete guide to single lens reflex camera technology and features...</p>
+                        <small style="color: #51cf66;">✅ Uses "single lens reflex" but marked up as equivalent to SLR!</small>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #ff6b6b15; border-left: 4px solid #ff6b6b; border-radius: 5px;">
+                        <strong>❌ Excluded from results:</strong>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>www.cheapCameras.com - No markup (markupURL = none)</li>
+                            <li>www.buyItHere.com - No markup (markupURL = none)</li>
+                            <li>All other vendor sites - No semantic markup</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-points">
+                <h3>🎊 The Results</h3>
+                <ul>
+                    <li>All vendor sites are GONE!</li>
+                    <li>Only informational pages that match YOUR semantic intent</li>
+                    <li>Pages found even with different terminology</li>
+                    <li>Pages found based on related properties</li>
+                    <li>Much smaller, much more relevant result set</li>
+                </ul>
+            </div>
+
+            <div class="discussion-prompt">
+                <h4>💬 Discussion (10 min)</h4>
+                <p><strong>Questions to consider:</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>What are the advantages and disadvantages of this approach?</li>
+                    <li>What challenges do you see in getting page owners to add markup?</li>
+                    <li>How could this help in YOUR field or industry?</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Slide 10: Summary and Next Steps -->
+        <div class="slide" id="slide10">
+            <h2>Summary & Key Takeaways 🎓</h2>
+            
+            <div class="comparison-container">
+                <div class="comparison-box traditional-web">
+                    <h3>Traditional Web Search</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li>❌ Keyword matching only</li>
+                        <li>❌ No understanding of meaning</li>
+                        <li>❌ Irrelevant results</li>
+                        <li>❌ Missed relevant pages</li>
+                        <li>❌ Manual filtering required</li>
+                    </ul>
+                </div>
+                
+                <div class="comparison-box semantic-web">
+                    <h3>Semantic Web Search</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li>✓ Understands meaning</li>
+                        <li>✓ Uses structured vocabulary</li>
+                        <li>✓ Makes intelligent inferences</li>
+                        <li>✓ Finds all relevant pages</li>
+                        <li>✓ Filters automatically</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="key-points">
+                <h3>🎯 Essential Components of Semantic Web</h3>
+                <ul>
+                    <li><strong>Structured Vocabulary:</strong> Domain-specific, machine-readable (e.g., mySimpleCamera.owl)</li>
+                    <li><strong>Markup/Metadata:</strong> Links pages to vocabulary concepts</li>
+                    <li><strong>Smart Agents/Crawlers:</strong> Can understand and reason about content</li>
+                    <li><strong>Inference Engines:</strong> Make logical deductions from structured data</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <h3>📘 Improved Definition of Semantic Web</h3>
+                <p style="font-size: 1.1em; padding: 15px; background: white; border-radius: 8px; margin: 15px 0;">
+                    <strong>The Semantic Web is an extension of the current Web.</strong> It is constructed by linking current Web pages to a <strong>structured data set</strong> that indicates the semantics of the linked page. A smart agent, which is able to understand this structured data set, will then be able to conduct <strong>intelligent actions</strong> and make <strong>educated decisions</strong> on a global scale.
+                </p>
+            </div>
+
+            <div class="highlight-box" style="background: linear-gradient(135deg, #ffd93d15, #ff6b6b15);">
+                <h3>🔑 The Key to Implementation</h3>
+                <p style="font-size: 1.2em; font-weight: bold; color: #667eea;">
+                    The structured data set (common vocabulary) is called an ONTOLOGY.
+                </p>
+                <p style="margin-top: 15px;">
+                    Languages to build ontologies: <strong>RDF, RDFS, OWL</strong>
+                </p>
+                <p style="margin-top: 10px; font-style: italic;">
+                    (We'll learn about these in Part 2!)
+                </p>
+            </div>
+
+            <div class="quiz-container">
+                <h3>📝 Quick Knowledge Check</h3>
+                
+                <div style="margin-bottom: 30px;">
+                    <p class="quiz-question">Q1: What is the main limitation of traditional search engines?</p>
+                    <div class="quiz-option" onclick="checkAnswer(this, false, 'q1')">
+                        A) They are too slow
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true, 'q1')">
+                        B) They can only do keyword matching and don't understand meaning
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false, 'q1')">
+                        C) They don't index enough pages
+                    </div>
+                    <div class="feedback" id="feedback-q1"></div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <p class="quiz-question">Q2: In the Semantic Web, what is the structured vocabulary file commonly called?</p>
+                    <div class="quiz-option" onclick="checkAnswer(this, false, 'q2')">
+                        A) A metadata schema
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true, 'q2')">
+                        B) An ontology
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false, 'q2')">
+                        C) A thesaurus
+                    </div>
+                    <div class="feedback" id="feedback-q2"></div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <p class="quiz-question">Q3: How does the smart crawler find pages about SLR cameras that use "single lens reflex"?</p>
+                    <div class="quiz-option" onclick="checkAnswer(this, false, 'q3')">
+                        A) It guesses based on context
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true, 'q3')">
+                        B) It uses markup metadata and vocabulary equivalences to infer the relationship
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false, 'q3')">
+                        C) It searches for all possible synonyms
+                    </div>
+                    <div class="feedback" id="feedback-q3"></div>
+                </div>
+            </div>
+
+            <div class="discussion-prompt">
+                <h4>🚀 Looking Ahead: Part 2</h4>
+                <p>In the next chapters, we'll learn the technical details:</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>RDF:</strong> Resource Description Framework</li>
+                    <li><strong>RDFS:</strong> RDF Schema</li>
+                    <li><strong>OWL:</strong> Web Ontology Language</li>
+                    <li><strong>Tools:</strong> How to build your own ontologies</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+        let timerSeconds = 5400; // 90 minutes
+        let timerInterval;
+        let timerPaused = false;
+
+        // Start timer
+        startTimer();
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (!timerPaused && timerSeconds > 0) {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(timerSeconds / 3600);
+            const minutes = Math.floor((timerSeconds % 3600) / 60);
+            const seconds = timerSeconds % 60;
+            document.getElementById('timer').textContent = 
+                `⏱️ ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function toggleTimer() {
+            timerPaused = !timerPaused;
+            const btn = event.target;
+            btn.textContent = timerPaused ? '▶️ Resume Timer' : '⏸️ Pause Timer';
+        }
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            if (n > totalSlides) currentSlide = totalSlides;
+            if (n < 1) currentSlide = 1;
+            
+            document.getElementById(`slide${currentSlide}`).classList.add('active');
+            
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            document.getElementById('slideCounter').textContent = `Slide ${currentSlide} of ${totalSlides}`;
+            
+            window.scrollTo(0, 0);
+        }
+
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+
+        function previousSlide() {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+
+        function resetPresentation() {
+            currentSlide = 1;
+            timerSeconds = 5400;
+            timerPaused = false;
+            showSlide(1);
+            updateTimerDisplay();
+            resetCrawler();
+        }
+
+        // Crawler Animation
+        let crawlerStep = 0;
+        let crawlerInterval;
+        const crawlerPath = [
+            {id: 'page0', x: '50%', y: 20},
+            {id: 'page1', x: '15%', y: 130},
+            {id: 'page4', x: '5%', y: 240},
+            {id: 'page5', x: '25%', y: 240},
+            {id: 'page2', x: '40%', y: 130},
+            {id: 'page3', x: '65%', y: 130},
+            {id: 'page6', x: '75%', y: 240}
+        ];
+
+        function startCrawler() {
+            if (crawlerInterval) return;
+            document.getElementById('crawlerStatus').textContent = 'Crawling...';
+            
+            crawlerInterval = setInterval(() => {
+                if (crawlerStep < crawlerPath.length) {
+                    const target = crawlerPath[crawlerStep];
+                    const crawler = document.getElementById('crawler');
+                    const page = document.getElementById(target.id);
+                    
+                    // Mark previous as visited
+                    if (crawlerStep > 0) {
+                        document.getElementById(crawlerPath[crawlerStep - 1].id).classList.add('crawled');
+                    }
+                    
+                    // Move crawler
+                    crawler.style.left = target.x;
+                    crawler.style.top = target.y + 'px';
+                    
+                    // Mark current
+                    page.classList.remove('crawled');
+                    page.classList.add('current');
+                    
+                    setTimeout(() => {
+                        page.classList.remove('current');
+                        page.classList.add('crawled');
+                    }, 400);
+                    
+                    crawlerStep++;
+                } else {
+                    clearInterval(crawlerInterval);
+                    crawlerInterval = null;
+                    document.getElementById('crawlerStatus').textContent = 'Complete!';
+                }
+            }, 800);
+        }
+
+        function resetCrawler() {
+            if (crawlerInterval) {
+                clearInterval(crawlerInterval);
+                crawlerInterval = null;
+            }
+            crawlerStep = 0;
+            document.getElementById('crawlerStatus').textContent = 'Ready';
+            
+            const crawler = document.getElementById('crawler');
+            crawler.style.left = '50%';
+            crawler.style.top = '20px';
+            
+            for (let i = 0; i <= 6; i++) {
+                const page = document.getElementById('page' + i);
+                if (page) {
+                    page.classList.remove('crawled', 'current');
+                }
+            }
+        }
+
+        // Search Demos
+        function doTraditionalSearch() {
+            const results = document.getElementById('traditionalResults');
+            results.style.display = 'block';
+            results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function doSemanticSearch() {
+            const vocab = document.getElementById('vocabSelect').value;
+            const results = document.getElementById('semanticResults');
+            
+            if (vocab === 'mySimpleCamera.owl') {
+                results.style.display = 'block';
+                results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                alert('For this demo, please select mySimpleCamera.owl (Photography)');
+            }
+        }
+
+        // Quiz
+        let answeredQuestions = {};
+
+        function checkAnswer(element, isCorrect, questionId) {
+            if (answeredQuestions[questionId]) return;
+            answeredQuestions[questionId] = true;
+
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+
+            const feedback = document.getElementById('feedback-' + questionId);
+            
+            if (isCorrect) {
+                element.classList.add('correct');
+                feedback.textContent = '✅ Correct! Excellent understanding!';
+                feedback.classList.add('correct', 'show');
+            } else {
+                element.classList.add('incorrect');
+                feedback.textContent = '❌ Not quite. Review the material to understand why.';
+                feedback.classList.add('incorrect', 'show');
+                
+                options.forEach(opt => {
+                    if (opt.onclick.toString().includes('true')) {
+                        opt.classList.add('correct');
+                    }
+                });
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                previousSlide();
+            } else if (event.key === 'r' || event.key === 'R') {
+                resetPresentation();
+            }
+        });
+
+        // Initialize
+        showSlide(1);
+    </script>
+</body>
+</html>
