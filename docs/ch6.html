@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validating Your OWL Ontology</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(138, 43, 226, 0.06) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 15s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(0, 255, 136, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        .presentation-container {
+            width: 960px;
+            height: 720px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.5),
+                0 0 40px rgba(0, 255, 136, 0.1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+
+        .slide-header {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.15));
+            padding: 30px 40px;
+            border-bottom: 2px solid rgba(0, 255, 136, 0.5);
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .slide-header h1 {
+            color: #00ff88;
+            font-size: 2.2em;
+            margin-bottom: 5px;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .slide-header .subtitle {
+            color: #b4b4b4;
+            font-size: 1em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .slide-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 50px;
+            background: rgba(10, 14, 39, 0.5);
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00ff88, #00d4ff);
+            border-radius: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #00d4ff, #00ff88);
+        }
+
+        /* Title Slide */
+        .slide-1 {
+            background: 
+                radial-gradient(circle at 30% 40%, rgba(0, 255, 136, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 70% 60%, rgba(0, 212, 255, 0.1) 0%, transparent 60%);
+        }
+
+        .slide-1 .slide-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px;
+            overflow: visible;
+        }
+
+        .slide-1 h1 {
+            font-size: 3em;
+            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-out, gradientShift 8s ease infinite;
+            background-size: 200% 200%;
+            font-weight: 800;
+            letter-spacing: -2px;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .slide-1 h2 {
+            font-size: 1.6em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease-out 0.3s both;
+            font-weight: 300;
+        }
+
+        .slide-1 h3 {
+            font-size: 1.3em;
+            color: #00ff88;
+            animation: fadeInUp 1s ease-out 0.6s both;
+            font-weight: 500;
+        }
+
+        .content-block {
+            background: rgba(0, 255, 136, 0.05);
+            backdrop-filter: blur(10px);
+            border-left: 4px solid #00ff88;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            color: #ffffff;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .content-block:hover {
+            background: rgba(0, 255, 136, 0.08);
+            border-left-width: 6px;
+            transform: translateX(5px);
+        }
+
+        .content-block h3 {
+            color: #00ff88;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .content-block p, .content-block li {
+            color: #e0e0e0;
+            line-height: 1.7;
+            font-size: 1.05em;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .highlight-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent,
+                rgba(0, 255, 136, 0.05),
+                transparent 30%
+            );
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(1turn); }
+        }
+
+        .highlight-box > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .highlight-box h3 {
+            color: #00ff88;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .highlight-box strong {
+            color: #00ff88;
+        }
+
+        .key-points {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(0, 212, 255, 0.08));
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .key-points h3 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .key-points li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #00ff88;
+            transition: all 0.3s ease;
+        }
+
+        .key-points li:hover {
+            padding-left: 35px;
+            color: #ffffff;
+        }
+
+        .key-points li:hover::before {
+            color: #00d4ff;
+            transform: translateX(3px);
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.7);
+            color: #00ff88;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            font-size: 0.85em;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .tool-card {
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            background: rgba(0, 255, 136, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .tool-card h4 {
+            color: #00ff88;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .tool-card p {
+            color: #e0e0e0;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
+            backdrop-filter: blur(10px);
+            color: #00ff88;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            color: #000000;
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .control-btn:disabled:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
+            color: #00ff88;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .slide-counter {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
+            backdrop-filter: blur(10px);
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: #00ff88;
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        ul {
+            margin-left: 25px;
+        }
+
+        li {
+            margin: 10px 0;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1024px) {
+            .presentation-container {
+                width: 100vw;
+                height: 75vw;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .slide-content {
+                padding: 30px 40px;
+            }
+
+            .tool-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles background -->
+    <div class="particles" id="particles"></div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide slide-1 active">
+            <div class="slide-content">
+                <h1>Validating Your OWL Ontology</h1>
+                <h2>Development Tools & Best Practices</h2>
+                <h3>Eng. Dr. Tiroshan Madushanka</h3>
+            </div>
+        </div>
+
+        <!-- Slide 2: Why Validation Matters -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Why Validate Your Ontology?</h1>
+                <div class="subtitle">The First Critical Step</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>The Essential Question</h3>
+                    <p><strong>Before building any application: How do I know my OWL ontology is correct?</strong></p>
+                </div>
+
+                <div class="key-points">
+                    <h3>What Your Agent Needs</h3>
+                    <ul>
+                        <li><strong>Parsing:</strong> Read information from ontology and instance documents</li>
+                        <li><strong>Validation:</strong> Ensure documents are syntactically and semantically correct</li>
+                        <li><strong>Reasoning:</strong> Conduct inference based on the knowledge in documents</li>
+                        <li><strong>APIs:</strong> Programmatic access to all capabilities for your code</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3>Development Environment Components</h3>
+                    <p>Validation, parsing, and reasoning APIs are part of your Semantic Web development environment - tools you use so you don't have to reinvent the wheel.</p>
+                    <p style="margin-top: 10px;">This chapter focuses on <strong>validation and understanding</strong> of ontology documents. We'll cover reasoning and inferencing in later chapters.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Development Tools Overview -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Semantic Web Development Tools</h1>
+                <div class="subtitle">A Comprehensive Ecosystem</div>
+            </div>
+            <div class="slide-content">
+                <div class="key-points">
+                    <h3>Tool Categories</h3>
+                    <ul>
+                        <li><strong>Editors:</strong> Create RDF, RDFS, and OWL documents with visual help and syntax checking</li>
+                        <li><strong>Viewers/Browsers:</strong> Visualize classes, properties, and instances</li>
+                        <li><strong>Validators:</strong> Ensure documents are syntactically and semantically correct</li>
+                        <li><strong>Markup Tools:</strong> Add semantic metadata to HTML pages</li>
+                        <li><strong>Parsers:</strong> Read and interpret ontology documents</li>
+                        <li><strong>Inference Engines:</strong> Reason over ontologies and derive new knowledge</li>
+                        <li><strong>Storage & Query:</strong> Store and query RDF triples</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Rich Ecosystem</h3>
+                    <p>At the time of writing, there's already an impressive collection of tools available for Semantic Web development. The ecosystem continues to grow!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Popular Editing Tools -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Ontology Editors</h1>
+                <div class="subtitle">Creating Your Semantic Models</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>What Editors Provide</h3>
+                    <p>Similar to IDEs like Visual Studio, ontology editors offer:</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Visual assistance for document creation</li>
+                        <li>Real-time syntax checking</li>
+                        <li>Export to multiple formats (XML, N3, etc.)</li>
+                        <li>Class and property visualization</li>
+                    </ul>
+                </div>
+
+                <div class="tool-grid">
+                    <div class="tool-card">
+                        <h4>Protégé</h4>
+                        <p><strong>http://protege.stanford.edu/</strong></p>
+                        <p style="margin-top: 8px;">Protégé-OWL editor: Create ontology documents in a variety of formats. One of the most popular and full-featured editors.</p>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>Swoop</h4>
+                        <p><strong>http://www.mindswap.org/2004/SWOOP/</strong></p>
+                        <p style="margin-top: 8px;">Swoop ontology editor with browser-like interface and excellent visualization capabilities.</p>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>OilEd</h4>
+                        <p><strong>http://oiled.man.ac.uk/</strong></p>
+                        <p style="margin-top: 8px;">Editor specifically designed for ontology documents with focus on OWL.</p>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>RDF Instance Creator</h4>
+                        <p><strong>http://www.mindswap.org</strong></p>
+                        <p style="margin-top: 8px;">Create RDF statements from existing ontologies, making instance creation easier.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Validation Tools -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>OWL Ontology Validators</h1>
+                <div class="subtitle">Ensuring Correctness</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Why Validate?</h3>
+                    <p>Validators check both <strong>syntax</strong> (correct XML structure, matching tags) and <strong>semantics</strong> (proper use of properties, correct value types, valid class relationships).</p>
+                </div>
+
+                <div class="tool-grid">
+                    <div class="tool-card">
+                        <h4>W3C RDF Validation Service</h4>
+                        <p><strong>http://www.w3.org/RDF/Validator/</strong></p>
+                        <p style="margin-top: 8px;">Official RDF document validation provided by W3C. We used this in Chapter 3.</p>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>OWL Ontology Validator</h4>
+                        <p><strong>http://phoebus.cs.man.ac.uk:9999/OWL/Validator</strong></p>
+                        <p style="margin-top: 8px;">OWL ontology validator developed by University of Manchester. Quite commonly used and comprehensive.</p>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>OWL Validator (VOWLidator)</h4>
+                        <p><strong>http://projects.semwebcentral.org/projects/vowlidator/</strong></p>
+                        <p style="margin-top: 8px;">Another OWL validation tool with good error reporting.</p>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>SMORE</h4>
+                        <p><strong>Markup Tool</strong></p>
+                        <p style="margin-top: 8px;">Creates OWL markup for HTML Web pages, helping add semantic metadata to existing content.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Inference Engines -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Reasoning & Inference Tools</h1>
+                <div class="subtitle">Understanding Your Ontologies</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>Beyond Validation</h3>
+                    <p>Inference engines not only parse documents but <strong>"understand"</strong> them - deriving new knowledge from explicit statements.</p>
+                    <p style="margin-top: 10px;">Many inference tools can also be used as parsers and for storage/query operations.</p>
+                </div>
+
+                <div class="tool-grid">
+                    <div class="tool-card">
+                        <h4>Jena</h4>
+                        <p><strong>http://jena.sourceforge.net/</strong></p>
+                        <p style="margin-top: 8px;">Developed by HP Labs. Java framework providing support for RDF, RDFS, and OWL with built-in reasoning engine. Excellent documentation!</p>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>Pellet</h4>
+                        <p><strong>http://www.mindswap.org/2003/pellet/</strong></p>
+                        <p style="margin-top: 8px;">Open-source Java-based OWL DL reasoner provided by Mindswap. Fast and complete reasoning.</p>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>Sesame</h4>
+                        <p><strong>http://www.openrdf.org/</strong></p>
+                        <p style="margin-top: 8px;">Provides support for RDF schema reasoning with excellent storage and query capabilities.</p>
+                    </div>
+
+                    <div class="tool-card">
+                        <h4>Euler</h4>
+                        <p><strong>http://www.agfa.com/w3c/euler/</strong></p>
+                        <p style="margin-top: 8px;">Inference engine supporting logic-based proof methods and reasoning.</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 20px;">
+                    <h3>Redland - Storage & Query</h3>
+                    <p><strong>http://librdf.org/</strong></p>
+                    <p style="margin-top: 10px;">Capable of manipulating triples, URIs, and graphs. Provides rich API for application development. While inference engines can handle storage/query, Redland specializes in it.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Two Types of Validation -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>What Does Validation Check?</h1>
+                <div class="subtitle">Syntax and Semantics</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>Part 1: Syntax Validation</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Well-formed XML:</strong> Each opening tag must have a closing tag</li>
+                        <li><strong>Namespace compliance:</strong> All constructs must be defined in declared namespaces</li>
+                        <li><strong>Element existence:</strong> Classes and properties mentioned must be defined</li>
+                        <li><strong>Case sensitivity:</strong> owl:Ontology ≠ owl:ontology</li>
+                    </ul>
+                </div>
+
+                <div class="code-block">
+&lt;owl:Class rdf:ID="PointAndShoot"&gt;
+  &lt;rdfs:subClassOf rdf:resource="#Digital"/&gt;
+&lt;/owl:Class&gt;
+
+&lt;!-- Digital class must be defined somewhere! --&gt;
+                </div>
+
+                <div class="content-block">
+                    <h3>Part 2: Semantic Validation</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Type consistency:</strong> If rdfs:range is XML string, value cannot be a resource</li>
+                        <li><strong>Property usage:</strong> Class using a property must be declared as domain (or superclass must be)</li>
+                        <li><strong>Restriction compliance:</strong> Values must satisfy all property restrictions</li>
+                        <li><strong>Cardinality:</strong> Number of values must respect min/max constraints</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Validator Output</h3>
+                    <p>Good validators also output the entire class and property structure based on their understanding. If correct, you should see the structure you intended!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Using Web-Based Validators -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Using OWL Ontology Validator</h1>
+                <div class="subtitle">Mindswap's Validator Example</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Mindswap Validator Features</h3>
+                    <p><strong>URL:</strong> http://www.mindswap.org/2003/pellet/demo.shtml</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Checks against OWL Full, OWL DL, and OWL Lite</li>
+                        <li>Identifies which OWL variant your ontology is</li>
+                        <li>Shows complete class and property structure</li>
+                        <li>Provides detailed exception messages for errors</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3>Two Input Methods</h3>
+                    <p><strong>1. Direct Input:</strong> Cut-and-paste your OWL document into the RDF window</p>
+                    <p style="margin-top: 8px;"><strong>2. URL Input:</strong> Specify a link pointing to your OWL ontology document</p>
+                    <p style="margin-top: 15px; color: #00ff88;">💡 During development, direct input is often preferred - no need to upload to web server until stable!</p>
+                </div>
+
+                <div class="key-points">
+                    <h3>Validation Process</h3>
+                    <ul>
+                        <li>Paste your ontology or enter URL</li>
+                        <li>Check appropriate validation options</li>
+                        <li>Click Submit button</li>
+                        <li>Review results: OWL variant classification, class hierarchy, error messages (if any)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Understanding Validation Results -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Interpreting Validator Output</h1>
+                <div class="subtitle">Camera Ontology Example</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Successful Validation</h3>
+                    <p>You'll receive a result page only when your ontology is legal. If there are errors, the validator throws exceptions for you to fix.</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>Typical Validator Output</h3>
+                    <p><strong>1. OWL Classification:</strong> "This is an OWL Full ontology"</p>
+                    <p style="margin-top: 8px;"><strong>2. Reason:</strong> Why it's classified as Full, DL, or Lite</p>
+                    <p style="margin-top: 8px;"><strong>3. Class Hierarchy:</strong> Complete structure showing inheritance</p>
+                    <p style="margin-top: 8px;"><strong>4. Property Summary:</strong> All defined properties with domains/ranges</p>
+                </div>
+
+                <div class="code-block">
+&lt;!-- Example: Our Camera Ontology Result --&gt;
+Input file: Camera.owl
+OWL Species: Full
+DL Expressivity: SROIF(D)
+Consistent: Yes
+Time: 1839 ms
+
+Classification:
+• owl:Thing
+  ○ camera:Camera
+    ■ www.yetAnotherOne.com:DigitalCamera = camera:Digital
+      • camera:PointAndShoot
+      • www.yetAnotherOne.com:SingleLensReflex = camera:SLR
+        ■ camera:ExpensiveSLR
+    ■ camera:Film
+  ○ camera:Person
+    ■ camera:Photographer
+      • camera:Professional
+      • camera:Amateur
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: University of Manchester Validator -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Advanced Validation Output</h1>
+                <div class="subtitle">Manchester Validator Details</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>More Detailed Structure</h3>
+                    <p><strong>URL:</strong> http://phoebus.cs.man.ac.uk:9999/OWL/Validator</p>
+                    <p style="margin-top: 10px;">Shows complete structure including all classes and properties defined in your ontology. Helps confirm the ontology expresses what you intended.</p>
+                </div>
+
+                <div class="code-block" style="font-size: 0.75em;">
+Namespace(rdf = &lt;http://www.w3.org/.../rdf-syntax-ns#&gt;)
+Namespace(owl = &lt;http://www.w3.org/2002/07/owl#&gt;)
+Namespace(a = &lt;http://www.yuchen.net/photography/Camera.owl#&gt;)
+
+Ontology( &lt;http://www.yuchen.net/photography/Camera.owl&gt;
+  Annotation(rdfs:label "Camera ontology")
+  Annotation(rdfs:comment "our final camera ontology")
+  Annotation(owl:versionInfo "Camera.owl 1.0")
+
+  ObjectProperty(a:betterQualityPriceRatio Transitive
+    domain(a:Camera) range(a:Camera))
+  
+  ObjectProperty(a:friend_with Symmetric
+    domain(a:Person) range(a:Person))
+
+  DatatypeProperty(a:model Functional
+    domain(a:Specifications) range(xsd:string))
+  
+  Class(a:ExpensiveSLR partial
+    restriction(a:owned_by someValuesFrom(a:Professional))
+    a:SLR
+    restriction(a:expensiveOrNot value "expensive"^^xsd:string))
+  
+  DisjointClasses(a:SLR a:PointAndShoot)
+  DisjointClasses(a:Professional a:Amateur)
+)
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Rich Semantics Confirmed</h3>
+                    <p>The detailed output lets you verify every aspect of your ontology - from property characteristics to class restrictions to disjointness declarations.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Programmatic Validation with Jena -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Programmatic Validation</h1>
+                <div class="subtitle">Using Jena APIs</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Why Programmatic Validation?</h3>
+                    <p>Your agent may discover OWL files on the Web and needs to validate them automatically - can't wait for manual validation!</p>
+                    <p style="margin-top: 10px;">APIs allow validation, parsing, and reasoning within your application code.</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>Enter Jena</h3>
+                    <p><strong>Developed by HP Labs</strong> - Java framework for Semantic Web applications</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Supports RDF, RDFS, and OWL</li>
+                        <li>Includes rule-based inference engine</li>
+                        <li><strong>Excellent documentation</strong> - tutorials, examples, comprehensive API docs</li>
+                        <li>Growing popularity in Semantic Web projects</li>
+                    </ul>
+                </div>
+
+                <div class="key-points">
+                    <h3>Using Jena is Straightforward</h3>
+                    <ul>
+                        <li>Download JAR package - no installation required</li>
+                        <li>No user interface - just callable libraries</li>
+                        <li>Use import statements to include needed libraries</li>
+                        <li>Set CLASSPATH variable correctly</li>
+                        <li>Call APIs from your Java code</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Setting Up Jena -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Jena Setup</h1>
+                <div class="subtitle">Configuration and Imports</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>Import Statements</h3>
+                    <p>Typical imports when working with Jena ontology APIs:</p>
+                </div>
+
+                <div class="code-block">
+import com.hp.hpl.jena.ontology.*;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+                </div>
+
+                <div class="content-block">
+                    <h3>CLASSPATH Configuration</h3>
+                    <p>Must set CLASSPATH to include all Jena JAR files. Example from .cshrc file:</p>
+                </div>
+
+                <div class="code-block" style="font-size: 0.8em;">
+setenv CLASSPATH $JENA_DIR/lib/antlr.jar:
+                 $JENA_DIR/lib/commons-logging.jar:
+                 $JENA_DIR/lib/concurrent.jar:
+                 $JENA_DIR/lib/icu4j.jar:
+                 $JENA_DIR/lib/jakarta-oro-2.0.5.jar:
+                 $JENA_DIR/lib/jena.jar:
+                 $JENA_DIR/lib/junit.jar:
+                 $JENA_DIR/lib/log4j-1.2.7.jar:
+                 $JENA_DIR/lib/xercesImpl.jar:
+                 $JENA_DIR/lib/xml-apis.jar:.
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Important Note</h3>
+                    <p>$JENA_DIR is your local installation directory. Replace with your actual path.</p>
+                    <p style="margin-top: 8px;"><strong>You must enumerate every JAR file</strong> you want to use - include each one individually in CLASSPATH!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Validation with Jena APIs -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>How Jena Validates</h1>
+                <div class="subtitle">Exception-Based Validation</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Validation Method</h3>
+                    <p><strong>How do you know your OWL document is valid?</strong></p>
+                    <p style="margin-top: 10px;">If your document has syntax or semantic errors, <strong>Jena throws exceptions</strong> when you try to load it!</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>Validation Process</h3>
+                    <p><strong>1. Try to load ontology:</strong> Use Jena APIs to read document into memory</p>
+                    <p style="margin-top: 8px;"><strong>2. Watch for exceptions:</strong> Error messages indicate problems</p>
+                    <p style="margin-top: 8px;"><strong>3. Success = Valid:</strong> If you create ontology model successfully, document is valid!</p>
+                </div>
+
+                <div class="key-points">
+                    <h3>Optional Confirmation Steps</h3>
+                    <ul>
+                        <li><strong>Output ontology:</strong> Call API to print entire ontology</li>
+                        <li><strong>Enumerate classes:</strong> Call API to list all defined classes</li>
+                        <li><strong>List properties:</strong> Call API to show all properties</li>
+                    </ul>
+                    <p style="margin-top: 15px; color: #00ff88;">These steps aren't required for validation but satisfy curiosity and provide viewing pleasure! 😊</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>Excellent Documentation</h3>
+                    <p>Jena provides comprehensive examples for all these tasks on their website. We won't repeat the code here - check their documentation!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Jena Output Examples -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Jena Output Format</h1>
+                <div class="subtitle">Understanding What Jena Returns</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>Important Note</h3>
+                    <p>After Jena reads your ontology, it <strong>converts to long form</strong> - expanding all namespace prefixes to full URIs.</p>
+                </div>
+
+                <div class="code-block" style="font-size: 0.75em;">
+&lt;rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xmlns:owl="http://www.w3.org/2002/07/owl#"&gt;
+
+&lt;rdf:Description
+  rdf:about="http://www.yuchen.net/photography/Camera.owl#Camera"&gt;
+  &lt;rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/&gt;
+&lt;/rdf:Description&gt;
+
+&lt;rdf:Description
+  rdf:about="http://www.yuchen.net/photography/Camera.owl#Digital"&gt;
+  &lt;rdfs:subClassOf
+    rdf:resource="http://www.yuchen.net/photography/Camera.owl#Camera"/&gt;
+  &lt;owl:equivalentClass 
+    rdf:resource="http://www.yetAnotherOne.com#DigitalCamera"/&gt;
+  &lt;rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/&gt;
+&lt;/rdf:Description&gt;
+
+&lt;rdf:Description
+  rdf:about="http://www.yuchen.net/photography/Camera.owl#SLR"&gt;
+  &lt;owl:disjointWith 
+    rdf:resource="http://www.yuchen.net/photography/Camera.owl#PointAndShoot"/&gt;
+  &lt;owl:equivalentClass 
+    rdf:resource="http://www.yetAnotherOne.com#SingleLensReflex"/&gt;
+  &lt;rdfs:subClassOf 
+    rdf:resource="http://www.yuchen.net/photography/Camera.owl#Digital"/&gt;
+&lt;/rdf:Description&gt;
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Jena Class Listing -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Class Summary from Jena</h1>
+                <div class="subtitle">Camera Ontology Classes</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>Complete Class Enumeration</h3>
+                    <p>Jena can output all classes defined in your ontology - including equivalent classes from other ontologies:</p>
+                </div>
+
+                <div class="code-block" style="font-size: 0.8em;">
+http://www.yuchen.net/photography/Camera.owl#SLR
+http://www.yuchen.net/photography/Camera.owl#PointAndShoot
+http://www.yuchen.net/photography/Camera.owl#Specifications
+http://www.yuchen.net/photography/Camera.owl#Film
+http://www.yuchen.net/photography/Camera.owl#Person
+http://www.yuchen.net/photography/Camera.owl#Camera
+http://www.yuchen.net/photography/Camera.owl#Photographer
+http://www.yuchen.net/photography/Camera.owl#Professional
+http://www.yuchen.net/photography/Camera.owl#ExpensiveSLR
+http://www.yuchen.net/photography/Camera.owl#Amateur
+http://www.yuchen.net/photography/Camera.owl#Digital
+http://www.yetAnotherOne.com#SingleLensReflex
+http://www.yetAnotherOne.com#DigitalCamera
+http://www.someStandard.org#MegaPixel
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Validation Confirmed!</h3>
+                    <p>Having all these outputs from Jena APIs, we can be assured that our Camera ontology is valid and correctly structured.</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>Beyond Validation</h3>
+                    <p>Jena has much more power than just validating OWL documents! We'll explore its reasoning and query capabilities in later chapters.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Summary -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1>Summary</h1>
+                <div class="subtitle">Key Takeaways</div>
+            </div>
+            <div class="slide-content">
+                <div class="key-points">
+                    <h3>What We Learned</h3>
+                    <ul>
+                        <li><strong>Validation is essential</strong> - First step before building any Semantic Web application</li>
+                        <li><strong>Two types of validation:</strong> Syntax (well-formed XML, correct tags) and Semantics (proper property usage, type consistency)</li>
+                        <li><strong>Rich tool ecosystem:</strong> Editors, validators, parsers, inference engines, and storage/query tools</li>
+                        <li><strong>Web-based validators:</strong> Easy to use for manual validation during development (Mindswap, Manchester)</li>
+                        <li><strong>Programmatic validation:</strong> Essential for agents that discover ontologies automatically (Jena)</li>
+                        <li><strong>Jena is powerful:</strong> Excellent documentation, comprehensive APIs, growing popularity</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Development Workflow</h3>
+                    <p><strong>1. Create:</strong> Build ontology using editor (Protégé, Swoop)</p>
+                    <p><strong>2. Validate:</strong> Use web validator during development</p>
+                    <p><strong>3. Integrate:</strong> Use APIs (Jena) for programmatic validation in applications</p>
+                    <p><strong>4. Reason:</strong> Apply inference engines to derive new knowledge (covered in later chapters)</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>Next Steps</h3>
+                    <p>Now that we know our ontologies are valid, we can move forward with:</p>
+                    <ul style="margin-left: 20px; margin-top: 8px;">
+                        <li>Real-world Semantic Web applications (FOAF, Swoogle)</li>
+                        <li>Semantic markup and annotation</li>
+                        <li>Building Semantic Web search engines</li>
+                        <li>Advanced reasoning and inference</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 6.25%;"></div>
+        </div>
+
+        <!-- Slide Counter -->
+        <div class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">16</span>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" disabled>‹</button>
+            <button class="control-btn" id="nextBtn">›</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Slide navigation
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const currentSlideSpan = document.getElementById('currentSlide');
+        const totalSlidesSpan = document.getElementById('totalSlides');
+        const progressFill = document.querySelector('.progress-fill');
+
+        totalSlidesSpan.textContent = totalSlides;
+
+        function updateSlides() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else if (index < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            currentSlideSpan.textContent = currentSlide + 1;
+            progressFill.style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlides();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlides();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                prevBtn.click();
+            } else if (e.key === 'ArrowRight') {
+                nextBtn.click();
+            }
+        });
+
+        // Initialize
+        updateSlides();
+    </script>
+</body>
+</html>
