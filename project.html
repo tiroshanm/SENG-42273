@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hands-On Project | Build a Movie Knowledge Graph</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #f8fafc; 
+            color: #334155; 
+            min-height: 100vh; 
+            line-height: 1.6;
+        }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+        textarea { font-family: 'JetBrains Mono', monospace; }
+        a { color: #2563eb; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Navigation */
+        .nav { background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 50; }
+        .nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+        .nav-logo { display: flex; align-items: center; gap: 0.75rem; }
+        .nav-logo-icon { font-size: 1.75rem; }
+        .nav-logo-text h1 { font-size: 1.125rem; font-weight: 700; color: #1e293b; }
+        .nav-logo-text p { font-size: 0.75rem; color: #64748b; }
+        .nav-links { display: flex; align-items: center; gap: 1rem; }
+        .nav-link { padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #475569; transition: all 0.15s; }
+        .nav-link:hover { background: #f1f5f9; text-decoration: none; }
+
+        /* Hero Section */
+        .hero { background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border-bottom: 1px solid #e2e8f0; padding: 3rem 1.5rem; text-align: center; }
+        .hero h1 { font-size: 2.25rem; font-weight: 800; color: #1e293b; margin-bottom: 0.75rem; }
+        .hero p { color: #64748b; max-width: 640px; margin: 0 auto 1.5rem; }
+        .badges { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+        .badge { background: white; border: 1px solid #e2e8f0; color: #475569; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; }
+
+        /* Layout */
+        .main-layout { display: flex; max-width: 1280px; margin: 0 auto; }
+        .sidebar { width: 280px; background: white; border-right: 1px solid #e2e8f0; min-height: calc(100vh - 64px); padding: 1.5rem; position: sticky; top: 64px; height: fit-content; }
+        .sidebar-title { font-size: 0.75rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+        .content { flex: 1; padding: 2rem; background: #f8fafc; }
+        .content-inner { max-width: 800px; }
+
+        /* Phase Navigation */
+        .phase-btn { width: 100%; text-align: left; padding: 0.75rem 1rem; border-radius: 0.5rem; color: #475569; font-size: 0.875rem; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; transition: all 0.15s; }
+        .phase-btn:hover { background: #f8fafc; }
+        .phase-btn.active { background: #eff6ff; color: #1d4ed8; }
+        .phase-btn.done { color: #059669; }
+        .phase-num { width: 1.75rem; height: 1.75rem; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: #64748b; }
+        .phase-btn.active .phase-num { background: #dbeafe; color: #1d4ed8; }
+        .phase-btn.done .phase-num { background: #d1fae5; color: #059669; }
+        .phase-info { flex: 1; }
+        .phase-info-title { font-weight: 500; }
+        .phase-info-time { font-size: 0.75rem; color: #94a3b8; }
+
+        /* Progress */
+        .progress-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; }
+        .progress-header { display: flex; justify-content: space-between; font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem; }
+        .progress-bar { height: 0.5rem; background: #e2e8f0; border-radius: 9999px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 9999px; transition: width 0.5s; }
+
+        /* Cards */
+        .card { background: white; border-radius: 0.75rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 1.5rem; overflow: hidden; }
+        .card-header { background: #f8fafc; padding: 1rem 1.5rem; font-weight: 600; color: #1e293b; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 0.5rem; }
+        .card-body { padding: 1.5rem; }
+
+        /* Buttons */
+        .btn { padding: 0.625rem 1.25rem; border-radius: 0.5rem; font-weight: 500; font-size: 0.875rem; transition: all 0.15s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-secondary { background: #f1f5f9; color: #475569; }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-outline { border: 1px solid #e2e8f0; color: #475569; background: white; }
+        .btn-outline:hover { background: #f8fafc; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-group { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+
+        /* Code Editor */
+        .code-editor { background: #1e293b; border-radius: 0.5rem; overflow: hidden; margin: 1rem 0; }
+        .code-header { background: #334155; padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .code-dots { display: flex; gap: 0.5rem; }
+        .code-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .code-dot.red { background: #ef4444; }
+        .code-dot.yellow { background: #eab308; }
+        .code-dot.green { background: #22c55e; }
+        .code-lang { font-size: 0.75rem; color: #94a3b8; }
+        .code-editor textarea { width: 100%; padding: 1rem; background: transparent; color: #e2e8f0; border: none; resize: none; font-size: 0.875rem; line-height: 1.6; min-height: 200px; }
+        .code-editor textarea:focus { outline: none; }
+        .code-editor pre { padding: 1rem; margin: 0; color: #e2e8f0; font-size: 0.875rem; line-height: 1.6; overflow-x: auto; white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; }
+
+        .inline-code { background: #f1f5f9; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #be185d; }
+
+        /* Info Boxes */
+        .info-box { border-radius: 0.5rem; padding: 1rem 1.5rem; margin: 1rem 0; }
+        .info-box.info { background: #eff6ff; border: 1px solid #bfdbfe; }
+        .info-box.warning { background: #fffbeb; border: 1px solid #fde68a; }
+        .info-box.success { background: #ecfdf5; border: 1px solid #a7f3d0; }
+        .info-box h4 { font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .info-box.info h4 { color: #1d4ed8; }
+        .info-box.warning h4 { color: #b45309; }
+        .info-box.success h4 { color: #047857; }
+        .info-box p, .info-box li { color: #475569; }
+
+        /* Task Box */
+        .task-box { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 0.75rem; padding: 1.5rem; margin: 1.5rem 0; }
+        .task-box h4 { color: #1d4ed8; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .task-box ol { margin-left: 1.5rem; color: #475569; }
+        .task-box li { margin-bottom: 0.5rem; }
+
+        /* Result Box */
+        .result-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem; max-height: 300px; overflow: auto; }
+        .result-box.success { background: #ecfdf5; border-color: #a7f3d0; }
+        .result-box.error { background: #fef2f2; border-color: #fecaca; }
+
+        /* Data Table */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        .data-table th { text-align: left; padding: 0.75rem; font-weight: 500; color: #475569; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+        .data-table td { padding: 0.75rem; border-bottom: 1px solid #f1f5f9; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+
+        /* Concept Grid */
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .concept-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; }
+        .concept-card h5 { color: #1d4ed8; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem; }
+        .concept-card p { color: #64748b; font-size: 0.8rem; }
+
+        /* Resource Links */
+        .resource-links { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1rem 0; }
+        .resource-link { background: #f1f5f9; color: #475569; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem; transition: all 0.15s; text-decoration: none; }
+        .resource-link:hover { background: #e2e8f0; text-decoration: none; }
+
+        /* Tabs */
+        .tab-buttons { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+        .tab-btn { padding: 0.5rem 1rem; border-radius: 0.5rem 0.5rem 0 0; color: #64748b; font-size: 0.875rem; font-weight: 500; }
+        .tab-btn:hover { color: #1e293b; }
+        .tab-btn.active { background: #eff6ff; color: #1d4ed8; }
+
+        /* Validation List */
+        .validation-list { list-style: none; }
+        .validation-list li { padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; }
+        .validation-list .pass { color: #059669; }
+        .validation-list .fail { color: #dc2626; }
+
+        /* Step Navigation */
+        .step-nav { display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; }
+
+        /* Graph */
+        .graph-container { width: 100%; height: 400px; background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; }
+        .graph-legend { display: flex; gap: 1.5rem; font-size: 0.875rem; color: #475569; margin-top: 0.75rem; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+        .legend-dot { width: 1rem; height: 1rem; border-radius: 50%; }
+
+        /* Animation */
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-layout { flex-direction: column; }
+            .sidebar { width: 100%; position: relative; top: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const PHASES = [
+            { id: 1, title: "Domain Analysis", icon: "🎬", time: "30 min", objectives: ["Analyze movie domain entities", "Identify classes and properties", "Explore existing vocabularies", "Map concepts to RDF"] },
+            { id: 2, title: "Design Ontology", icon: "📐", time: "45 min", objectives: ["Define namespaces", "Create class hierarchy", "Define properties with constraints", "Add OWL restrictions"] },
+            { id: 3, title: "Query DBpedia", icon: "🔍", time: "45 min", objectives: ["Understand SPARQL endpoints", "Extract real movie data", "Handle federated queries", "Map external data"] },
+            { id: 4, title: "Build Dataset", icon: "🗃️", time: "45 min", objectives: ["Create instance data", "Import from DBpedia", "Validate against schema", "Link with owl:sameAs"] },
+            { id: 5, title: "Reasoning", icon: "🧠", time: "30 min", objectives: ["Apply RDFS inference", "Use OWL reasoning", "Query inferred facts", "Detect inconsistencies"] },
+            { id: 6, title: "SPARQL Analytics", icon: "📊", time: "45 min", objectives: ["Write complex queries", "Use aggregates", "Graph pattern matching", "Data transformation"] },
+            { id: 7, title: "Visualization", icon: "🌐", time: "45 min", objectives: ["Visualize knowledge graph", "Build query interface", "Entity exploration", "Deploy application"] }
+        ];
+
+        const ONTOLOGY_STARTER = `# Movie Knowledge Graph Ontology
+@prefix : <http://example.org/movie#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ===== CLASSES =====
+:Movie a rdfs:Class ;
+    rdfs:label "Movie" ;
+    rdfs:comment "A motion picture" .
+
+:Person a rdfs:Class ;
+    rdfs:label "Person" .
+
+# TODO: Add :Director as subclass of :Person
+
+# TODO: Add :Actor as subclass of :Person
+
+# TODO: Add :Genre class
+
+# ===== PROPERTIES =====
+:title a rdf:Property ;
+    rdfs:domain :Movie ;
+    rdfs:range xsd:string .
+
+# TODO: Add :directedBy (Movie -> Director)
+
+# TODO: Add :starring (Movie -> Actor)
+
+# TODO: Add :hasGenre (Movie -> Genre)
+
+# ===== OWL =====
+# TODO: Make :directedBy functional
+# TODO: Add inverse :directed
+`;
+
+        const ONTOLOGY_SOLUTION = `@prefix : <http://example.org/movie#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# CLASSES
+:Movie a rdfs:Class ; rdfs:label "Movie" .
+:Person a rdfs:Class ; rdfs:label "Person" .
+:Director a rdfs:Class ; rdfs:subClassOf :Person ; rdfs:label "Director" .
+:Actor a rdfs:Class ; rdfs:subClassOf :Person ; rdfs:label "Actor" .
+:Genre a rdfs:Class ; rdfs:label "Genre" .
+:Studio a rdfs:Class ; rdfs:label "Studio" .
+
+# PROPERTIES
+:title a rdf:Property ; rdfs:domain :Movie ; rdfs:range xsd:string .
+:releaseYear a rdf:Property ; rdfs:domain :Movie ; rdfs:range xsd:gYear .
+:runtime a rdf:Property ; rdfs:domain :Movie ; rdfs:range xsd:integer .
+:budget a rdf:Property ; rdfs:domain :Movie ; rdfs:range xsd:decimal .
+:rating a rdf:Property ; rdfs:domain :Movie ; rdfs:range xsd:decimal .
+:name a rdf:Property ; rdfs:domain :Person ; rdfs:range xsd:string .
+
+:directedBy a rdf:Property, owl:FunctionalProperty ;
+    rdfs:domain :Movie ; rdfs:range :Director ; owl:inverseOf :directed .
+:directed a rdf:Property ; rdfs:domain :Director ; rdfs:range :Movie .
+:starring a rdf:Property ; rdfs:domain :Movie ; rdfs:range :Actor .
+:hasGenre a rdf:Property ; rdfs:domain :Movie ; rdfs:range :Genre .
+:producedBy a rdf:Property ; rdfs:domain :Movie ; rdfs:range :Studio .`;
+
+        const DBPEDIA_QUERIES = {
+            basic: `# Find movies by Christopher Nolan
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?movie ?title ?year
+WHERE {
+    ?movie dbo:director dbr:Christopher_Nolan .
+    ?movie rdfs:label ?title .
+    OPTIONAL { ?movie dbo:releaseDate ?date }
+    BIND(YEAR(?date) AS ?year)
+    FILTER(LANG(?title) = "en")
+}
+LIMIT 20`,
+            detailed: `# Detailed movie info with budget
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?movie ?title ?directorName ?budget
+WHERE {
+    ?movie a dbo:Film .
+    ?movie rdfs:label ?title .
+    ?movie dbo:director ?director .
+    ?director foaf:name ?directorName .
+    OPTIONAL { ?movie dbo:budget ?budget }
+    FILTER(LANG(?title) = "en")
+    FILTER(?budget > 100000000)
+}
+ORDER BY DESC(?budget)
+LIMIT 30`,
+            actors: `# Actor statistics
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?actorName (COUNT(?movie) AS ?films)
+WHERE {
+    ?movie a dbo:Film .
+    ?movie dbo:starring ?actor .
+    ?actor foaf:name ?actorName .
+}
+GROUP BY ?actorName
+ORDER BY DESC(?films)
+LIMIT 20`
+        };
+
+        const SAMPLE_DATA = `@prefix : <http://example.org/movie#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dbr: <http://dbpedia.org/resource/> .
+
+# GENRES
+:scifi a :Genre ; :name "Science Fiction" .
+:action a :Genre ; :name "Action" .
+:drama a :Genre ; :name "Drama" .
+
+# DIRECTORS
+:nolan a :Director ; :name "Christopher Nolan" ;
+    owl:sameAs dbr:Christopher_Nolan .
+:villeneuve a :Director ; :name "Denis Villeneuve" ;
+    owl:sameAs dbr:Denis_Villeneuve .
+
+# ACTORS
+:dicaprio a :Actor ; :name "Leonardo DiCaprio" ;
+    owl:sameAs dbr:Leonardo_DiCaprio .
+:hardy a :Actor ; :name "Tom Hardy" ;
+    owl:sameAs dbr:Tom_Hardy .
+:chalamet a :Actor ; :name "Timothée Chalamet" ;
+    owl:sameAs dbr:Timothée_Chalamet .
+
+# MOVIES
+:inception a :Movie ;
+    :title "Inception" ;
+    :releaseYear "2010"^^xsd:gYear ;
+    :runtime 148 ; :budget 160000000 ; :rating 8.8 ;
+    :directedBy :nolan ;
+    :starring :dicaprio, :hardy ;
+    :hasGenre :scifi, :action ;
+    owl:sameAs dbr:Inception .
+
+:interstellar a :Movie ;
+    :title "Interstellar" ;
+    :releaseYear "2014"^^xsd:gYear ;
+    :runtime 169 ; :budget 165000000 ; :rating 8.6 ;
+    :directedBy :nolan ;
+    :hasGenre :scifi, :drama ;
+    owl:sameAs dbr:Interstellar_(film) .
+
+:dune a :Movie ;
+    :title "Dune" ;
+    :releaseYear "2021"^^xsd:gYear ;
+    :runtime 155 ; :budget 165000000 ; :rating 8.0 ;
+    :directedBy :villeneuve ;
+    :starring :chalamet ;
+    :hasGenre :scifi, :action ;
+    owl:sameAs dbr:Dune_(2021_film) .`;
+
+        const ANALYTICS = {
+            byDirector: `PREFIX : <http://example.org/movie#>
+SELECT ?director (COUNT(?m) AS ?movies) (AVG(?r) AS ?avgRating)
+WHERE {
+    ?m a :Movie ; :directedBy ?d ; :rating ?r .
+    ?d :name ?director .
+}
+GROUP BY ?director
+ORDER BY DESC(?avgRating)`,
+            byGenre: `PREFIX : <http://example.org/movie#>
+SELECT ?genre (COUNT(?m) AS ?count) (SUM(?b) AS ?totalBudget)
+WHERE {
+    ?m a :Movie ; :hasGenre ?g ; :budget ?b .
+    ?g :name ?genre .
+}
+GROUP BY ?genre`
+        };
+
+        function parseTriples(text) {
+            const triples = [], prefixes = {};
+            text.match(/@prefix\s+(\w*):?\s*<([^>]+)>\s*\./g)?.forEach(m => {
+                const [, p, u] = m.match(/@prefix\s+(\w*):?\s*<([^>]+)>/);
+                prefixes[p || ''] = u;
+            });
+            let subj = null, pred = null;
+            text.split('\n').forEach(line => {
+                line = line.trim();
+                if (!line || line.startsWith('#') || line.startsWith('@')) return;
+                const match = line.match(/^(\S+)\s+(\S+)\s+(.+?)\s*[.;,]?\s*$/);
+                if (match) {
+                    let [, s, p, o] = match;
+                    if (s !== ';' && s !== ',') subj = s;
+                    if (p && p !== ';') pred = p;
+                    if (subj && pred && o) {
+                        o = o.replace(/[.;,]\s*$/, '').trim();
+                        o.split(/\s*,\s*/).forEach(obj => obj.trim() && triples.push({ subject: subj, predicate: pred, object: obj.trim() }));
+                    }
+                }
+            });
+            return { triples, prefixes };
+        }
+
+        function validateOntology(code) {
+            const checks = [
+                { name: "Has @prefix declarations", test: () => code.includes('@prefix') },
+                { name: "Defines :Director class", test: () => code.includes(':Director') && code.includes('rdfs:Class') },
+                { name: "Defines :Actor class", test: () => code.includes(':Actor') && code.includes('rdfs:Class') },
+                { name: "Defines :Genre class", test: () => code.includes(':Genre') },
+                { name: "Uses rdfs:subClassOf", test: () => code.includes('rdfs:subClassOf') },
+                { name: "Has :directedBy property", test: () => code.includes(':directedBy') },
+                { name: "Has :starring property", test: () => code.includes(':starring') },
+                { name: "Uses rdfs:domain", test: () => code.includes('rdfs:domain') },
+                { name: "Uses rdfs:range", test: () => code.includes('rdfs:range') },
+                { name: "Has owl:inverseOf", test: () => code.includes('owl:inverseOf') }
+            ];
+            const results = checks.map(c => ({ ...c, passed: c.test() }));
+            return { results, score: Math.round(results.filter(r => r.passed).length / checks.length * 100) };
+        }
+
+        function Header() {
+            return (
+                <nav className="nav">
+                    <div className="nav-inner">
+                        <div className="nav-logo">
+                            <span className="nav-logo-icon">🎬</span>
+                            <div className="nav-logo-text">
+                                <h1>Hands-On Project</h1>
+                                <p>Build a Movie Knowledge Graph</p>
+                            </div>
+                        </div>
+                        <div className="nav-links">
+                            <a href="index.html" className="nav-link">← Back to Lab</a>
+                            <a href="https://dbpedia.org/sparql" target="_blank" className="nav-link">DBpedia SPARQL ↗</a>
+                            <a href="https://query.wikidata.org/" target="_blank" className="nav-link">Wikidata ↗</a>
+                        </div>
+                    </div>
+                </nav>
+            );
+        }
+
+        function Hero() {
+            return (
+                <section className="hero">
+                    <h1>🎬 Build a Movie Knowledge Graph</h1>
+                    <p>Create a complete Semantic Web application using real movie data from DBpedia and Wikidata. Design ontologies, write SPARQL queries, perform reasoning, and build visualizations.</p>
+                    <div className="badges">
+                        <span className="badge">⏱️ 4-6 Hours</span>
+                        <span className="badge">📊 Real Data</span>
+                        <span className="badge">🔗 Linked Data</span>
+                        <span className="badge">🧠 Reasoning</span>
+                    </div>
+                </section>
+            );
+        }
+
+        function Sidebar({ phase, setPhase, done }) {
+            return (
+                <aside className="sidebar">
+                    <div className="sidebar-title">Project Phases</div>
+                    {PHASES.map(p => (
+                        <button key={p.id} onClick={() => setPhase(p.id)}
+                            className={`phase-btn ${phase === p.id ? 'active' : ''} ${done.includes(p.id) ? 'done' : ''}`}>
+                            <span className="phase-num">{done.includes(p.id) ? '✓' : p.id}</span>
+                            <div className="phase-info">
+                                <div className="phase-info-title">{p.icon} {p.title}</div>
+                                <div className="phase-info-time">{p.time}</div>
+                            </div>
+                        </button>
+                    ))}
+                    <div className="progress-section">
+                        <div className="progress-header">
+                            <span>Progress</span>
+                            <span style={{fontWeight:600,color:'#059669'}}>{Math.round(done.length / PHASES.length * 100)}%</span>
+                        </div>
+                        <div className="progress-bar">
+                            <div className="progress-fill" style={{width:`${done.length / PHASES.length * 100}%`}}></div>
+                        </div>
+                    </div>
+                </aside>
+            );
+        }
+
+        function Phase1({ onDone }) {
+            const p = PHASES[0];
+            return (
+                <div className="fade-in">
+                    <h2 style={{fontSize:'1.5rem',fontWeight:700,color:'#1e293b',marginBottom:'0.5rem'}}>{p.icon} Phase 1: {p.title}</h2>
+                    <p style={{color:'#64748b',marginBottom:'2rem'}}>Before building, understand the movie domain thoroughly.</p>
+                    
+                    <div className="card">
+                        <div className="card-header">🎯 Learning Objectives</div>
+                        <div className="card-body">
+                            <ul style={{marginLeft:'1.5rem',color:'#475569'}}>{p.objectives.map((o,i) => <li key={i} style={{marginBottom:'0.5rem'}}>{o}</li>)}</ul>
+                        </div>
+                    </div>
+
+                    <div className="card">
+                        <div className="card-header">📚 Domain Entities</div>
+                        <div className="card-body">
+                            <div className="concept-grid">
+                                <div className="concept-card"><h5>Entities</h5><p>Movie, Person, Director, Actor, Genre, Studio</p></div>
+                                <div className="concept-card"><h5>Relationships</h5><p>directedBy, starring, hasGenre, producedBy</p></div>
+                                <div className="concept-card"><h5>Attributes</h5><p>title, releaseDate, runtime, budget, rating</p></div>
+                                <div className="concept-card"><h5>Vocabularies</h5><p>schema.org, DBpedia, FOAF, Wikidata</p></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="info-box info">
+                        <h4>💡 Why Reuse Vocabularies?</h4>
+                        <ul style={{marginLeft:'1.5rem'}}>
+                            <li>Enables interoperability with other datasets</li>
+                            <li>Provides established semantics</li>
+                            <li>Allows federated queries</li>
+                            <li>Follows Linked Data best practices</li>
+                        </ul>
+                    </div>
+
+                    <div className="resource-links">
+                        <a href="https://schema.org/Movie" target="_blank" className="resource-link">📋 Schema.org/Movie</a>
+                        <a href="https://dbpedia.org/ontology/Film" target="_blank" className="resource-link">🗄️ DBpedia Ontology</a>
+                        <a href="http://xmlns.com/foaf/spec/" target="_blank" className="resource-link">👤 FOAF</a>
+                    </div>
+
+                    <div className="task-box">
+                        <h4>✏️ Exercise: Domain Mapping</h4>
+                        <ol>
+                            <li>A movie can have multiple actors - what property type is this?</li>
+                            <li>A director directs movies - should this be functional?</li>
+                            <li>How would you model "sequel of" relationship?</li>
+                        </ol>
+                    </div>
+
+                    <div className="btn-group"><button onClick={onDone} className="btn btn-success">✓ Complete Phase 1</button></div>
+                </div>
+            );
+        }
+
+        function Phase2({ onDone }) {
+            const [code, setCode] = useState(ONTOLOGY_STARTER);
+            const [result, setResult] = useState(null);
+            const p = PHASES[1];
+            return (
+                <div className="fade-in">
+                    <h2 style={{fontSize:'1.5rem',fontWeight:700,color:'#1e293b',marginBottom:'0.5rem'}}>{p.icon} Phase 2: {p.title}</h2>
+                    <p style={{color:'#64748b',marginBottom:'2rem'}}>Create a formal ontology using RDFS and OWL.</p>
+                    
+                    <div className="card">
+                        <div className="card-header">🎯 Learning Objectives</div>
+                        <div className="card-body">
+                            <ul style={{marginLeft:'1.5rem',color:'#475569'}}>{p.objectives.map((o,i) => <li key={i} style={{marginBottom:'0.5rem'}}>{o}</li>)}</ul>
+                        </div>
+                    </div>
+
+                    <div className="task-box">
+                        <h4>✏️ Complete the Ontology</h4>
+                        <ol>
+                            <li>Add <code className="inline-code">:Director</code> and <code className="inline-code">:Actor</code> as subclasses of <code className="inline-code">:Person</code></li>
+                            <li>Add <code className="inline-code">:Genre</code> class</li>
+                            <li>Define <code className="inline-code">:directedBy</code>, <code className="inline-code">:starring</code>, <code className="inline-code">:hasGenre</code> properties</li>
+                            <li>Add domain/range constraints</li>
+                            <li>Make <code className="inline-code">:directedBy</code> functional with inverse</li>
+                        </ol>
+                    </div>
+
+                    <div className="card">
+                        <div className="card-header" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                            <span>📝 Ontology Editor</span>
+                            <div style={{display:'flex',gap:'0.5rem'}}>
+                                <button onClick={() => setCode(ONTOLOGY_STARTER)} className="btn btn-secondary" style={{padding:'0.25rem 0.75rem',fontSize:'0.75rem'}}>Reset</button>
+                                <button onClick={() => setCode(ONTOLOGY_SOLUTION)} className="btn btn-secondary" style={{padding:'0.25rem 0.75rem',fontSize:'0.75rem'}}>Show Solution</button>
+                            </div>
+                        </div>
+                        <div className="card-body" style={{padding:0}}>
+                            <div className="code-editor" style={{borderRadius:0}}>
+                                <div className="code-header">
+                                    <div className="code-dots"><span className="code-dot red"></span><span className="code-dot yellow"></span><span className="code-dot green"></span></div>
+                                    <span className="code-lang">Turtle</span>
+                                </div>
+                                <textarea value={code} onChange={e => setCode(e.target.value)} style={{minHeight:'350px'}} spellCheck={false}/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="btn-group">
+                        <button onClick={() => setResult(validateOntology(code))} className="btn btn-primary">✓ Validate Ontology</button>
+                    </div>
+
+                    {result && (
+                        <div className={`result-box ${result.score === 100 ? 'success' : ''}`}>
+                            <div style={{display:'flex',justifyContent:'space-between',marginBottom:'1rem'}}>
+                                <strong style={{color: result.score === 100 ? '#059669' : '#b45309'}}>{result.score === 100 ? '🎉 Perfect!' : '📝 Progress'}</strong>
+                                <span style={{fontWeight:600}}>Score: {result.score}%</span>
+                            </div>
+                            <ul className="validation-list">
+                                {result.results.map((r,i) => <li key={i} className={r.passed ? 'pass' : 'fail'}>{r.passed ? '✓' : '✗'} {r.name}</li>)}
+                            </ul>
+                        </div>
+                    )}
+
+                    <div className="step-nav"><div></div><button onClick={onDone} className="btn btn-success">Complete Phase 2 →</button></div>
+                </div>
+            );
+        }
+
+        function Phase3({ onDone }) {
+            const [tab, setTab] = useState('basic');
+            const [running, setRunning] = useState(false);
+            const [result, setResult] = useState(null);
+            const p = PHASES[2];
+            
+            const runQuery = () => {
+                setRunning(true);
+                setTimeout(() => {
+                    setResult({
+                        data: [
+                            { movie: 'dbr:Inception', title: 'Inception', year: 2010 },
+                            { movie: 'dbr:Interstellar', title: 'Interstellar', year: 2014 },
+                            { movie: 'dbr:The_Dark_Knight', title: 'The Dark Knight', year: 2008 },
+                            { movie: 'dbr:Tenet', title: 'Tenet', year: 2020 }
+                        ]
+                    });
+                    setRunning(false);
+                }, 1000);
+            };
+
+            return (
+                <div className="fade-in">
+                    <h2 style={{fontSize:'1.5rem',fontWeight:700,color:'#1e293b',marginBottom:'0.5rem'}}>{p.icon} Phase 3: {p.title}</h2>
+                    <p style={{color:'#64748b',marginBottom:'2rem'}}>Query real Linked Data from DBpedia.</p>
+
+                    <div className="info-box info">
+                        <h4>🌐 About DBpedia</h4>
+                        <p>DBpedia extracts structured data from Wikipedia. It contains millions of entities including movies, people, and places.</p>
+                        <div className="resource-links" style={{marginTop:'1rem',marginBottom:0}}>
+                            <a href="https://dbpedia.org/sparql" target="_blank" className="resource-link">🔗 DBpedia SPARQL Endpoint</a>
+                            <a href="https://dbpedia.org/ontology/" target="_blank" className="resource-link">📖 DBpedia Ontology</a>
+                        </div>
+                    </div>
+
+                    <div className="card">
+                        <div className="card-header">📝 SPARQL Queries</div>
+                        <div className="card-body">
+                            <div className="tab-buttons">
+                                <button onClick={() => setTab('basic')} className={`tab-btn ${tab === 'basic' ? 'active' : ''}`}>Basic Query</button>
+                                <button onClick={() => setTab('detailed')} className={`tab-btn ${tab === 'detailed' ? 'active' : ''}`}>Detailed Info</button>
+                                <button onClick={() => setTab('actors')} className={`tab-btn ${tab === 'actors' ? 'active' : ''}`}>Actor Stats</button>
+                            </div>
+                            <div className="code-editor">
+                                <div className="code-header">
+                                    <div className="code-dots"><span className="code-dot red"></span><span className="code-dot yellow"></span><span className="code-dot green"></span></div>
+                                    <span className="code-lang">SPARQL</span>
+                                </div>
+                                <pre>{DBPEDIA_QUERIES[tab]}</pre>
+                            </div>
+                            <div className="btn-group" style={{marginTop:'1rem'}}>
+                                <button onClick={runQuery} className="btn btn-primary" disabled={running}>{running ? '⏳ Running...' : '▶ Run (Simulated)'}</button>
+                                <a href={`https://dbpedia.org/sparql?query=${encodeURIComponent(DBPEDIA_QUERIES[tab])}`} target="_blank" className="btn btn-outline">Open in DBpedia ↗</a>
+                            </div>
+                            {result && (
+                                <div className="result-box success" style={{marginTop:'1rem'}}>
+                                    <strong style={{color:'#059669'}}>✓ Query Results (simulated)</strong>
+                                    <table className="data-table" style={{marginTop:'1rem'}}>
+                                        <thead><tr><th>Movie URI</th><th>Title</th><th>Year</th></tr></thead>
+                                        <tbody>{result.data.map((r,i) => <tr key={i}><td>{r.movie}</td><td>{r.title}</td><td>{r.year}</td></tr>)}</tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="task-box">
+                        <h4>✏️ Exercise</h4>
+                        <ol>
+                            <li>Find all movies released in 2023</li>
+                            <li>Get top 10 highest-budget films</li>
+                            <li>Find movies sharing actors with "Inception"</li>
+                        </ol>
+                    </div>
+
+                    <div className="step-nav"><div></div><button onClick={onDone} className="btn btn-success">Complete Phase 3 →</button></div>
+                </div>
+            );
+        }
+
+        function Phase4({ onDone }) {
+            const [code, setCode] = useState(SAMPLE_DATA);
+            const [result, setResult] = useState(null);
+            const p = PHASES[3];
+            const parse = () => { try { setResult({ ok: true, ...parseTriples(code) }); } catch(e) { setResult({ ok: false, error: e.message }); }};
+            return (
+                <div className="fade-in">
+                    <h2 style={{fontSize:'1.5rem',fontWeight:700,color:'#1e293b',marginBottom:'0.5rem'}}>{p.icon} Phase 4: {p.title}</h2>
+                    <p style={{color:'#64748b',marginBottom:'2rem'}}>Create instance data and link to external sources.</p>
+
+                    <div className="info-box info">
+                        <h4>🔗 Linking to External Data</h4>
+                        <p>Use <code className="inline-code">owl:sameAs</code> to link entities to DBpedia and Wikidata for seamless data integration.</p>
+                    </div>
+
+                    <div className="card">
+                        <div className="card-header" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                            <span>📊 Movie Dataset</span>
+                            <button onClick={() => setCode(SAMPLE_DATA)} className="btn btn-secondary" style={{padding:'0.25rem 0.75rem',fontSize:'0.75rem'}}>Reset</button>
+                        </div>
+                        <div className="card-body" style={{padding:0}}>
+                            <div className="code-editor" style={{borderRadius:0}}>
+                                <div className="code-header">
+                                    <div className="code-dots"><span className="code-dot red"></span><span className="code-dot yellow"></span><span className="code-dot green"></span></div>
+                                    <span className="code-lang">Turtle</span>
+                                </div>
+                                <textarea value={code} onChange={e => setCode(e.target.value)} style={{minHeight:'350px'}} spellCheck={false}/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="btn-group"><button onClick={parse} className="btn btn-primary">✓ Parse & Validate</button></div>
+
+                    {result && (
+                        <div className={`result-box ${result.ok ? 'success' : 'error'}`}>
+                            {result.ok ? (
+                                <>
+                                    <strong style={{color:'#059669'}}>✓ Parsed {result.triples.length} triples successfully!</strong>
+                                    <div style={{marginTop:'1rem',maxHeight:'150px',overflow:'auto'}}>
+                                        {result.triples.slice(0,10).map((t,i) => (
+                                            <div key={i} style={{fontSize:'0.75rem',fontFamily:'JetBrains Mono, monospace',marginBottom:'0.5rem',padding:'0.5rem',background:'#f8fafc',borderRadius:'0.25rem'}}>
+                                                <span style={{color:'#2563eb'}}>{t.subject}</span>
+                                                <span style={{color:'#64748b'}}> → </span>
+                                                <span style={{color:'#be185d'}}>{t.predicate}</span>
+                                                <span style={{color:'#64748b'}}> → </span>
+                                                <span style={{color:'#059669'}}>{t.object}</span>
+                                            </div>
+                                        ))}
+                                        {result.triples.length > 10 && <div style={{color:'#64748b',fontSize:'0.875rem'}}>...and {result.triples.length - 10} more triples</div>}
+                                    </div>
+                                </>
+                            ) : <span style={{color:'#dc2626'}}>Error: {result.error}</span>}
+                        </div>
+                    )}
+
+                    <div className="task-box">
+                        <h4>✏️ Extend the Dataset</h4>
+                        <ol>
+                            <li>Add 2 more movies with all properties</li>
+                            <li>Add a new actor who appears in multiple films</li>
+                            <li>Add <code className="inline-code">owl:sameAs</code> links to DBpedia</li>
+                        </ol>
+                    </div>
+
+                    <div className="step-nav"><div></div><button onClick={onDone} className="btn btn-success">Complete Phase 4 →</button></div>
+                </div>
+            );
+        }
+
+        function Phase5({ onDone }) {
+            const p = PHASES[4];
+            return (
+                <div className="fade-in">
+                    <h2 style={{fontSize:'1.5rem',fontWeight:700,color:'#1e293b',marginBottom:'0.5rem'}}>{p.icon} Phase 5: {p.title}</h2>
+                    <p style={{color:'#64748b',marginBottom:'2rem'}}>Understand how reasoners derive new knowledge.</p>
+
+                    <div className="card">
+                        <div className="card-header">🧠 RDFS Inference Rules</div>
+                        <div className="card-body">
+                            <div className="concept-grid">
+                                <div className="concept-card">
+                                    <h5>Subclass Transitivity</h5>
+                                    <p style={{marginBottom:'0.5rem'}}>If A ⊆ B and B ⊆ C, then A ⊆ C</p>
+                                    <div className="code-editor"><pre style={{fontSize:'0.7rem',padding:'0.75rem'}}>{`:Director rdfs:subClassOf :Person .
+:nolan a :Director .
+# → :nolan a :Person`}</pre></div>
+                                </div>
+                                <div className="concept-card">
+                                    <h5>Domain Inference</h5>
+                                    <p style={{marginBottom:'0.5rem'}}>If P has domain C, x P y → x ∈ C</p>
+                                    <div className="code-editor"><pre style={{fontSize:'0.7rem',padding:'0.75rem'}}>{`:directedBy rdfs:domain :Movie .
+:inception :directedBy :nolan .
+# → :inception a :Movie`}</pre></div>
+                                </div>
+                                <div className="concept-card">
+                                    <h5>Range Inference</h5>
+                                    <p style={{marginBottom:'0.5rem'}}>If P has range C, x P y → y ∈ C</p>
+                                    <div className="code-editor"><pre style={{fontSize:'0.7rem',padding:'0.75rem'}}>{`:directedBy rdfs:range :Director .
+:inception :directedBy :nolan .
+# → :nolan a :Director`}</pre></div>
+                                </div>
+                                <div className="concept-card">
+                                    <h5>Inverse Properties</h5>
+                                    <p style={{marginBottom:'0.5rem'}}>If P inverseOf Q, x P y → y Q x</p>
+                                    <div className="code-editor"><pre style={{fontSize:'0.7rem',padding:'0.75rem'}}>{`:directedBy owl:inverseOf :directed .
+:inception :directedBy :nolan .
+# → :nolan :directed :inception`}</pre></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="info-box warning">
+                        <h4>⚠️ Open World Assumption</h4>
+                        <p>In Semantic Web, missing data is <strong>unknown</strong>, not false. This differs from traditional databases!</p>
+                        <ul style={{marginLeft:'1.5rem',marginTop:'0.5rem'}}>
+                            <li>Missing information ≠ Non-existence</li>
+                            <li>Use <code className="inline-code">owl:complementOf</code> for explicit negation</li>
+                            <li>Use SPARQL <code className="inline-code">NOT EXISTS</code> for closed-world queries</li>
+                        </ul>
+                    </div>
+
+                    <div className="card">
+                        <div className="card-header">🔍 Inference Examples</div>
+                        <div className="card-body">
+                            <table className="data-table">
+                                <thead><tr><th>Asserted Fact</th><th>Rule Applied</th><th>Inferred Fact</th></tr></thead>
+                                <tbody>
+                                    <tr><td><code className="inline-code">:nolan a :Director</code></td><td>rdfs:subClassOf</td><td><code className="inline-code">:nolan a :Person</code></td></tr>
+                                    <tr><td><code className="inline-code">:inception :directedBy :nolan</code></td><td>owl:inverseOf</td><td><code className="inline-code">:nolan :directed :inception</code></td></tr>
+                                    <tr><td><code className="inline-code">:inception :starring :dicaprio</code></td><td>rdfs:range</td><td><code className="inline-code">:dicaprio a :Actor</code></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="task-box">
+                        <h4>✏️ Reasoning Practice</h4>
+                        <ol>
+                            <li>What's inferred if <code className="inline-code">:Studio rdfs:subClassOf :Organization</code>?</li>
+                            <li>If <code className="inline-code">:hasSequel</code> is transitive, and A hasSequel B, B hasSequel C, what's inferred?</li>
+                            <li>How would you detect someone who is both a Director and Actor?</li>
+                        </ol>
+                    </div>
+
+                    <div className="step-nav"><div></div><button onClick={onDone} className="btn btn-success">Complete Phase 5 →</button></div>
+                </div>
+            );
+        }
+
+        function Phase6({ onDone }) {
+            const [tab, setTab] = useState('byDirector');
+            const p = PHASES[5];
+            return (
+                <div className="fade-in">
+                    <h2 style={{fontSize:'1.5rem',fontWeight:700,color:'#1e293b',marginBottom:'0.5rem'}}>{p.icon} Phase 6: {p.title}</h2>
+                    <p style={{color:'#64748b',marginBottom:'2rem'}}>Write advanced analytical SPARQL queries.</p>
+
+                    <div className="card">
+                        <div className="card-header">📊 Analytics Queries</div>
+                        <div className="card-body">
+                            <div className="tab-buttons">
+                                <button onClick={() => setTab('byDirector')} className={`tab-btn ${tab === 'byDirector' ? 'active' : ''}`}>By Director</button>
+                                <button onClick={() => setTab('byGenre')} className={`tab-btn ${tab === 'byGenre' ? 'active' : ''}`}>By Genre</button>
+                            </div>
+                            <div className="code-editor">
+                                <div className="code-header">
+                                    <div className="code-dots"><span className="code-dot red"></span><span className="code-dot yellow"></span><span className="code-dot green"></span></div>
+                                    <span className="code-lang">SPARQL</span>
+                                </div>
+                                <pre>{ANALYTICS[tab]}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="info-box info">
+                        <h4>📈 SPARQL Analytics Features</h4>
+                        <div className="concept-grid" style={{marginTop:'1rem',marginBottom:0}}>
+                            <div className="concept-card"><h5>Aggregates</h5><p>COUNT, SUM, AVG, MIN, MAX, GROUP_CONCAT</p></div>
+                            <div className="concept-card"><h5>Grouping</h5><p>GROUP BY, HAVING for filtering groups</p></div>
+                            <div className="concept-card"><h5>Subqueries</h5><p>Nested SELECT statements for complex logic</p></div>
+                            <div className="concept-card"><h5>Path Queries</h5><p>Property paths: *, +, ?, |, / operators</p></div>
+                        </div>
+                    </div>
+
+                    <div className="task-box">
+                        <h4>✏️ Write Queries</h4>
+                        <ol>
+                            <li>Find the director with the highest average movie rating</li>
+                            <li>List actors who have worked with multiple directors</li>
+                            <li>Calculate total budget per genre per year</li>
+                        </ol>
+                    </div>
+
+                    <div className="step-nav"><div></div><button onClick={onDone} className="btn btn-success">Complete Phase 6 →</button></div>
+                </div>
+            );
+        }
+
+        function Phase7({ onDone }) {
+            const ref = useRef();
+            const [graph, setGraph] = useState(null);
+            const p = PHASES[6];
+
+            const generate = () => {
+                setGraph({
+                    nodes: [
+                        { id: 'inception', label: 'Inception', type: 'movie' },
+                        { id: 'interstellar', label: 'Interstellar', type: 'movie' },
+                        { id: 'dune', label: 'Dune', type: 'movie' },
+                        { id: 'nolan', label: 'Nolan', type: 'director' },
+                        { id: 'villeneuve', label: 'Villeneuve', type: 'director' },
+                        { id: 'dicaprio', label: 'DiCaprio', type: 'actor' },
+                        { id: 'scifi', label: 'Sci-Fi', type: 'genre' }
+                    ],
+                    links: [
+                        { source: 'inception', target: 'nolan' },
+                        { source: 'interstellar', target: 'nolan' },
+                        { source: 'dune', target: 'villeneuve' },
+                        { source: 'inception', target: 'dicaprio' },
+                        { source: 'inception', target: 'scifi' },
+                        { source: 'interstellar', target: 'scifi' },
+                        { source: 'dune', target: 'scifi' }
+                    ]
+                });
+            };
+
+            useEffect(() => {
+                if (!graph || !ref.current) return;
+                const svg = d3.select(ref.current); svg.selectAll('*').remove();
+                const w = ref.current.clientWidth, h = ref.current.clientHeight;
+                const g = svg.append('g');
+                svg.call(d3.zoom().on('zoom', e => g.attr('transform', e.transform)));
+                const colors = { movie: '#3b82f6', director: '#10b981', actor: '#f59e0b', genre: '#a855f7' };
+                const sim = d3.forceSimulation(graph.nodes)
+                    .force('link', d3.forceLink(graph.links).id(d => d.id).distance(100))
+                    .force('charge', d3.forceManyBody().strength(-400))
+                    .force('center', d3.forceCenter(w/2, h/2));
+                const link = g.append('g').selectAll('line').data(graph.links).join('line').attr('stroke','#cbd5e1').attr('stroke-width',2);
+                const node = g.append('g').selectAll('g').data(graph.nodes).join('g').style('cursor','pointer')
+                    .call(d3.drag().on('start',(e,d)=>{if(!e.active)sim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y;})
+                    .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y;}).on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}));
+                node.append('circle').attr('r',22).attr('fill',d=>colors[d.type]).attr('stroke','white').attr('stroke-width',3);
+                node.append('text').attr('dy',40).attr('text-anchor','middle').attr('font-size',11).attr('font-weight',500).attr('fill','#475569').text(d=>d.label);
+                sim.on('tick',()=>{link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);node.attr('transform',d=>`translate(${d.x},${d.y})`);});
+                return () => sim.stop();
+            }, [graph]);
+
+            return (
+                <div className="fade-in">
+                    <h2 style={{fontSize:'1.5rem',fontWeight:700,color:'#1e293b',marginBottom:'0.5rem'}}>{p.icon} Phase 7: {p.title}</h2>
+                    <p style={{color:'#64748b',marginBottom:'2rem'}}>Build an interactive knowledge graph visualization.</p>
+
+                    <div className="card">
+                        <div className="card-header" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                            <span>🌐 Knowledge Graph Visualization</span>
+                            <button onClick={generate} className="btn btn-primary" style={{padding:'0.375rem 1rem',fontSize:'0.875rem'}}>Generate Graph</button>
+                        </div>
+                        <div className="card-body">
+                            <svg ref={ref} className="graph-container"></svg>
+                            <div className="graph-legend">
+                                <div className="legend-item"><span className="legend-dot" style={{background:'#3b82f6'}}></span>Movie</div>
+                                <div className="legend-item"><span className="legend-dot" style={{background:'#10b981'}}></span>Director</div>
+                                <div className="legend-item"><span className="legend-dot" style={{background:'#f59e0b'}}></span>Actor</div>
+                                <div className="legend-item"><span className="legend-dot" style={{background:'#a855f7'}}></span>Genre</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="info-box success">
+                        <h4>🎉 Congratulations!</h4>
+                        <p>You've completed the hands-on project! You now have practical experience with:</p>
+                        <ul style={{marginLeft:'1.5rem',marginTop:'0.5rem'}}>
+                            <li>Designing ontologies with RDFS and OWL</li>
+                            <li>Querying real Linked Data from DBpedia</li>
+                            <li>Creating and validating RDF datasets</li>
+                            <li>Understanding semantic reasoning and inference</li>
+                            <li>Writing analytical SPARQL queries</li>
+                            <li>Visualizing knowledge graphs</li>
+                        </ul>
+                    </div>
+
+                    <div className="card">
+                        <div className="card-header">🚀 Next Steps & Resources</div>
+                        <div className="card-body">
+                            <div className="resource-links">
+                                <a href="https://protege.stanford.edu/" target="_blank" className="resource-link">🦉 Protégé (OWL Editor)</a>
+                                <a href="https://jena.apache.org/" target="_blank" className="resource-link">⚙️ Apache Jena (Java)</a>
+                                <a href="https://rdflib.readthedocs.io/" target="_blank" className="resource-link">🐍 RDFLib (Python)</a>
+                                <a href="https://graphdb.ontotext.com/" target="_blank" className="resource-link">🗄️ GraphDB</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="step-nav"><div></div><button onClick={onDone} className="btn btn-success">✓ Complete Project</button></div>
+                </div>
+            );
+        }
+
+        function App() {
+            const [phase, setPhase] = useState(1);
+            const [done, setDone] = useState([]);
+            const complete = id => { if (!done.includes(id)) setDone([...done, id]); if (id < PHASES.length) setPhase(id + 1); };
+            const render = () => {
+                switch(phase) {
+                    case 1: return <Phase1 onDone={() => complete(1)} />;
+                    case 2: return <Phase2 onDone={() => complete(2)} />;
+                    case 3: return <Phase3 onDone={() => complete(3)} />;
+                    case 4: return <Phase4 onDone={() => complete(4)} />;
+                    case 5: return <Phase5 onDone={() => complete(5)} />;
+                    case 6: return <Phase6 onDone={() => complete(6)} />;
+                    case 7: return <Phase7 onDone={() => complete(7)} />;
+                    default: return null;
+                }
+            };
+            return (
+                <div>
+                    <Header />
+                    <Hero />
+                    <div className="main-layout">
+                        <Sidebar phase={phase} setPhase={setPhase} done={done} />
+                        <main className="content"><div className="content-inner">{render()}</div></main>
+                    </div>
+                </div>
+            );
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>

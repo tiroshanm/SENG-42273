@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semantic Web Learning Lab</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #f8fafc; 
+            color: #334155; 
+            min-height: 100vh; 
+        }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+        textarea { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Navigation */
+        .nav { background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 50; }
+        .nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1rem; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+        .nav-logo { display: flex; align-items: center; gap: 0.75rem; }
+        .nav-logo-icon { font-size: 1.5rem; }
+        .nav-logo-title { font-weight: 700; color: #1e293b; }
+        .nav-logo-subtitle { font-size: 0.75rem; color: #64748b; }
+        .nav-tabs { display: flex; align-items: center; gap: 0.5rem; }
+        .nav-tab { padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #475569; transition: all 0.15s; }
+        .nav-tab:hover { background: #f1f5f9; }
+        .nav-tab.active { background: #dbeafe; color: #1d4ed8; }
+        .progress-text { font-size: 0.875rem; color: #475569; }
+        .progress-value { font-weight: 700; color: #059669; }
+
+        /* Layout */
+        .main-layout { display: flex; }
+        .sidebar { width: 256px; background: white; border-right: 1px solid #e2e8f0; min-height: calc(100vh - 64px); padding: 1rem; }
+        .main-content { flex: 1; overflow: auto; }
+        .content-area { max-width: 896px; margin: 0 auto; padding: 2rem; }
+        .full-height { height: calc(100vh - 64px); }
+
+        /* Sidebar */
+        .sidebar-header { margin-bottom: 1.5rem; }
+        .sidebar-title { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .sidebar-title-icon { font-size: 1.5rem; }
+        .sidebar-title-text { font-weight: 700; color: #1e293b; }
+        .sidebar-desc { font-size: 0.875rem; color: #64748b; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 0.5rem; }
+        .sidebar-btn { width: 100%; text-align: left; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #475569; transition: all 0.15s; }
+        .sidebar-btn:hover { background: #f8fafc; }
+        .sidebar-btn.active { background: #eff6ff; color: #1d4ed8; }
+        .sidebar-lessons { margin-top: 2rem; }
+        .sidebar-lessons-title { font-size: 0.75rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.75rem; }
+        .lesson-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #475569; }
+        .lesson-item.completed { color: #047857; }
+        .lesson-check { color: #10b981; }
+        .lesson-num { color: #cbd5e1; }
+
+        /* Cards and Buttons */
+        .card { background: white; border-radius: 0.75rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; transition: all 0.15s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-ghost { color: #475569; }
+        .btn-ghost:hover { color: #1e293b; }
+        .btn-secondary { background: #f1f5f9; color: #475569; }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Code Editor */
+        .code-editor { background: #1e293b; border-radius: 0.5rem; overflow: hidden; }
+        .code-editor-header { background: #334155; padding: 0.5rem 1rem; font-size: 0.75rem; color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; }
+        .code-dots { display: flex; gap: 0.5rem; }
+        .code-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .code-dot.red { background: #ef4444; }
+        .code-dot.yellow { background: #eab308; }
+        .code-dot.green { background: #22c55e; }
+        .code-editor textarea { width: 100%; padding: 1rem; background: transparent; color: #e2e8f0; border: none; resize: none; font-size: 0.875rem; line-height: 1.6; }
+        .code-editor textarea:focus { outline: none; }
+        .copy-btn { color: #94a3b8; cursor: pointer; font-size: 0.75rem; }
+        .copy-btn:hover { color: white; }
+
+        /* Code Block */
+        .code-block { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; white-space: pre-wrap; }
+        .inline-code { background: #f1f5f9; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; }
+
+        /* Syntax Colors */
+        .syntax-prefix { color: #c678dd; }
+        .syntax-uri { color: #61afef; }
+        .syntax-literal { color: #98c379; }
+        .syntax-keyword { color: #e06c75; }
+
+        /* Quiz */
+        .quiz-option { width: 100%; text-align: left; padding: 1rem; border-radius: 0.5rem; border: 2px solid #e2e8f0; color: #475569; transition: all 0.15s; background: white; margin-bottom: 0.75rem; }
+        .quiz-option:hover:not(.correct):not(.incorrect):not(:disabled) { background: #eff6ff; border-color: #3b82f6; }
+        .quiz-option.selected { background: #eff6ff; border-color: #3b82f6; color: #1d4ed8; }
+        .quiz-option.correct { background: #ecfdf5; border-color: #10b981; color: #047857; }
+        .quiz-option.incorrect { background: #fef2f2; border-color: #ef4444; color: #b91c1c; }
+
+        /* Alerts */
+        .alert { padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; }
+        .alert-success { background: #ecfdf5; color: #047857; }
+        .alert-warning { background: #fffbeb; color: #b45309; }
+        .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+
+        /* Progress Bar */
+        .progress-bar { width: 100%; height: 1rem; background: #f1f5f9; border-radius: 9999px; overflow: hidden; margin: 1rem 0; }
+        .progress-fill { height: 100%; border-radius: 9999px; transition: width 0.5s; }
+        .progress-fill.success { background: #10b981; }
+        .progress-fill.warning { background: #f59e0b; }
+        .progress-fill.danger { background: #ef4444; }
+
+        /* Table */
+        .data-table { width: 100%; font-size: 0.875rem; border-collapse: collapse; }
+        .data-table th { text-align: left; padding: 0.5rem; font-weight: 500; color: #475569; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+        .data-table td { padding: 0.5rem; border-bottom: 1px solid #f1f5f9; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+
+        /* Triple Display */
+        .triple-row { background: #f8fafc; border-radius: 0.5rem; padding: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; margin-bottom: 0.5rem; }
+        .triple-arrow { color: #94a3b8; margin: 0 0.5rem; }
+
+        /* Empty State */
+        .empty-state { height: 100%; display: flex; align-items: center; justify-content: center; color: #94a3b8; text-align: center; padding: 2rem; }
+        .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+        /* Graph */
+        .graph-container { width: 100%; height: 100%; }
+        .graph-legend { display: flex; gap: 1.5rem; font-size: 0.875rem; color: #475569; margin-top: 1rem; padding: 0.5rem 0; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+        .legend-dot { width: 1rem; height: 1rem; border-radius: 50%; }
+        .legend-dot.resource { background: #3b82f6; }
+        .legend-dot.literal { background: #fbbf24; }
+
+        /* Grid layouts */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .flex-col { display: flex; flex-direction: column; }
+        .flex-row { display: flex; flex-direction: row; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .flex-1 { flex: 1; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .mt-8 { margin-top: 2rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-8 { padding: 2rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-4xl { font-size: 2.25rem; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .text-center { text-align: center; }
+        .text-slate-500 { color: #64748b; }
+        .text-slate-600 { color: #475569; }
+        .text-slate-700 { color: #334155; }
+        .text-slate-800 { color: #1e293b; }
+        .text-blue-600 { color: #2563eb; }
+        .text-emerald-700 { color: #047857; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .overflow-auto { overflow: auto; }
+        .overflow-hidden { overflow: hidden; }
+
+        /* Animation */
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // ==================== DATA ====================
+        
+        const MODULES = {
+            RDF: {
+                id: 'rdf',
+                title: 'RDF Fundamentals',
+                icon: '🔷',
+                description: 'Resource Description Framework - The foundation of Semantic Web',
+                lessons: [
+                    {
+                        id: 'rdf-basics',
+                        title: 'RDF Basics: Triples',
+                        content: `# RDF: Resource Description Framework
+
+RDF is the fundamental data model of the Semantic Web. It represents information as **triples** - statements consisting of three parts:
+
+## The Triple Structure
+
+\`\`\`
+Subject → Predicate → Object
+\`\`\`
+
+- **Subject**: The resource being described (URI or blank node)
+- **Predicate**: The property or relationship (always a URI)
+- **Object**: The value (URI, blank node, or literal)
+
+## Example
+
+\`\`\`turtle
+@prefix ex: <http://example.org/> .
+
+ex:JohnDoe ex:hasName "John Doe" .
+ex:JohnDoe ex:worksAt ex:AcmeCorp .
+ex:JohnDoe ex:age 30 .
+\`\`\`
+
+This creates three statements about John Doe:
+1. His name is "John Doe" (literal)
+2. He works at Acme Corp (resource)
+3. His age is 30 (typed literal)`,
+                        example: `@prefix ex: <http://example.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+# Describing a person
+ex:alice a foaf:Person ;
+    foaf:name "Alice Smith" ;
+    foaf:age 28 ;
+    foaf:knows ex:bob .
+
+ex:bob a foaf:Person ;
+    foaf:name "Bob Johnson" ;
+    foaf:mbox <mailto:bob@example.org> .`
+                    },
+                    {
+                        id: 'rdf-serialization',
+                        title: 'RDF Serialization Formats',
+                        content: `# RDF Serialization Formats
+
+RDF data can be serialized in multiple formats:
+
+## Turtle (Terse RDF Triple Language)
+Human-readable, compact syntax using prefixes.
+
+## N-Triples
+Simple line-based format, one triple per line.
+
+## RDF/XML
+XML-based format, verbose but widely supported.
+
+## JSON-LD
+JSON-based format, good for web applications.
+
+## Key Turtle Syntax
+
+- **@prefix**: Define namespace shortcuts
+- **;** (semicolon): Same subject, new predicate-object
+- **,** (comma): Same subject and predicate, new object
+- **.** (period): End of statement
+- **a**: Shorthand for rdf:type`,
+                        example: `@prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:Course a rdfs:Class ;
+    rdfs:label "University Course" ;
+    rdfs:comment "A course offered at a university" .
+
+ex:SemanticWeb a ex:Course ;
+    rdfs:label "Semantic Web Technologies" ;
+    ex:credits 3 ;
+    ex:instructor ex:DrSmith .`
+                    }
+                ]
+            },
+            RDFS: {
+                id: 'rdfs',
+                title: 'RDFS Schema',
+                icon: '🔶',
+                description: 'RDF Schema - Adding semantics and structure',
+                lessons: [
+                    {
+                        id: 'rdfs-classes',
+                        title: 'Classes and Properties',
+                        content: `# RDFS: RDF Schema
+
+RDFS extends RDF with vocabulary for describing schemas:
+
+## Core Concepts
+
+### Classes (rdfs:Class)
+Define categories of resources.
+
+### Properties (rdf:Property)
+Define relationships between resources.
+
+### Key RDFS Properties
+
+- **rdfs:subClassOf**: Class hierarchy
+- **rdfs:subPropertyOf**: Property hierarchy
+- **rdfs:domain**: Subject type restriction
+- **rdfs:range**: Object type restriction
+- **rdfs:label**: Human-readable name
+- **rdfs:comment**: Description`,
+                        example: `@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://example.org/> .
+
+# Define classes
+ex:Person a rdfs:Class ;
+    rdfs:label "Person" .
+
+ex:Student a rdfs:Class ;
+    rdfs:subClassOf ex:Person .
+
+# Define properties
+ex:teaches a rdf:Property ;
+    rdfs:domain ex:Professor ;
+    rdfs:range ex:Course .`
+                    },
+                    {
+                        id: 'rdfs-inference',
+                        title: 'RDFS Inference Rules',
+                        content: `# RDFS Inference
+
+RDFS enables reasoning through entailment rules:
+
+## Key Inference Rules
+
+### 1. Subclass Transitivity
+If A subClassOf B and B subClassOf C, then A subClassOf C.
+
+### 2. Type Propagation
+If x is type A and A subClassOf B, then x is type B.
+
+### 3. Domain Inference
+If P has domain C and x P y, then x is type C.
+
+### 4. Range Inference
+If P has range C and x P y, then y is type C.`,
+                        example: `@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://example.org/> .
+
+# Class hierarchy
+ex:Animal rdfs:subClassOf ex:LivingThing .
+ex:Dog rdfs:subClassOf ex:Animal .
+
+# Instance
+ex:buddy a ex:Dog .
+
+# Inferred: ex:buddy is also Animal and LivingThing`
+                    }
+                ]
+            },
+            OWL: {
+                id: 'owl',
+                title: 'OWL Ontology',
+                icon: '🦉',
+                description: 'Web Ontology Language - Rich semantic expressivity',
+                lessons: [
+                    {
+                        id: 'owl-basics',
+                        title: 'OWL Fundamentals',
+                        content: `# OWL: Web Ontology Language
+
+OWL extends RDFS with more expressive constructs:
+
+## Property Characteristics
+
+- **owl:FunctionalProperty**: At most one value
+- **owl:TransitiveProperty**: a→b→c implies a→c
+- **owl:SymmetricProperty**: a→b implies b→a
+- **owl:inverseOf**: Reverse relationship
+
+## Class Expressions
+
+- **owl:intersectionOf**: AND of classes
+- **owl:unionOf**: OR of classes
+- **owl:complementOf**: NOT of a class`,
+                        example: `@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <http://example.org/> .
+
+ex:hasSpouse a owl:SymmetricProperty .
+
+ex:hasParent a owl:ObjectProperty ;
+    owl:inverseOf ex:hasChild .
+
+ex:hasFather a owl:FunctionalProperty ;
+    rdfs:subPropertyOf ex:hasParent .`
+                    },
+                    {
+                        id: 'owl-reasoning',
+                        title: 'OWL Reasoning',
+                        content: `# OWL Reasoning
+
+## Open World Assumption
+
+Unlike databases, OWL uses OWA:
+- Missing information ≠ False
+- Explicit negation required
+
+## Reasoning Tasks
+
+1. **Consistency Checking**: Is the ontology contradiction-free?
+2. **Classification**: Compute class hierarchy
+3. **Realization**: Find most specific classes for instances`,
+                        example: `@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <http://example.org/> .
+
+# Disjoint classes
+ex:Male a owl:Class .
+ex:Female a owl:Class .
+ex:Male owl:disjointWith ex:Female .
+
+# Instance
+ex:john a ex:Male ;
+    ex:hasChild ex:mary .
+
+# Reasoner infers: john is a Parent`
+                    }
+                ]
+            },
+            SPARQL: {
+                id: 'sparql',
+                title: 'SPARQL Queries',
+                icon: '🔍',
+                description: 'SPARQL Protocol and RDF Query Language',
+                lessons: [
+                    {
+                        id: 'sparql-basics',
+                        title: 'SPARQL Query Basics',
+                        content: `# SPARQL: Query Language for RDF
+
+## Query Forms
+
+- **SELECT**: Return variable bindings
+- **CONSTRUCT**: Create new RDF graph
+- **ASK**: Return boolean (yes/no)
+- **DESCRIBE**: Return resource description
+
+## Basic Structure
+
+\`\`\`sparql
+PREFIX ex: <http://example.org/>
+SELECT ?variable
+WHERE {
+    ?s ?p ?o .
+}
+\`\`\``,
+                        example: `PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?person ?name
+WHERE {
+    ?person a foaf:Person .
+    ?person foaf:name ?name .
+}
+ORDER BY ?name`
+                    },
+                    {
+                        id: 'sparql-advanced',
+                        title: 'Advanced SPARQL',
+                        content: `# Advanced SPARQL Features
+
+## OPTIONAL
+Include results even if pattern doesn't match.
+
+## FILTER
+Constrain results with conditions.
+
+## UNION
+Combine multiple patterns.
+
+## Aggregates
+COUNT, SUM, AVG, MIN, MAX with GROUP BY.`,
+                        example: `PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?name ?age ?email
+WHERE {
+    ?person a foaf:Person ;
+            foaf:name ?name ;
+            foaf:age ?age .
+    
+    OPTIONAL { ?person foaf:mbox ?email }
+    
+    FILTER(?age > 25)
+}
+ORDER BY DESC(?age)`
+                    }
+                ]
+            }
+        };
+
+        const QUIZ_DATA = {
+            rdf: [
+                {
+                    question: "What are the three components of an RDF triple?",
+                    options: ["Subject, Verb, Object", "Subject, Predicate, Object", "Entity, Relationship, Value", "Node, Edge, Node"],
+                    correct: 1,
+                    explanation: "RDF triples consist of Subject, Predicate, and Object."
+                },
+                {
+                    question: "Which can be an RDF subject?",
+                    options: ["Only URIs", "URIs or Blank Nodes", "URIs, Blank Nodes, or Literals", "Only Literals"],
+                    correct: 1,
+                    explanation: "Subjects can be URIs or blank nodes, not literals."
+                },
+                {
+                    question: "What does @prefix do in Turtle?",
+                    options: ["Declares a namespace shorthand", "Imports ontologies", "Defines base URI", "Creates a class"],
+                    correct: 0,
+                    explanation: "@prefix creates namespace shortcuts."
+                },
+                {
+                    question: "In Turtle, what does semicolon (;) mean?",
+                    options: ["End of statement", "Same subject, new predicate-object", "Same predicate, new object", "Comment"],
+                    correct: 1,
+                    explanation: "Semicolon continues with same subject but new predicate-object."
+                }
+            ],
+            rdfs: [
+                {
+                    question: "What does rdfs:subClassOf express?",
+                    options: ["Instance relationship", "Class hierarchy", "Property domain", "Equivalence"],
+                    correct: 1,
+                    explanation: "rdfs:subClassOf creates class hierarchy."
+                },
+                {
+                    question: "If ex:teaches has rdfs:domain ex:Professor, and ex:john ex:teaches ex:course1, what can we infer?",
+                    options: ["ex:course1 is a Professor", "ex:john is a Professor", "Nothing", "ex:john teaches something"],
+                    correct: 1,
+                    explanation: "Domain means subject must be of that type."
+                },
+                {
+                    question: "Difference between rdf:type and rdfs:subClassOf?",
+                    options: ["No difference", "type for instances, subClassOf for classes", "Opposite", "type is deprecated"],
+                    correct: 1,
+                    explanation: "rdf:type relates instance to class, subClassOf relates classes."
+                },
+                {
+                    question: "What does rdfs:range specify?",
+                    options: ["Type of subject", "Type of object", "Min cardinality", "Max cardinality"],
+                    correct: 1,
+                    explanation: "Range specifies expected type of object."
+                }
+            ],
+            owl: [
+                {
+                    question: "What does owl:FunctionalProperty mean?",
+                    options: ["Always has value", "At most one value", "Exactly one value", "Computed property"],
+                    correct: 1,
+                    explanation: "Functional properties have at most one value per subject."
+                },
+                {
+                    question: "If ex:hasSibling is owl:SymmetricProperty and john hasSibling mary, what's inferred?",
+                    options: ["Nothing", "mary hasSibling john", "john is male", "Same parents"],
+                    correct: 1,
+                    explanation: "Symmetric means reverse relationship also holds."
+                },
+                {
+                    question: "What is Open World Assumption?",
+                    options: ["All data public", "Missing = false", "Missing = unknown", "Classes extensible"],
+                    correct: 2,
+                    explanation: "OWA: missing information is unknown, not false."
+                },
+                {
+                    question: "What does owl:disjointWith express?",
+                    options: ["No common instances", "Equivalent", "Subset", "Unrelated"],
+                    correct: 0,
+                    explanation: "Disjoint classes share no instances."
+                }
+            ],
+            sparql: [
+                {
+                    question: "What does SELECT ?x return?",
+                    options: ["All triples with subject ?x", "Bindings for ?x", "Type of ?x", "Count"],
+                    correct: 1,
+                    explanation: "SELECT returns variable bindings."
+                },
+                {
+                    question: "Purpose of OPTIONAL?",
+                    options: ["Make query optional", "Include results even if no match", "Mark nullable", "Skip invalid"],
+                    correct: 1,
+                    explanation: "OPTIONAL includes results even without matches."
+                },
+                {
+                    question: "What does FILTER(?age > 18) do?",
+                    options: ["Orders by age", "Groups by age", "Excludes age ≤ 18", "Limits to 18"],
+                    correct: 2,
+                    explanation: "FILTER constrains results."
+                },
+                {
+                    question: "Which query form returns true/false?",
+                    options: ["SELECT", "CONSTRUCT", "ASK", "DESCRIBE"],
+                    correct: 2,
+                    explanation: "ASK returns boolean."
+                }
+            ]
+        };
+
+        const SAMPLE_DATA = `@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.org/> .
+
+ex:alice a foaf:Person ;
+    foaf:name "Alice Smith" ;
+    foaf:age 28 ;
+    foaf:knows ex:bob, ex:charlie .
+
+ex:bob a foaf:Person ;
+    foaf:name "Bob Johnson" ;
+    foaf:age 35 ;
+    foaf:knows ex:alice .
+
+ex:charlie a foaf:Person ;
+    foaf:name "Charlie Brown" ;
+    foaf:age 42 .`;
+
+        // ==================== UTILITIES ====================
+
+        function parseTriples(text) {
+            const triples = [];
+            const prefixes = {};
+            
+            const prefixRegex = /@prefix\s+(\w+):\s*<([^>]+)>\s*\./g;
+            let match;
+            while ((match = prefixRegex.exec(text)) !== null) {
+                prefixes[match[1]] = match[2];
+            }
+            
+            const lines = text.split('\n');
+            let currentSubject = null;
+            let currentPredicate = null;
+            
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('@')) continue;
+                
+                const parts = trimmed.match(/^(\S+)\s+(\S+)\s+(.+?)\s*[.;,]?\s*$/);
+                if (parts) {
+                    let [, s, p, o] = parts;
+                    if (s !== ';' && s !== ',') currentSubject = s;
+                    if (p && p !== ';') currentPredicate = p;
+                    if (currentSubject && currentPredicate && o) {
+                        o = o.replace(/[.;,]\s*$/, '').trim();
+                        const objects = o.split(/\s*,\s*/);
+                        for (const obj of objects) {
+                            if (obj.trim()) {
+                                triples.push({
+                                    subject: currentSubject,
+                                    predicate: currentPredicate,
+                                    object: obj.trim()
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return { triples, prefixes };
+        }
+
+        function executeSparql(query, triples) {
+            const selectMatch = query.match(/SELECT\s+(.+?)\s+WHERE/i);
+            if (!selectMatch) return { error: "Invalid query" };
+            
+            const variables = selectMatch[1].match(/\?\w+/g) || [];
+            const whereMatch = query.match(/WHERE\s*\{([^}]+)\}/i);
+            if (!whereMatch) return { error: "No WHERE clause" };
+            
+            const results = [];
+            const patterns = whereMatch[1].trim().split(/\s*\.\s*/).filter(p => p.trim());
+            
+            for (const pattern of patterns) {
+                if (!pattern.trim() || pattern.includes('OPTIONAL') || pattern.includes('FILTER')) continue;
+                
+                const parts = pattern.trim().split(/\s+/);
+                if (parts.length >= 3) {
+                    const [s, p, ...rest] = parts;
+                    const o = rest.join(' ');
+                    
+                    for (const triple of triples) {
+                        const binding = {};
+                        let matches = true;
+                        
+                        if (s.startsWith('?')) binding[s] = triple.subject;
+                        else if (s !== triple.subject) matches = false;
+                        
+                        if (p.startsWith('?')) binding[p] = triple.predicate;
+                        else if (p !== triple.predicate && !p.includes(triple.predicate.split(':')[1])) matches = false;
+                        
+                        if (o.startsWith('?')) binding[o] = triple.object;
+                        else if (o !== triple.object) matches = false;
+                        
+                        if (matches && Object.keys(binding).length > 0) {
+                            results.push(binding);
+                        }
+                    }
+                }
+            }
+            
+            return { variables, results: results.slice(0, 20), count: results.length };
+        }
+
+        // ==================== COMPONENTS ====================
+
+        function Navigation({ activeModule, setActiveModule, setActiveView, progress }) {
+            return (
+                <nav className="nav">
+                    <div className="nav-inner">
+                        <div className="nav-logo">
+                            <span className="nav-logo-icon">🌐</span>
+                            <div>
+                                <div className="nav-logo-title">Semantic Web Lab</div>
+                                <div className="nav-logo-subtitle">Interactive Learning Platform</div>
+                            </div>
+                        </div>
+                        
+                        <div className="nav-tabs">
+                            {Object.values(MODULES).map(mod => (
+                                <button
+                                    key={mod.id}
+                                    onClick={() => { setActiveModule(mod.id); setActiveView('learn'); }}
+                                    className={"nav-tab " + (activeModule === mod.id ? "active" : "")}
+                                >
+                                    {mod.icon} {mod.title}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="progress-text">
+                            Progress: <span className="progress-value">{progress}%</span>
+                        </div>
+                    </div>
+                </nav>
+            );
+        }
+
+        function Sidebar({ activeModule, activeView, setActiveView, completedLessons }) {
+            const module = MODULES[activeModule.toUpperCase()];
+            
+            return (
+                <aside className="sidebar">
+                    <div className="sidebar-header">
+                        <div className="sidebar-title">
+                            <span className="sidebar-title-icon">{module?.icon}</span>
+                            <span className="sidebar-title-text">{module?.title}</span>
+                        </div>
+                        <p className="sidebar-desc">{module?.description}</p>
+                    </div>
+
+                    <div className="sidebar-nav">
+                        <button onClick={() => setActiveView('learn')} className={"sidebar-btn " + (activeView === 'learn' ? "active" : "")}>
+                            📖 Learn
+                        </button>
+                        <button onClick={() => setActiveView('practice')} className={"sidebar-btn " + (activeView === 'practice' ? "active" : "")}>
+                            ✏️ Practice Editor
+                        </button>
+                        <button onClick={() => setActiveView('visualize')} className={"sidebar-btn " + (activeView === 'visualize' ? "active" : "")}>
+                            🔗 Graph Visualizer
+                        </button>
+                        <button onClick={() => setActiveView('quiz')} className={"sidebar-btn " + (activeView === 'quiz' ? "active" : "")}>
+                            🎯 Quiz
+                        </button>
+                        {activeModule === 'sparql' && (
+                            <button onClick={() => setActiveView('sparql')} className={"sidebar-btn " + (activeView === 'sparql' ? "active" : "")}>
+                                🔍 SPARQL Playground
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="sidebar-lessons">
+                        <h3 className="sidebar-lessons-title">Lessons</h3>
+                        {module?.lessons.map((lesson, idx) => (
+                            <div key={lesson.id} className={"lesson-item " + (completedLessons.includes(lesson.id) ? "completed" : "")}>
+                                {completedLessons.includes(lesson.id) ? (
+                                    <span className="lesson-check">✓</span>
+                                ) : (
+                                    <span className="lesson-num">{idx + 1}.</span>
+                                )}
+                                <span>{lesson.title}</span>
+                            </div>
+                        ))}
+                    </div>
+                </aside>
+            );
+        }
+
+        function LearnView({ module, onComplete, completedLessons }) {
+            const [lessonIdx, setLessonIdx] = useState(0);
+            const mod = MODULES[module.toUpperCase()];
+            const lesson = mod?.lessons[lessonIdx];
+
+            function renderContent(text) {
+                if (!text) return null;
+                
+                const elements = [];
+                const lines = text.split('\n');
+                let inCode = false;
+                let codeLines = [];
+                
+                lines.forEach((line, i) => {
+                    if (line.startsWith('```')) {
+                        if (inCode) {
+                            elements.push(<pre key={"code-" + i} className="code-block">{codeLines.join('\n')}</pre>);
+                            codeLines = [];
+                        }
+                        inCode = !inCode;
+                        return;
+                    }
+                    
+                    if (inCode) {
+                        codeLines.push(line);
+                        return;
+                    }
+                    
+                    if (line.startsWith('# ')) {
+                        elements.push(<h1 key={i} className="text-2xl font-bold text-slate-800 mt-6 mb-4">{line.slice(2)}</h1>);
+                    } else if (line.startsWith('## ')) {
+                        elements.push(<h2 key={i} className="text-xl font-semibold text-slate-700 mt-6 mb-3">{line.slice(3)}</h2>);
+                    } else if (line.startsWith('### ')) {
+                        elements.push(<h3 key={i} className="text-lg font-medium text-slate-600 mt-4 mb-2">{line.slice(4)}</h3>);
+                    } else if (line.startsWith('- ')) {
+                        elements.push(<li key={i} style={{marginLeft: '1.5rem', color: '#475569'}}>{line.slice(2)}</li>);
+                    } else if (line.trim()) {
+                        const html = line
+                            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/`(.+?)`/g, '<code class="inline-code">$1</code>');
+                        elements.push(<p key={i} style={{color: '#475569', margin: '0.5rem 0'}} dangerouslySetInnerHTML={{__html: html}} />);
+                    }
+                });
+                
+                return elements;
+            }
+
+            return (
+                <div className="content-area">
+                    <div className="flex-row gap-2 mb-6">
+                        {mod?.lessons.map((l, idx) => (
+                            <button
+                                key={l.id}
+                                onClick={() => setLessonIdx(idx)}
+                                className={"btn " + (idx === lessonIdx ? "btn-primary" : completedLessons.includes(l.id) ? "btn-success" : "btn-secondary")}
+                            >
+                                {l.title}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="card p-8 fade-in">
+                        {renderContent(lesson?.content)}
+
+                        {lesson?.example && (
+                            <div className="mt-8">
+                                <h3 className="text-lg font-semibold text-slate-700 mb-4">💡 Example Code</h3>
+                                <div className="code-editor">
+                                    <div className="code-editor-header">
+                                        <div className="code-dots">
+                                            <span className="code-dot red"></span>
+                                            <span className="code-dot yellow"></span>
+                                            <span className="code-dot green"></span>
+                                        </div>
+                                        <button className="copy-btn" onClick={() => navigator.clipboard.writeText(lesson.example)}>
+                                            📋 Copy
+                                        </button>
+                                    </div>
+                                    <pre style={{padding: '1rem', margin: 0, color: '#e2e8f0', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.875rem', whiteSpace: 'pre-wrap'}}>
+                                        {lesson.example}
+                                    </pre>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex-row justify-between items-center mt-8">
+                            <button
+                                disabled={lessonIdx === 0}
+                                onClick={() => setLessonIdx(i => i - 1)}
+                                className="btn btn-ghost"
+                            >
+                                ← Previous
+                            </button>
+                            
+                            <button
+                                onClick={() => {
+                                    onComplete(lesson.id);
+                                    if (lessonIdx < mod.lessons.length - 1) {
+                                        setLessonIdx(i => i + 1);
+                                    }
+                                }}
+                                className="btn btn-success"
+                            >
+                                {completedLessons.includes(lesson?.id) ? '✓ Completed' : 'Mark Complete'}
+                            </button>
+                            
+                            <button
+                                disabled={lessonIdx === mod.lessons.length - 1}
+                                onClick={() => setLessonIdx(i => i + 1)}
+                                className="btn btn-ghost"
+                            >
+                                Next →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function PracticeEditor({ module }) {
+            const [code, setCode] = useState(MODULES[module.toUpperCase()]?.lessons[0]?.example || '');
+            const [result, setResult] = useState(null);
+            const [error, setError] = useState(null);
+
+            function handleParse() {
+                try {
+                    setError(null);
+                    setResult(parseTriples(code));
+                } catch (e) {
+                    setError(e.message);
+                    setResult(null);
+                }
+            }
+
+            return (
+                <div className="p-6 grid-2 full-height">
+                    <div className="flex-col">
+                        <div className="flex-row justify-between items-center mb-4">
+                            <h3 className="font-semibold text-slate-700">RDF/Turtle Editor</h3>
+                            <div className="flex-row gap-2">
+                                <button onClick={() => setCode(SAMPLE_DATA)} className="btn btn-secondary text-sm">
+                                    Load Sample
+                                </button>
+                                <button onClick={handleParse} className="btn btn-primary text-sm">
+                                    Parse ▶
+                                </button>
+                            </div>
+                        </div>
+                        <div className="code-editor flex-1">
+                            <div className="code-editor-header">
+                                <div className="code-dots">
+                                    <span className="code-dot red"></span>
+                                    <span className="code-dot yellow"></span>
+                                    <span className="code-dot green"></span>
+                                </div>
+                                <span>turtle</span>
+                            </div>
+                            <textarea
+                                value={code}
+                                onChange={(e) => setCode(e.target.value)}
+                                placeholder="Enter your RDF/Turtle code here..."
+                                spellCheck={false}
+                                style={{height: 'calc(100% - 40px)'}}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex-col">
+                        <h3 className="font-semibold text-slate-700 mb-4">Parse Results</h3>
+                        <div className="card flex-1 overflow-auto p-4">
+                            {error && (
+                                <div className="alert alert-error">
+                                    <strong>Error:</strong> {error}
+                                </div>
+                            )}
+                            
+                            {result && (
+                                <div>
+                                    <div className="mb-6">
+                                        <h4 className="font-medium text-slate-600 mb-2">Prefixes</h4>
+                                        <div style={{background: '#f8fafc', padding: '0.75rem', borderRadius: '0.5rem', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.75rem'}}>
+                                            {Object.entries(result.prefixes).map(([prefix, uri]) => (
+                                                <div key={prefix}>
+                                                    <span className="syntax-prefix">{prefix}:</span>
+                                                    <span className="syntax-uri" style={{marginLeft: '0.5rem'}}>&lt;{uri}&gt;</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="font-medium text-slate-600 mb-2">
+                                            Triples ({result.triples.length})
+                                        </h4>
+                                        {result.triples.slice(0, 50).map((triple, idx) => (
+                                            <div key={idx} className="triple-row">
+                                                <span className="syntax-uri">{triple.subject}</span>
+                                                <span className="triple-arrow">→</span>
+                                                <span className="syntax-keyword">{triple.predicate}</span>
+                                                <span className="triple-arrow">→</span>
+                                                <span className={triple.object.startsWith('"') ? "syntax-literal" : "syntax-uri"}>
+                                                    {triple.object}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {!result && !error && (
+                                <div className="empty-state">
+                                    <div>
+                                        <div className="empty-icon">📝</div>
+                                        <p>Write or paste RDF/Turtle code and click Parse</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function GraphVisualizer() {
+            const svgRef = useRef(null);
+            const [code, setCode] = useState(SAMPLE_DATA);
+            const [nodes, setNodes] = useState([]);
+            const [links, setLinks] = useState([]);
+
+            function generateGraph() {
+                const { triples } = parseTriples(code);
+                const nodeMap = new Map();
+                const linkList = [];
+
+                triples.forEach(({ subject, predicate, object }) => {
+                    if (!nodeMap.has(subject)) {
+                        nodeMap.set(subject, {
+                            id: subject,
+                            label: subject.split(':')[1] || subject,
+                            type: 'resource'
+                        });
+                    }
+
+                    const isLiteral = object.startsWith('"');
+                    if (!nodeMap.has(object)) {
+                        nodeMap.set(object, {
+                            id: object,
+                            label: isLiteral ? object.replace(/"/g, '') : (object.split(':')[1] || object),
+                            type: isLiteral ? 'literal' : 'resource'
+                        });
+                    }
+
+                    linkList.push({
+                        source: subject,
+                        target: object,
+                        label: predicate.split(':')[1] || predicate
+                    });
+                });
+
+                setNodes(Array.from(nodeMap.values()));
+                setLinks(linkList);
+            }
+
+            useEffect(() => {
+                if (nodes.length === 0 || !svgRef.current) return;
+
+                const svg = d3.select(svgRef.current);
+                svg.selectAll('*').remove();
+
+                const width = svgRef.current.clientWidth;
+                const height = svgRef.current.clientHeight;
+
+                const g = svg.append('g');
+
+                svg.call(d3.zoom().on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                }));
+
+                svg.append('defs').append('marker')
+                    .attr('id', 'arrowhead')
+                    .attr('viewBox', '-0 -5 10 10')
+                    .attr('refX', 25)
+                    .attr('refY', 0)
+                    .attr('orient', 'auto')
+                    .attr('markerWidth', 6)
+                    .attr('markerHeight', 6)
+                    .append('path')
+                    .attr('d', 'M 0,-5 L 10,0 L 0,5')
+                    .attr('fill', '#94a3b8');
+
+                const simulation = d3.forceSimulation(nodes)
+                    .force('link', d3.forceLink(links).id(d => d.id).distance(150))
+                    .force('charge', d3.forceManyBody().strength(-500))
+                    .force('center', d3.forceCenter(width / 2, height / 2))
+                    .force('collision', d3.forceCollide().radius(60));
+
+                const link = g.append('g')
+                    .selectAll('line')
+                    .data(links)
+                    .join('line')
+                    .attr('stroke', '#94a3b8')
+                    .attr('stroke-width', 2)
+                    .attr('marker-end', 'url(#arrowhead)');
+
+                const linkLabel = g.append('g')
+                    .selectAll('text')
+                    .data(links)
+                    .join('text')
+                    .attr('font-size', 10)
+                    .attr('fill', '#64748b')
+                    .attr('text-anchor', 'middle')
+                    .text(d => d.label);
+
+                const node = g.append('g')
+                    .selectAll('g')
+                    .data(nodes)
+                    .join('g')
+                    .style('cursor', 'pointer')
+                    .call(d3.drag()
+                        .on('start', (event, d) => {
+                            if (!event.active) simulation.alphaTarget(0.3).restart();
+                            d.fx = d.x;
+                            d.fy = d.y;
+                        })
+                        .on('drag', (event, d) => {
+                            d.fx = event.x;
+                            d.fy = event.y;
+                        })
+                        .on('end', (event, d) => {
+                            if (!event.active) simulation.alphaTarget(0);
+                            d.fx = null;
+                            d.fy = null;
+                        })
+                    );
+
+                node.append('circle')
+                    .attr('r', 20)
+                    .attr('fill', d => d.type === 'literal' ? '#fbbf24' : '#3b82f6')
+                    .attr('stroke', '#fff')
+                    .attr('stroke-width', 2);
+
+                node.append('text')
+                    .attr('dy', 35)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', 11)
+                    .attr('fill', '#334155')
+                    .text(d => d.label.length > 15 ? d.label.slice(0, 15) + '...' : d.label);
+
+                simulation.on('tick', () => {
+                    link
+                        .attr('x1', d => d.source.x)
+                        .attr('y1', d => d.source.y)
+                        .attr('x2', d => d.target.x)
+                        .attr('y2', d => d.target.y);
+
+                    linkLabel
+                        .attr('x', d => (d.source.x + d.target.x) / 2)
+                        .attr('y', d => (d.source.y + d.target.y) / 2);
+
+                    node.attr('transform', d => `translate(${d.x},${d.y})`);
+                });
+
+                return () => simulation.stop();
+            }, [nodes, links]);
+
+            return (
+                <div className="p-6 flex-col full-height">
+                    <div className="flex-row gap-4 mb-4">
+                        <div className="flex-1">
+                            <div className="code-editor" style={{height: '120px'}}>
+                                <textarea
+                                    value={code}
+                                    onChange={(e) => setCode(e.target.value)}
+                                    placeholder="Enter RDF/Turtle to visualize..."
+                                    style={{height: '100%'}}
+                                />
+                            </div>
+                        </div>
+                        <button onClick={generateGraph} className="btn btn-primary" style={{padding: '0.5rem 1.5rem'}}>
+                            Visualize 🔗
+                        </button>
+                    </div>
+
+                    <div className="card flex-1 overflow-hidden">
+                        <svg ref={svgRef} className="graph-container"></svg>
+                    </div>
+
+                    <div className="graph-legend">
+                        <div className="legend-item">
+                            <div className="legend-dot resource"></div>
+                            Resource (URI)
+                        </div>
+                        <div className="legend-item">
+                            <div className="legend-dot literal"></div>
+                            Literal
+                        </div>
+                        <span style={{marginLeft: 'auto', color: '#94a3b8'}}>Drag nodes • Scroll to zoom</span>
+                    </div>
+                </div>
+            );
+        }
+
+        function QuizView({ module, onQuizComplete }) {
+            const [qIdx, setQIdx] = useState(0);
+            const [selected, setSelected] = useState(null);
+            const [showResult, setShowResult] = useState(false);
+            const [score, setScore] = useState(0);
+            const [completed, setCompleted] = useState(false);
+
+            const questions = QUIZ_DATA[module] || [];
+            const question = questions[qIdx];
+
+            function handleSubmit() {
+                if (selected === null) return;
+                if (selected === question.correct) {
+                    setScore(s => s + 1);
+                }
+                setShowResult(true);
+            }
+
+            function handleNext() {
+                if (qIdx < questions.length - 1) {
+                    setQIdx(q => q + 1);
+                    setSelected(null);
+                    setShowResult(false);
+                } else {
+                    setCompleted(true);
+                    onQuizComplete(module, score + (selected === question.correct ? 1 : 0), questions.length);
+                }
+            }
+
+            function retry() {
+                setQIdx(0);
+                setSelected(null);
+                setShowResult(false);
+                setScore(0);
+                setCompleted(false);
+            }
+
+            if (questions.length === 0) {
+                return (
+                    <div className="full-height empty-state">
+                        <p>No quiz available for this module yet.</p>
+                    </div>
+                );
+            }
+
+            if (completed) {
+                const finalScore = score + (selected === question.correct ? 1 : 0);
+                const pct = Math.round((finalScore / questions.length) * 100);
+                
+                return (
+                    <div className="full-height" style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <div className="card p-8 text-center fade-in" style={{maxWidth: '400px'}}>
+                            <div className="text-4xl mb-4">
+                                {pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚'}
+                            </div>
+                            <h2 className="text-2xl font-bold text-slate-800 mb-2">Quiz Complete!</h2>
+                            <p className="text-slate-600 mb-4">
+                                You scored <span className="font-bold text-blue-600">{finalScore}</span> out of <span className="font-bold">{questions.length}</span>
+                            </p>
+                            <div className="progress-bar">
+                                <div 
+                                    className={"progress-fill " + (pct >= 80 ? "success" : pct >= 60 ? "warning" : "danger")}
+                                    style={{ width: pct + '%' }}
+                                ></div>
+                            </div>
+                            <p className="text-lg font-medium mb-6">
+                                {pct >= 80 ? 'Excellent work!' : pct >= 60 ? 'Good effort!' : 'Keep studying!'}
+                            </p>
+                            <button onClick={retry} className="btn btn-primary">
+                                Retry Quiz
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="content-area" style={{maxWidth: '640px'}}>
+                    <div className="flex-row justify-between items-center mb-6">
+                        <span className="text-sm text-slate-500">
+                            Question {qIdx + 1} of {questions.length}
+                        </span>
+                        <span className="text-sm font-medium text-blue-600">
+                            Score: {score}/{qIdx + (showResult ? 1 : 0)}
+                        </span>
+                    </div>
+
+                    <div className="card p-6 fade-in">
+                        <h3 className="text-lg font-medium text-slate-800 mb-6">{question.question}</h3>
+
+                        <div>
+                            {question.options.map((option, idx) => {
+                                let cls = 'quiz-option';
+                                if (showResult) {
+                                    if (idx === question.correct) cls += ' correct';
+                                    else if (idx === selected) cls += ' incorrect';
+                                } else if (selected === idx) {
+                                    cls += ' selected';
+                                }
+                                
+                                return (
+                                    <button
+                                        key={idx}
+                                        onClick={() => !showResult && setSelected(idx)}
+                                        disabled={showResult}
+                                        className={cls}
+                                    >
+                                        <span className="font-medium" style={{marginRight: '0.5rem'}}>
+                                            {String.fromCharCode(65 + idx)}.
+                                        </span>
+                                        {option}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {showResult && (
+                            <div className={"alert " + (selected === question.correct ? "alert-success" : "alert-warning")}>
+                                <strong>{selected === question.correct ? '✓ Correct!' : '✗ Incorrect'}</strong>
+                                <p className="text-sm mt-1">{question.explanation}</p>
+                            </div>
+                        )}
+
+                        <div className="mt-6" style={{display: 'flex', justifyContent: 'flex-end'}}>
+                            {!showResult ? (
+                                <button onClick={handleSubmit} disabled={selected === null} className="btn btn-primary">
+                                    Submit Answer
+                                </button>
+                            ) : (
+                                <button onClick={handleNext} className="btn btn-primary">
+                                    {qIdx < questions.length - 1 ? 'Next Question →' : 'See Results'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function SparqlPlayground() {
+            const [data, setData] = useState(SAMPLE_DATA);
+            const [query, setQuery] = useState(`PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?person ?name ?age
+WHERE {
+    ?person a foaf:Person .
+    ?person foaf:name ?name .
+    ?person foaf:age ?age .
+}`);
+            const [results, setResults] = useState(null);
+            const [error, setError] = useState(null);
+
+            function execute() {
+                try {
+                    setError(null);
+                    const { triples } = parseTriples(data);
+                    const r = executeSparql(query, triples);
+                    if (r.error) {
+                        setError(r.error);
+                    } else {
+                        setResults(r);
+                    }
+                } catch (e) {
+                    setError(e.message);
+                }
+            }
+
+            return (
+                <div className="p-6 grid-2 full-height">
+                    <div className="flex-col gap-4">
+                        <div className="flex-1 flex-col">
+                            <div className="flex-row justify-between items-center mb-2">
+                                <h3 className="font-semibold text-slate-700">RDF Data</h3>
+                                <button onClick={() => setData(SAMPLE_DATA)} className="text-sm text-blue-600" style={{background:'none',border:'none',cursor:'pointer'}}>
+                                    Reset
+                                </button>
+                            </div>
+                            <div className="code-editor flex-1">
+                                <textarea
+                                    value={data}
+                                    onChange={(e) => setData(e.target.value)}
+                                    style={{height: '100%', fontSize: '0.75rem'}}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex-1 flex-col">
+                            <h3 className="font-semibold text-slate-700 mb-2">SPARQL Query</h3>
+                            <div className="code-editor flex-1">
+                                <textarea
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    style={{height: '100%'}}
+                                />
+                            </div>
+                        </div>
+
+                        <button onClick={execute} className="btn btn-success" style={{padding: '0.75rem', width: '100%'}}>
+                            Execute Query ▶
+                        </button>
+                    </div>
+
+                    <div className="flex-col">
+                        <h3 className="font-semibold text-slate-700 mb-2">Results</h3>
+                        <div className="card flex-1 overflow-auto">
+                            {error && (
+                                <div className="p-4 alert alert-error">
+                                    <strong>Error:</strong> {error}
+                                </div>
+                            )}
+
+                            {results && (
+                                <div className="p-4">
+                                    <div className="text-sm text-slate-500 mb-4">
+                                        Found {results.count} result(s)
+                                    </div>
+                                    
+                                    {results.results.length > 0 ? (
+                                        <table className="data-table">
+                                            <thead>
+                                                <tr>
+                                                    {results.variables.map(v => (
+                                                        <th key={v}>{v}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {results.results.map((row, idx) => (
+                                                    <tr key={idx}>
+                                                        {results.variables.map(v => (
+                                                            <td key={v}>{row[v] || '-'}</td>
+                                                        ))}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    ) : (
+                                        <p className="text-slate-500">No matching results.</p>
+                                    )}
+                                </div>
+                            )}
+
+                            {!results && !error && (
+                                <div className="empty-state">
+                                    <div>
+                                        <div className="empty-icon">🔍</div>
+                                        <p>Execute a query to see results</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function App() {
+            const [activeModule, setActiveModule] = useState('rdf');
+            const [activeView, setActiveView] = useState('learn');
+            const [completedLessons, setCompletedLessons] = useState([]);
+            const [quizScores, setQuizScores] = useState({});
+
+            function handleLessonComplete(lessonId) {
+                if (!completedLessons.includes(lessonId)) {
+                    setCompletedLessons([...completedLessons, lessonId]);
+                }
+            }
+
+            function handleQuizComplete(module, score, total) {
+                setQuizScores({ ...quizScores, [module]: { score, total } });
+            }
+
+            function calculateProgress() {
+                const totalLessons = Object.values(MODULES).reduce((acc, m) => acc + m.lessons.length, 0);
+                const totalQuizzes = Object.keys(QUIZ_DATA).length;
+                const lessonProgress = (completedLessons.length / totalLessons) * 50;
+                const quizProgress = (Object.keys(quizScores).length / totalQuizzes) * 50;
+                return Math.round(lessonProgress + quizProgress);
+            }
+
+            function renderView() {
+                switch (activeView) {
+                    case 'learn':
+                        return <LearnView module={activeModule} onComplete={handleLessonComplete} completedLessons={completedLessons} />;
+                    case 'practice':
+                        return <PracticeEditor module={activeModule} />;
+                    case 'visualize':
+                        return <GraphVisualizer />;
+                    case 'quiz':
+                        return <QuizView module={activeModule} onQuizComplete={handleQuizComplete} />;
+                    case 'sparql':
+                        return <SparqlPlayground />;
+                    default:
+                        return null;
+                }
+            }
+
+            return (
+                <div>
+                    <Navigation 
+                        activeModule={activeModule}
+                        setActiveModule={setActiveModule}
+                        setActiveView={setActiveView}
+                        progress={calculateProgress()}
+                    />
+                    
+                    <div className="main-layout">
+                        <Sidebar 
+                            activeModule={activeModule}
+                            activeView={activeView}
+                            setActiveView={setActiveView}
+                            completedLessons={completedLessons}
+                        />
+                        
+                        <main className="main-content">
+                            {renderView()}
+                        </main>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>

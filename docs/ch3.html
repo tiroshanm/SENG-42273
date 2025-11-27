@@ -4,97 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RDF: The Building Block of the Semantic Web</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0e27;
-            overflow: hidden;
-            height: 100vh;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #f8fafc; 
+            color: #334155; 
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            padding: 2rem;
         }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
 
-        /* Animated Background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(138, 43, 226, 0.06) 0%, transparent 50%);
-            z-index: -1;
-            animation: backgroundShift 15s ease-in-out infinite;
-        }
-
-        @keyframes backgroundShift {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 0.8; }
-        }
-
-        /* Floating particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: rgba(0, 255, 136, 0.3);
-            border-radius: 50%;
-            animation: float 20s infinite;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(100px);
-                opacity: 0;
-            }
-        }
-
+        /* Presentation Container */
         .presentation-container {
             width: 960px;
             height: 720px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            box-shadow: 
-                0 20px 60px rgba(0,0,0,0.5),
-                0 0 40px rgba(0, 255, 136, 0.1);
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            border-radius: 20px;
-            z-index: 10;
         }
 
+        /* Slides */
         .slide {
             width: 100%;
             height: 100%;
@@ -103,9 +40,10 @@
             left: 0;
             opacity: 0;
             transform: translateX(100%);
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
+            background: white;
         }
 
         .slide.active {
@@ -118,86 +56,53 @@
             transform: translateX(-100%);
         }
 
+        /* Slide Header */
         .slide-header {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.15));
-            padding: 30px 40px;
-            border-bottom: 2px solid rgba(0, 255, 136, 0.5);
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            padding: 24px 40px;
+            border-bottom: 1px solid #e2e8f0;
             flex-shrink: 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .slide-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #00ff88, transparent);
-            animation: scanline 3s linear infinite;
-        }
-
-        @keyframes scanline {
-            0% { left: -100%; }
-            100% { left: 100%; }
         }
 
         .slide-header h1 {
-            color: #00ff88;
-            font-size: 2.2em;
-            margin-bottom: 5px;
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            color: #1e293b;
+            font-size: 1.75rem;
             font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .slide-1 h3 {
-            font-size: 1.3em;
-            color: #00ff88;
-            animation: fadeInUp 1s ease-out 0.6s both;
-            font-weight: 500;
+            margin-bottom: 4px;
         }
 
         .slide-header .subtitle {
-            color: #b4b4b4;
-            font-size: 1em;
-            opacity: 0.9;
-            font-weight: 300;
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
         }
 
+        /* Slide Content */
         .slide-content {
             flex: 1;
             overflow-y: auto;
-            padding: 40px 50px;
-            background: rgba(10, 14, 39, 0.5);
+            padding: 32px 40px;
         }
 
         .slide-content::-webkit-scrollbar {
-            width: 10px;
+            width: 8px;
         }
 
         .slide-content::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
+            background: #f1f5f9;
+            border-radius: 8px;
         }
 
         .slide-content::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #00ff88, #00d4ff);
-            border-radius: 10px;
+            background: #cbd5e1;
+            border-radius: 8px;
         }
 
         .slide-content::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, #00d4ff, #00ff88);
+            background: #94a3b8;
         }
 
         /* Title Slide */
-        .slide-1 {
-            background: 
-                radial-gradient(circle at 30% 40%, rgba(0, 255, 136, 0.15) 0%, transparent 60%),
-                radial-gradient(circle at 70% 60%, rgba(0, 212, 255, 0.1) 0%, transparent 60%);
-        }
-
         .slide-1 .slide-content {
             display: flex;
             flex-direction: column;
@@ -205,136 +110,104 @@
             align-items: center;
             text-align: center;
             padding: 60px;
-            overflow: visible;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         }
 
         .slide-1 h1 {
-            font-size: 3em;
-            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 20px;
-            animation: fadeInDown 1s ease-out, gradientShift 8s ease infinite;
-            background-size: 200% 200%;
+            margin-bottom: 16px;
             font-weight: 800;
-            letter-spacing: -2px;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+            letter-spacing: -1px;
+            animation: fadeInDown 0.8s ease-out;
         }
 
         .slide-1 h2 {
-            font-size: 1.6em;
-            color: #ffffff;
-            margin-bottom: 20px;
-            opacity: 0.95;
-            animation: fadeInUp 1s ease-out 0.3s both;
-            font-weight: 300;
+            font-size: 1.25rem;
+            color: #475569;
+            margin-bottom: 16px;
+            font-weight: 400;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
         }
 
-        .slide-1 .intro-text {
-            font-size: 1.2em;
-            color: #e0e0e0;
-            max-width: 700px;
-            line-height: 1.8;
-            animation: fadeInUp 1s ease-out 0.6s both;
+        .slide-1 h3 {
+            font-size: 1rem;
+            color: #3b82f6;
+            font-weight: 600;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
         }
 
+        /* Content Block */
         .content-block {
-            background: rgba(0, 255, 136, 0.05);
-            backdrop-filter: blur(10px);
-            border-left: 4px solid #00ff88;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 12px;
-            color: #ffffff;
-            border: 1px solid rgba(0, 255, 136, 0.2);
-            transition: all 0.3s ease;
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.2s ease;
         }
 
         .content-block:hover {
-            background: rgba(0, 255, 136, 0.08);
-            border-left-width: 6px;
-            transform: translateX(5px);
+            background: #f1f5f9;
+            transform: translateX(4px);
         }
 
         .content-block h3 {
-            color: #00ff88;
-            font-size: 1.4em;
-            margin-bottom: 15px;
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 8px;
             font-weight: 600;
         }
-        
 
         .content-block p, .content-block li {
-            color: #e0e0e0;
-            line-height: 1.7;
-            font-size: 1.05em;
+            color: #475569;
+            line-height: 1.6;
+            font-size: 0.9375rem;
         }
 
+        /* Highlight Box */
         .highlight-box {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
-            border: 2px solid rgba(0, 255, 136, 0.3);
-            padding: 25px;
-            margin: 20px 0;
-            border-radius: 15px;
-            color: #ffffff;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .highlight-box::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(
-                transparent,
-                rgba(0, 255, 136, 0.05),
-                transparent 30%
-            );
-            animation: rotate 4s linear infinite;
-        }
-
-        @keyframes rotate {
-            100% { transform: rotate(1turn); }
-        }
-
-        .highlight-box > * {
-            position: relative;
-            z-index: 1;
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            border: 1px solid #c7d2fe;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
         }
 
         .highlight-box h3 {
-            color: #00ff88;
-            font-size: 1.3em;
-            margin-bottom: 12px;
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 10px;
             font-weight: 600;
+        }
+
+        .highlight-box p {
+            color: #475569;
+            line-height: 1.6;
         }
 
         .highlight-box strong {
-            color: #00ff88;
+            color: #3b82f6;
         }
 
+        /* Key Points */
         .key-points {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(0, 212, 255, 0.08));
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin: 20px 0;
-            border: 2px solid rgba(0, 255, 136, 0.3);
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .key-points h3 {
-            color: #00ff88;
-            margin-bottom: 15px;
+            color: #1e293b;
+            margin-bottom: 12px;
             font-weight: 600;
+            font-size: 1rem;
         }
 
         .key-points ul {
@@ -343,180 +216,182 @@
         }
 
         .key-points li {
-            padding: 10px 0;
-            padding-left: 30px;
+            padding: 8px 0;
+            padding-left: 24px;
             position: relative;
-            color: #e0e0e0;
-            transition: all 0.3s ease;
+            color: #475569;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
         }
 
         .key-points li::before {
             content: "▸";
             position: absolute;
             left: 0;
+            color: #3b82f6;
             font-weight: bold;
-            font-size: 1.2em;
-            color: #00ff88;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .key-points li:hover {
-            padding-left: 35px;
-            color: #ffffff;
+            padding-left: 28px;
+            color: #1e293b;
         }
 
         .key-points li:hover::before {
-            color: #00d4ff;
-            transform: translateX(3px);
+            color: #2563eb;
+            transform: translateX(2px);
         }
 
+        /* Code Block */
         .code-block {
-            background: rgba(0, 0, 0, 0.7);
-            color: #00ff88;
-            padding: 20px;
-            border-radius: 12px;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px 20px;
+            border-radius: 8px;
             overflow-x: auto;
-            margin: 20px 0;
-            font-family: 'Courier New', monospace;
+            margin: 16px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.6;
             position: relative;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            font-size: 0.9em;
+            white-space: pre-wrap;
         }
 
         .code-block::before {
             content: "RDF/XML";
             position: absolute;
-            top: 5px;
-            right: 10px;
-            color: #00ff88;
-            font-size: 12px;
-            opacity: 0.5;
+            top: 8px;
+            right: 12px;
+            color: #64748b;
+            font-size: 0.6875rem;
+            font-weight: 500;
         }
 
+        .code-block.light {
+            background: #f8fafc;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block.light::before {
+            display: none;
+        }
+
+        /* Example Box */
         .example-box {
-            background: rgba(0, 255, 136, 0.05);
-            border: 2px dashed rgba(0, 255, 136, 0.3);
+            background: #f0fdf4;
+            border: 1px dashed #86efac;
             padding: 20px;
-            margin: 20px 0;
+            margin: 16px 0;
             border-radius: 12px;
             position: relative;
-            color: #e0e0e0;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .example-box:hover {
-            background: rgba(0, 255, 136, 0.08);
             border-style: solid;
+            background: #ecfdf5;
         }
 
         .example-box::before {
             content: "💡 Example";
             position: absolute;
-            top: -12px;
-            left: 20px;
-            background: linear-gradient(135deg, rgba(10, 14, 39, 0.95), rgba(10, 14, 39, 0.98));
-            padding: 0 10px;
-            color: #00ff88;
-            font-weight: bold;
-            border-radius: 5px;
+            top: -10px;
+            left: 16px;
+            background: #f8fafc;
+            padding: 0 8px;
+            color: #059669;
+            font-weight: 600;
+            font-size: 0.75rem;
+            border-radius: 4px;
         }
 
+        .example-box h4 {
+            color: #047857;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .example-box p {
+            color: #065f46;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .example-box ul {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+
+        .example-box li {
+            color: #065f46;
+            font-size: 0.875rem;
+        }
+
+        /* Triple Table */
         .triple-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
-            background: rgba(0, 255, 136, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
+            margin: 16px 0;
+            background: white;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
         }
 
         .triple-table th {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 212, 255, 0.3));
-            color: #00ff88;
-            padding: 15px;
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            color: #1e293b;
+            padding: 12px 16px;
             text-align: left;
             font-weight: 600;
-            border: 1px solid rgba(0, 255, 136, 0.3);
+            font-size: 0.8125rem;
         }
 
         .triple-table td {
-            padding: 15px;
-            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
-            color: #e0e0e0;
-            border: 1px solid rgba(0, 255, 136, 0.1);
+            padding: 12px 16px;
+            border-top: 1px solid #f1f5f9;
+            color: #475569;
+            font-size: 0.8125rem;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        .triple-table tr:hover {
-            background: rgba(0, 255, 136, 0.1);
+        .triple-table tr:hover td {
+            background: #f8fafc;
         }
 
+        /* Interactive Demo */
         .interactive-demo {
-            background: rgba(0, 255, 136, 0.05);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(0, 255, 136, 0.3);
-            padding: 25px;
-            margin: 20px 0;
-            border-radius: 15px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        .demo-input {
-            width: 100%;
-            padding: 15px;
-            font-size: 16px;
-            background: rgba(0, 0, 0, 0.5);
-            color: #00ff88;
-            border: 2px solid rgba(0, 255, 136, 0.3);
-            border-radius: 10px;
-            margin-bottom: 15px;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
-
-        .demo-input:focus {
-            outline: none;
-            border-color: #00ff88;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        .interactive-demo h3 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .demo-btn {
-            padding: 14px 32px;
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
-            color: #00ff88;
-            border: 2px solid rgba(0, 255, 136, 0.5);
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .demo-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(0, 255, 136, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .demo-btn:hover::before {
-            width: 300px;
-            height: 300px;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
         .demo-btn:hover {
-            background: linear-gradient(135deg, #00ff88, #00d4ff);
-            color: #000000;
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(0, 255, 136, 0.3);
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .demo-btn span {
@@ -525,250 +400,296 @@
         }
 
         .demo-output {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
+            margin-top: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
             display: none;
-            color: #e0e0e0;
-            border: 1px solid rgba(0, 255, 136, 0.2);
+            border: 1px solid #e2e8f0;
         }
 
         .demo-output.show {
             display: block;
-            animation: fadeInUp 0.5s ease;
+            animation: fadeInUp 0.4s ease;
         }
 
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .comparison-card {
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .comparison-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .comparison-card.traditional {
-            background: rgba(255, 68, 68, 0.1);
-            border-color: rgba(255, 107, 107, 0.5);
-        }
-
-        .comparison-card.traditional h3 {
-            color: #ff6b6b;
-        }
-
-        .comparison-card.semantic {
-            background: rgba(0, 255, 136, 0.1);
-            border-color: rgba(0, 255, 136, 0.5);
-        }
-
-        .comparison-card.semantic h3 {
-            color: #00ff88;
-        }
-
-        .comparison-card p {
-            color: #e0e0e0;
-            margin-top: 10px;
-            line-height: 1.6;
-        }
-
-        .rule-box {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 212, 255, 0.15));
-            backdrop-filter: blur(10px);
-            border-left: 5px solid #00ff88;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .rule-box:hover {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
-            transform: translateX(5px);
-        }
-
-        .rule-box h4 {
-            color: #00ff88;
-            margin-bottom: 10px;
-            font-size: 1.2em;
-            font-weight: 600;
-        }
-
-        .rule-box p {
-            color: #e0e0e0;
-            line-height: 1.6;
-        }
-
-        .vocab-list {
-            background: rgba(0, 255, 136, 0.05);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 12px;
-            margin: 20px 0;
-            border: 1px solid rgba(0, 255, 136, 0.2);
-        }
-
-        .vocab-category {
-            margin-bottom: 15px;
-        }
-
-        .vocab-category h4 {
-            color: #00ff88;
+        .demo-output h4 {
+            color: #1e293b;
             margin-bottom: 8px;
             font-weight: 600;
         }
 
+        .demo-output p {
+            color: #475569;
+            font-size: 0.875rem;
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .comparison-card {
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid;
+            transition: all 0.2s ease;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .comparison-card h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .comparison-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .comparison-card li {
+            padding: 6px 0;
+            font-size: 0.875rem;
+        }
+
+        .comparison-card p {
+            margin-top: 8px;
+            line-height: 1.6;
+            font-size: 0.875rem;
+        }
+
+        .comparison-card.traditional {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .comparison-card.traditional h3 {
+            color: #b91c1c;
+        }
+
+        .comparison-card.traditional p, .comparison-card.traditional li {
+            color: #7f1d1d;
+        }
+
+        .comparison-card.semantic {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+        }
+
+        .comparison-card.semantic h3 {
+            color: #047857;
+        }
+
+        .comparison-card.semantic p, .comparison-card.semantic li {
+            color: #065f46;
+        }
+
+        /* Rule Box */
+        .rule-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            border-left: 5px solid #3b82f6;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 12px 12px 0;
+            transition: all 0.2s ease;
+        }
+
+        .rule-box:hover {
+            transform: translateX(4px);
+        }
+
+        .rule-box h4 {
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .rule-box p {
+            color: #475569;
+            line-height: 1.6;
+            font-size: 0.9375rem;
+        }
+
+        .rule-box ul {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+
+        .rule-box li {
+            color: #475569;
+            font-size: 0.875rem;
+        }
+
+        /* Vocabulary List */
+        .vocab-list {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .vocab-category {
+            margin-bottom: 16px;
+        }
+
+        .vocab-category:last-child {
+            margin-bottom: 0;
+        }
+
+        .vocab-category h4 {
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
         .vocab-category code {
-            background: rgba(0, 0, 0, 0.5);
-            color: #00ff88;
+            background: white;
+            color: #3b82f6;
             padding: 4px 10px;
             border-radius: 6px;
             margin: 3px;
-            font-size: 0.9em;
+            font-size: 0.8125rem;
             display: inline-block;
-            border: 1px solid rgba(0, 255, 136, 0.2);
+            border: 1px solid #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
             transition: all 0.2s ease;
         }
 
         .vocab-category code:hover {
-            background: rgba(0, 255, 136, 0.1);
+            background: #eff6ff;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 255, 136, 0.2);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
         }
 
+        /* Controls */
         .controls {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
+            bottom: 24px;
+            right: 24px;
             display: flex;
-            gap: 15px;
+            gap: 12px;
             z-index: 100;
         }
 
         .control-btn {
-            width: 50px;
-            height: 50px;
-            border: 2px solid #00ff88;
+            width: 44px;
+            height: 44px;
+            border: 1px solid #e2e8f0;
             border-radius: 50%;
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
-            backdrop-filter: blur(10px);
-            color: #00ff88;
-            font-size: 1.5em;
+            background: white;
+            color: #475569;
+            font-size: 1.25rem;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .control-btn:hover:not(:disabled) {
-            transform: scale(1.1);
-            background: linear-gradient(135deg, #00ff88, #00d4ff);
-            color: #000000;
-            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .control-btn:disabled {
-            opacity: 0.3;
+            opacity: 0.4;
             cursor: not-allowed;
-            transform: scale(1);
         }
 
-        .control-btn:disabled:hover {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
-            color: #00ff88;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        /* Slide Counter */
+        .slide-counter {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            z-index: 100;
         }
 
+        /* Progress Bar */
         .progress-bar {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 5px;
-            background: rgba(0, 0, 0, 0.3);
+            height: 4px;
+            background: #f1f5f9;
             z-index: 100;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
             transition: width 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
         }
 
-        .slide-counter {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
-            backdrop-filter: blur(10px);
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-weight: bold;
-            color: #00ff88;
-            border: 2px solid rgba(0, 255, 136, 0.5);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            z-index: 100;
-        }
-
+        /* Animations */
         @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Typography */
         ul {
-            margin-left: 25px;
+            margin-left: 20px;
         }
 
         li {
-            margin: 10px 0;
-            color: #e0e0e0;
+            margin: 8px 0;
+            color: #475569;
             line-height: 1.6;
+            font-size: 0.9375rem;
         }
 
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #3b82f6;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+        }
+
+        /* Responsive */
         @media (max-width: 1024px) {
+            body {
+                padding: 0;
+            }
             .presentation-container {
                 width: 100vw;
-                height: 75vw;
-                max-height: 100vh;
+                height: 100vh;
                 border-radius: 0;
             }
-
             .slide-content {
-                padding: 30px 40px;
+                padding: 24px;
             }
-
             .comparison-grid {
                 grid-template-columns: 1fr;
             }
@@ -776,15 +697,12 @@
     </style>
 </head>
 <body>
-    <!-- Floating Particles -->
-    <div class="particles" id="particles"></div>
-
     <div class="presentation-container">
         <!-- Slide 1: Title -->
         <div class="slide slide-1 active">
             <div class="slide-content">
                 <h1>RDF: The Building Block of the Semantic Web</h1>
-                <h2>Resource Description Framework</h2>
+                <h2>Chapter 3: Resource Description Framework</h2>
                 <h3>Eng. Dr. Tiroshan Madushanka</h3>
             </div>
         </div>
@@ -896,26 +814,18 @@
 
                 <div class="content-block">
                     <h3>RDF Statement Format</h3>
-                    <div class="code-block" style="background: rgba(0, 255, 136, 0.1); color: #e0e0e0;">
-resource (subject) + property (predicate) + property value (object)
-                    </div>
-                    <p style="margin-top: 15px;">Can be interpreted as:</p>
-                    <div class="code-block" style="background: rgba(0, 255, 136, 0.1); color: #e0e0e0;">
-&lt;subject&gt; has a property &lt;predicate&gt;, whose value is &lt;object&gt;
-                    </div>
+                    <div class="code-block light">resource (subject) + property (predicate) + property value (object)</div>
+                    <p style="margin-top: 12px;">Can be interpreted as:</p>
+                    <div class="code-block light">&lt;subject&gt; has a property &lt;predicate&gt;, whose value is &lt;object&gt;</div>
                 </div>
 
                 <div class="example-box">
                     <h4>Example Statement</h4>
                     <p><strong>Full form:</strong></p>
-                    <div class="code-block" style="font-size: 0.8em;">
-http://www.yuchen.net/photography/SLR#Nikon-D70 has a 
-http://www.yuchen.net/photography/SLR#weight whose value is 1.4 lb
-                    </div>
-                    <p style="margin-top: 15px;"><strong>Using namespace abbreviation:</strong></p>
-                    <div class="code-block">
-mySLR:Nikon-D70 has a mySLR:weight whose value is 1.4 lb
-                    </div>
+                    <div class="code-block" style="font-size: 0.75rem;">http://www.yuchen.net/photography/SLR#Nikon-D70 has a 
+http://www.yuchen.net/photography/SLR#weight whose value is 1.4 lb</div>
+                    <p style="margin-top: 12px;"><strong>Using namespace abbreviation:</strong></p>
+                    <div class="code-block">mySLR:Nikon-D70 has a mySLR:weight whose value is 1.4 lb</div>
                 </div>
 
                 <div class="highlight-box">
@@ -979,22 +889,22 @@ mySLR:Nikon-D70 has a mySLR:weight whose value is 1.4 lb
 
                 <div class="interactive-demo">
                     <h3>Interactive Query Demo</h3>
-                    <p style="color: #e0e0e0; margin-bottom: 15px;">Question: What properties did we define for Nikon D70?</p>
+                    <p style="color: #475569; margin-bottom: 12px;">Question: What properties did we define for Nikon D70?</p>
                     <button class="demo-btn" onclick="runQuery()"><span>Execute Query</span></button>
                     <div class="demo-output" id="queryOutput">
-                        <h4 style="color: #00ff88; margin-bottom: 10px;">Query Results:</h4>
-                        <div style="padding: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; margin-top: 10px;">
-                            <p><strong style="color: #00ff88;">Properties found:</strong></p>
-                            <ul>
-                                <li>mySLR:weight</li>
-                                <li>mySLR:pixel</li>
+                        <h4>Query Results:</h4>
+                        <div style="padding: 12px; background: white; border-radius: 6px; margin-top: 8px; border: 1px solid #e2e8f0;">
+                            <p><strong style="color: #3b82f6;">Properties found:</strong></p>
+                            <ul style="margin-left: 20px; margin-top: 8px;">
+                                <li style="color: #475569;">mySLR:weight</li>
+                                <li style="color: #475569;">mySLR:pixel</li>
                             </ul>
                         </div>
-                        <p style="margin-top: 15px; font-style: italic;">The machine can perform useful work based on the RDF statements!</p>
+                        <p style="margin-top: 12px; font-style: italic; color: #64748b;">The machine can perform useful work based on the RDF statements!</p>
                     </div>
                 </div>
 
-                <div class="highlight-box" style="margin-top: 20px;">
+                <div class="highlight-box" style="margin-top: 16px;">
                     <h3>The Power of Structured Data</h3>
                     <p>Even with simple statements, machines can draw inferences and answer questions without understanding the specific meaning of the content.</p>
                 </div>
@@ -1078,15 +988,13 @@ mySLR:Nikon-D70 has a mySLR:weight whose value is 1.4 lb
             <div class="slide-content">
                 <div class="example-box">
                     <h4>Simple RDF Document</h4>
-                    <div class="code-block" style="font-size: 0.85em;">
-&lt;?xml version="1.0"?&gt;
+                    <div class="code-block" style="font-size: 0.8rem;">&lt;?xml version="1.0"?&gt;
 &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns="http://www.yuchen.net/photography/Camera#"&gt;
     &lt;SLR rdf:ID="Nikon-D70"&gt;
         &lt;weight&gt;1.4 lbs&lt;/weight&gt;
     &lt;/SLR&gt;
-&lt;/rdf:RDF&gt;
-                    </div>
+&lt;/rdf:RDF&gt;</div>
                 </div>
 
                 <div class="content-block">
@@ -1103,10 +1011,8 @@ mySLR:Nikon-D70 has a mySLR:weight whose value is 1.4 lb
                 <div class="highlight-box">
                     <h3>Resource URI Construction</h3>
                     <p>The complete URI for the subject is constructed as:</p>
-                    <div class="code-block" style="background: rgba(0, 255, 136, 0.1); color: #e0e0e0;">
-document-location + "#" + rdf:ID value
-                    </div>
-                    <p style="margin-top: 15px;">Result: <code>http://www.yuchen.net/rdf/NikonD70.rdf#Nikon-D70</code></p>
+                    <div class="code-block light">document-location + "#" + rdf:ID value</div>
+                    <p style="margin-top: 12px;">Result: <code>http://www.yuchen.net/rdf/NikonD70.rdf#Nikon-D70</code></p>
                 </div>
             </div>
         </div>
@@ -1121,23 +1027,19 @@ document-location + "#" + rdf:ID value
                 <div class="comparison-grid">
                     <div class="comparison-card traditional">
                         <h3>Short Form (Abbreviated)</h3>
-                        <div class="code-block" style="font-size: 0.75em;">
-&lt;SLR rdf:about="...#Nikon-D70"&gt;
+                        <div class="code-block" style="font-size: 0.7rem;">&lt;SLR rdf:about="...#Nikon-D70"&gt;
     &lt;weight&gt;1.4 lbs&lt;/weight&gt;
-&lt;/SLR&gt;
-                        </div>
+&lt;/SLR&gt;</div>
                     </div>
 
                     <div class="comparison-card semantic">
                         <h3>Long Form (Full)</h3>
-                        <div class="code-block" style="font-size: 0.75em;">
-&lt;rdf:Description 
+                        <div class="code-block" style="font-size: 0.7rem;">&lt;rdf:Description 
     rdf:about="...#Nikon-D70"&gt;
     &lt;rdf:type 
         rdf:resource="...#SLR"/&gt;
     &lt;weight&gt;1.4 lbs&lt;/weight&gt;
-&lt;/rdf:Description&gt;
-                        </div>
+&lt;/rdf:Description&gt;</div>
                     </div>
                 </div>
 
@@ -1172,15 +1074,13 @@ document-location + "#" + rdf:ID value
 
                 <div class="example-box">
                     <h4>Using Blank Nodes for Structured Values</h4>
-                    <div class="code-block" style="font-size: 0.8em;">
-&lt;weight&gt;
+                    <div class="code-block" style="font-size: 0.75rem;">&lt;weight&gt;
     &lt;rdf:Description&gt;
         &lt;rdf:value&gt;1.4&lt;/rdf:value&gt;
         &lt;uom:units rdf:resource="...#lbs"/&gt;
     &lt;/rdf:Description&gt;
-&lt;/weight&gt;
-                    </div>
-                    <p style="margin-top: 15px;">The inner <code>&lt;rdf:Description&gt;</code> has no <code>rdf:about</code> - it's a blank node!</p>
+&lt;/weight&gt;</div>
+                    <p style="margin-top: 12px;">The inner <code>&lt;rdf:Description&gt;</code> has no <code>rdf:about</code> - it's a blank node!</p>
                 </div>
 
                 <div class="content-block">
@@ -1192,9 +1092,9 @@ document-location + "#" + rdf:ID value
                     </ul>
                 </div>
 
-                <div class="highlight-box">
-                    <h3>Important Note</h3>
-                    <p><strong>Anonymous resources cannot be aggregated</strong> because there's no way to identify them across different documents.</p>
+                <div class="highlight-box" style="background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%); border-color: #fcd34d;">
+                    <h3 style="color: #92400e;">Important Note</h3>
+                    <p style="color: #78350f;"><strong>Anonymous resources cannot be aggregated</strong> because there's no way to identify them across different documents.</p>
                 </div>
             </div>
         </div>
@@ -1210,24 +1110,20 @@ document-location + "#" + rdf:ID value
                     <h3>The Problem with Untyped Literals</h3>
                     <p>Without explicit type information, we can't be sure how to interpret values:</p>
                     <div class="code-block">&lt;rdf:value&gt;1.4&lt;/rdf:value&gt;</div>
-                    <p style="margin-top: 10px;">Is this a decimal? A string? An integer with a typo?</p>
+                    <p style="margin-top: 8px;">Is this a decimal? A string? An integer with a typo?</p>
                 </div>
 
                 <div class="example-box">
                     <h4>Using rdf:datatype</h4>
-                    <div class="code-block" style="font-size: 0.85em;">
-&lt;rdf:value rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal"&gt;
+                    <div class="code-block" style="font-size: 0.8rem;">&lt;rdf:value rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal"&gt;
     1.4
-&lt;/rdf:value&gt;
-                    </div>
-                    <p style="margin-top: 15px;"><strong>Better with XML entities:</strong></p>
-                    <div class="code-block" style="font-size: 0.85em;">
-&lt;!DOCTYPE rdf:RDF [
+&lt;/rdf:value&gt;</div>
+                    <p style="margin-top: 12px;"><strong>Better with XML entities:</strong></p>
+                    <div class="code-block" style="font-size: 0.8rem;">&lt;!DOCTYPE rdf:RDF [
     &lt;!ENTITY xsd "http://www.w3.org/2001/XMLSchema#"&gt;
 ]&gt;
 
-&lt;rdf:value rdf:datatype="&amp;xsd;decimal"&gt;1.4&lt;/rdf:value&gt;
-                    </div>
+&lt;rdf:value rdf:datatype="&amp;xsd;decimal"&gt;1.4&lt;/rdf:value&gt;</div>
                 </div>
 
                 <div class="key-points">
@@ -1252,19 +1148,19 @@ document-location + "#" + rdf:ID value
                 <div class="rule-box">
                     <h4>Rule #1: Global Naming</h4>
                     <p>The name of a resource must be <strong>global</strong>. If you have a doubt that someone else might use the same name to refer to something else, then you cannot use that name.</p>
-                    <p style="margin-top: 10px;"><em>This ensures that the same URI always refers to the same concept everywhere.</em></p>
+                    <p style="margin-top: 8px;"><em>This ensures that the same URI always refers to the same concept everywhere.</em></p>
                 </div>
 
                 <div class="rule-box">
                     <h4>Rule #2: Statement Structure</h4>
                     <p>Knowledge is expressed as a statement in the form of <strong>subject-predicate-object</strong>, and this order should never be changed.</p>
-                    <p style="margin-top: 10px;"><em>This fixed structure enables machines to process and understand RDF statements.</em></p>
+                    <p style="margin-top: 8px;"><em>This fixed structure enables machines to process and understand RDF statements.</em></p>
                 </div>
 
                 <div class="rule-box">
                     <h4>Rule #3: Open World - Anyone Can Say Anything</h4>
                     <p>I can talk about <strong>any resource</strong> at my will. If I choose to use an existing URI to identify the resource I am talking about, then:</p>
-                    <ul style="margin-top: 10px;">
+                    <ul>
                         <li>The resource I'm describing and the existing resource represent <strong>exactly the same concept</strong></li>
                         <li>Everything I say about this resource is considered <strong>additional knowledge</strong></li>
                     </ul>
@@ -1296,32 +1192,26 @@ document-location + "#" + rdf:ID value
 
                 <div class="example-box">
                     <h4>Step 1: Define Common URIs</h4>
-                    <div class="code-block" style="font-size: 0.85em;">
-http://www.yuchen.net/rdf/NikonD70.rdf#Nikon-D70
-http://www.yuchen.net/rdf/Canon20D.rdf#Canon-20D
-                    </div>
-                    <p style="margin-top: 10px;">Share these URIs with all vendors and reviewers</p>
+                    <div class="code-block" style="font-size: 0.8rem;">http://www.yuchen.net/rdf/NikonD70.rdf#Nikon-D70
+http://www.yuchen.net/rdf/Canon20D.rdf#Canon-20D</div>
+                    <p style="margin-top: 8px;">Share these URIs with all vendors and reviewers</p>
                 </div>
 
                 <div class="comparison-grid">
                     <div class="comparison-card semantic">
                         <h3>Vendor RDF</h3>
-                        <div class="code-block" style="font-size: 0.7em;">
-&lt;rdf:Description 
+                        <div class="code-block" style="font-size: 0.65rem;">&lt;rdf:Description 
   rdf:about="...#Nikon-D70"&gt;
   &lt;itemSold&gt;12&lt;/itemSold&gt;
-&lt;/rdf:Description&gt;
-                        </div>
+&lt;/rdf:Description&gt;</div>
                     </div>
 
                     <div class="comparison-card semantic">
                         <h3>Reviewer RDF</h3>
-                        <div class="code-block" style="font-size: 0.7em;">
-&lt;rdf:Description 
+                        <div class="code-block" style="font-size: 0.65rem;">&lt;rdf:Description 
   rdf:about="...#Nikon-D70"&gt;
   &lt;review&gt;Excellent!&lt;/review&gt;
-&lt;/rdf:Description&gt;
-                        </div>
+&lt;/rdf:Description&gt;</div>
                     </div>
                 </div>
 
@@ -1365,8 +1255,7 @@ http://www.yuchen.net/rdf/Canon20D.rdf#Canon-20D
 
                 <div class="example-box">
                     <h4>XML Ambiguity Example</h4>
-                    <div class="code-block" style="font-size: 0.75em;">
-&lt;!-- Three different ways in XML --&gt;
+                    <div class="code-block" style="font-size: 0.7rem;">&lt;!-- Three different ways in XML --&gt;
 &lt;author&gt;
   &lt;firstName&gt;Liyang&lt;/firstName&gt;
   &lt;lastName&gt;Yu&lt;/lastName&gt;
@@ -1376,18 +1265,15 @@ http://www.yuchen.net/rdf/Canon20D.rdf#Canon-20D
 &lt;author&gt;
   &lt;name&gt;Liyang Yu&lt;/name&gt;
   &lt;book&gt;Intro to Semantic Web&lt;/book&gt;
-&lt;/author&gt;
-                    </div>
+&lt;/author&gt;</div>
                 </div>
 
                 <div class="example-box">
                     <h4>RDF: One Clear Way</h4>
-                    <div class="code-block" style="font-size: 0.75em;">
-&lt;rdf:Description rdf:about="http://...#semanticweb"&gt;
+                    <div class="code-block" style="font-size: 0.7rem;">&lt;rdf:Description rdf:about="http://...#semanticweb"&gt;
     &lt;dc:title&gt;Introduction to the Semantic Web&lt;/dc:title&gt;
     &lt;dc:creator&gt;Liyang Yu&lt;/dc:creator&gt;
-&lt;/rdf:Description&gt;
-                    </div>
+&lt;/rdf:Description&gt;</div>
                 </div>
 
                 <div class="highlight-box">
@@ -1423,8 +1309,7 @@ http://www.yuchen.net/rdf/Canon20D.rdf#Canon-20D
 
                 <div class="example-box">
                     <h4>Using Dublin Core in RDF</h4>
-                    <div class="code-block" style="font-size: 0.8em;">
-&lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                    <div class="code-block" style="font-size: 0.75rem;">&lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;
     
     &lt;rdf:Description rdf:about="http://...#Nikon-D70"&gt;
@@ -1433,8 +1318,7 @@ http://www.yuchen.net/rdf/Canon20D.rdf#Canon-20D
         &lt;dc:title&gt;Nikon D70 Camera Information&lt;/dc:title&gt;
     &lt;/rdf:Description&gt;
     
-&lt;/rdf:RDF&gt;
-                    </div>
+&lt;/rdf:RDF&gt;</div>
                 </div>
 
                 <div class="highlight-box">
@@ -1479,9 +1363,9 @@ http://www.yuchen.net/rdf/Canon20D.rdf#Canon-20D
                     <p>To fully realize the Semantic Web vision, we need to add <strong>vocabularies and schemas</strong> that define the meaning of classes and properties. This is where <strong>RDFS (RDF Schema)</strong> and <strong>OWL (Web Ontology Language)</strong> come in!</p>
                 </div>
 
-                <div class="content-block" style="text-align: center; margin-top: 30px;">
-                    <h3 style="color: #00ff88;">Thank you!</h3>
-                    <p style="font-size: 1.1em; margin-top: 15px;">RDF is the foundation - now you're ready to build on it.</p>
+                <div class="content-block" style="text-align: center; margin-top: 24px;">
+                    <h3 style="color: #3b82f6;">Thank you!</h3>
+                    <p style="font-size: 1rem; margin-top: 12px;">RDF is the foundation - now you're ready to build on it.</p>
                 </div>
             </div>
         </div>
@@ -1502,19 +1386,6 @@ http://www.yuchen.net/rdf/Canon20D.rdf#Canon-20D
     </div>
 
     <script>
-        // Create floating particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
-
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
         const totalSlides = slides.length;
@@ -1571,7 +1442,6 @@ http://www.yuchen.net/rdf/Canon20D.rdf#Canon-20D
         }
 
         // Initialize
-        createParticles();
         updateSlideCounter();
         updateProgressBar();
         updateNavigationButtons();

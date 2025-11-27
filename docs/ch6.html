@@ -4,98 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validating Your OWL Ontology</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0e27;
-            overflow: hidden;
-            height: 100vh;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #f8fafc; 
+            color: #334155; 
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            padding: 2rem;
         }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
 
-        /* Animated Background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(138, 43, 226, 0.06) 0%, transparent 50%);
-            z-index: -1;
-            animation: backgroundShift 15s ease-in-out infinite;
-        }
-
-        @keyframes backgroundShift {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 0.8; }
-        }
-
-        /* Floating particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: rgba(0, 255, 136, 0.3);
-            border-radius: 50%;
-            animation: float 20s infinite;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(100px);
-                opacity: 0;
-            }
-        }
-
+        /* Presentation Container */
         .presentation-container {
             width: 960px;
             height: 720px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            box-shadow: 
-                0 20px 60px rgba(0,0,0,0.5),
-                0 0 40px rgba(0, 255, 136, 0.1);
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            border-radius: 20px;
-            z-index: 10;
         }
 
+        /* Slides */
         .slide {
             width: 100%;
             height: 100%;
@@ -104,9 +40,10 @@
             left: 0;
             opacity: 0;
             transform: translateX(100%);
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
+            background: white;
         }
 
         .slide.active {
@@ -119,79 +56,53 @@
             transform: translateX(-100%);
         }
 
+        /* Slide Header */
         .slide-header {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.15));
-            padding: 30px 40px;
-            border-bottom: 2px solid rgba(0, 255, 136, 0.5);
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            padding: 24px 40px;
+            border-bottom: 1px solid #e2e8f0;
             flex-shrink: 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .slide-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #00ff88, transparent);
-            animation: scanline 3s linear infinite;
-        }
-
-        @keyframes scanline {
-            0% { left: -100%; }
-            100% { left: 100%; }
         }
 
         .slide-header h1 {
-            color: #00ff88;
-            font-size: 2.2em;
-            margin-bottom: 5px;
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            color: #1e293b;
+            font-size: 1.75rem;
             font-weight: 700;
-            letter-spacing: -0.5px;
+            margin-bottom: 4px;
         }
 
         .slide-header .subtitle {
-            color: #b4b4b4;
-            font-size: 1em;
-            opacity: 0.9;
-            font-weight: 300;
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
         }
 
+        /* Slide Content */
         .slide-content {
             flex: 1;
             overflow-y: auto;
-            padding: 40px 50px;
-            background: rgba(10, 14, 39, 0.5);
+            padding: 32px 40px;
         }
 
         .slide-content::-webkit-scrollbar {
-            width: 10px;
+            width: 8px;
         }
 
         .slide-content::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
+            background: #f1f5f9;
+            border-radius: 8px;
         }
 
         .slide-content::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #00ff88, #00d4ff);
-            border-radius: 10px;
+            background: #cbd5e1;
+            border-radius: 8px;
         }
 
         .slide-content::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, #00d4ff, #00ff88);
+            background: #94a3b8;
         }
 
         /* Title Slide */
-        .slide-1 {
-            background: 
-                radial-gradient(circle at 30% 40%, rgba(0, 255, 136, 0.15) 0%, transparent 60%),
-                radial-gradient(circle at 70% 60%, rgba(0, 212, 255, 0.1) 0%, transparent 60%);
-        }
-
         .slide-1 .slide-content {
             display: flex;
             flex-direction: column;
@@ -199,134 +110,115 @@
             align-items: center;
             text-align: center;
             padding: 60px;
-            overflow: visible;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         }
 
         .slide-1 h1 {
-            font-size: 3em;
-            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 20px;
-            animation: fadeInDown 1s ease-out, gradientShift 8s ease infinite;
-            background-size: 200% 200%;
+            margin-bottom: 16px;
             font-weight: 800;
-            letter-spacing: -2px;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+            letter-spacing: -1px;
+            animation: fadeInDown 0.8s ease-out;
         }
 
         .slide-1 h2 {
-            font-size: 1.6em;
-            color: #ffffff;
-            margin-bottom: 20px;
-            opacity: 0.95;
-            animation: fadeInUp 1s ease-out 0.3s both;
-            font-weight: 300;
+            font-size: 1.25rem;
+            color: #475569;
+            margin-bottom: 16px;
+            font-weight: 400;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
         }
 
         .slide-1 h3 {
-            font-size: 1.3em;
-            color: #00ff88;
-            animation: fadeInUp 1s ease-out 0.6s both;
-            font-weight: 500;
+            font-size: 1rem;
+            color: #3b82f6;
+            font-weight: 600;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
         }
 
+        /* Content Block */
         .content-block {
-            background: rgba(0, 255, 136, 0.05);
-            backdrop-filter: blur(10px);
-            border-left: 4px solid #00ff88;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 12px;
-            color: #ffffff;
-            border: 1px solid rgba(0, 255, 136, 0.2);
-            transition: all 0.3s ease;
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.2s ease;
         }
 
         .content-block:hover {
-            background: rgba(0, 255, 136, 0.08);
-            border-left-width: 6px;
-            transform: translateX(5px);
+            background: #f1f5f9;
+            transform: translateX(4px);
         }
 
         .content-block h3 {
-            color: #00ff88;
-            font-size: 1.4em;
-            margin-bottom: 15px;
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 8px;
             font-weight: 600;
         }
 
         .content-block p, .content-block li {
-            color: #e0e0e0;
-            line-height: 1.7;
-            font-size: 1.05em;
+            color: #475569;
+            line-height: 1.6;
+            font-size: 0.9375rem;
         }
 
+        /* Highlight Box */
         .highlight-box {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
-            border: 2px solid rgba(0, 255, 136, 0.3);
-            padding: 25px;
-            margin: 20px 0;
-            border-radius: 15px;
-            color: #ffffff;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .highlight-box::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(
-                transparent,
-                rgba(0, 255, 136, 0.05),
-                transparent 30%
-            );
-            animation: rotate 4s linear infinite;
-        }
-
-        @keyframes rotate {
-            100% { transform: rotate(1turn); }
-        }
-
-        .highlight-box > * {
-            position: relative;
-            z-index: 1;
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            border: 1px solid #c7d2fe;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
         }
 
         .highlight-box h3 {
-            color: #00ff88;
-            font-size: 1.3em;
-            margin-bottom: 12px;
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 10px;
             font-weight: 600;
+        }
+
+        .highlight-box p {
+            color: #475569;
+            line-height: 1.6;
         }
 
         .highlight-box strong {
-            color: #00ff88;
+            color: #3b82f6;
         }
 
+        .highlight-box ul {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+
+        .highlight-box li {
+            color: #475569;
+            font-size: 0.9375rem;
+            margin: 6px 0;
+        }
+
+        /* Key Points */
         .key-points {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(0, 212, 255, 0.08));
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin: 20px 0;
-            border: 2px solid rgba(0, 255, 136, 0.3);
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .key-points h3 {
-            color: #00ff88;
-            margin-bottom: 15px;
+            color: #1e293b;
+            margin-bottom: 12px;
             font-weight: 600;
+            font-size: 1rem;
         }
 
         .key-points ul {
@@ -335,197 +227,211 @@
         }
 
         .key-points li {
-            padding: 10px 0;
-            padding-left: 30px;
+            padding: 8px 0;
+            padding-left: 24px;
             position: relative;
-            color: #e0e0e0;
-            transition: all 0.3s ease;
+            color: #475569;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
         }
 
         .key-points li::before {
             content: "▸";
             position: absolute;
             left: 0;
+            color: #3b82f6;
             font-weight: bold;
-            font-size: 1.2em;
-            color: #00ff88;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .key-points li:hover {
-            padding-left: 35px;
-            color: #ffffff;
+            padding-left: 28px;
+            color: #1e293b;
         }
 
         .key-points li:hover::before {
-            color: #00d4ff;
-            transform: translateX(3px);
+            color: #2563eb;
+            transform: translateX(2px);
         }
 
+        /* Code Block */
         .code-block {
-            background: rgba(0, 0, 0, 0.7);
-            color: #00ff88;
-            padding: 20px;
-            border-radius: 12px;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px 20px;
+            border-radius: 8px;
             overflow-x: auto;
-            margin: 20px 0;
-            font-family: 'Courier New', monospace;
+            margin: 16px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.6;
             position: relative;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            font-size: 0.85em;
+            white-space: pre-wrap;
         }
 
+        /* Tool Grid */
         .tool-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
+            gap: 16px;
+            margin: 16px 0;
         }
 
         .tool-card {
-            background: rgba(0, 255, 136, 0.05);
-            border: 2px solid rgba(0, 255, 136, 0.3);
+            background: white;
+            border: 1px solid #e2e8f0;
             padding: 20px;
             border-radius: 12px;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .tool-card:hover {
-            background: rgba(0, 255, 136, 0.1);
+            border-color: #3b82f6;
             transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.2);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.12);
         }
 
         .tool-card h4 {
-            color: #00ff88;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+            color: #3b82f6;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            font-weight: 600;
         }
 
         .tool-card p {
-            color: #e0e0e0;
-            font-size: 0.95em;
+            color: #475569;
+            font-size: 0.875rem;
             line-height: 1.5;
         }
 
+        .tool-card p:first-of-type {
+            color: #64748b;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        /* Controls */
         .controls {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
+            bottom: 24px;
+            right: 24px;
             display: flex;
-            gap: 15px;
+            gap: 12px;
             z-index: 100;
         }
 
         .control-btn {
-            width: 50px;
-            height: 50px;
-            border: 2px solid #00ff88;
+            width: 44px;
+            height: 44px;
+            border: 1px solid #e2e8f0;
             border-radius: 50%;
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
-            backdrop-filter: blur(10px);
-            color: #00ff88;
-            font-size: 1.5em;
+            background: white;
+            color: #475569;
+            font-size: 1.25rem;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .control-btn:hover {
-            transform: scale(1.1);
-            background: linear-gradient(135deg, #00ff88, #00d4ff);
-            color: #000000;
-            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
+        .control-btn:hover:not(:disabled) {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .control-btn:disabled {
-            opacity: 0.3;
+            opacity: 0.4;
             cursor: not-allowed;
-            transform: scale(1);
         }
 
-        .control-btn:disabled:hover {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
-            color: #00ff88;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        /* Slide Counter */
+        .slide-counter {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            z-index: 100;
         }
 
+        /* Progress Bar */
         .progress-bar {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 5px;
-            background: rgba(0, 0, 0, 0.3);
+            height: 4px;
+            background: #f1f5f9;
             z-index: 100;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
             transition: width 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
         }
 
-        .slide-counter {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
-            backdrop-filter: blur(10px);
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-weight: bold;
-            color: #00ff88;
-            border: 2px solid rgba(0, 255, 136, 0.5);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            z-index: 100;
-        }
-
+        /* Animations */
         @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Typography */
         ul {
-            margin-left: 25px;
+            margin-left: 20px;
         }
 
         li {
-            margin: 10px 0;
-            color: #e0e0e0;
+            margin: 8px 0;
+            color: #475569;
             line-height: 1.6;
+            font-size: 0.9375rem;
         }
 
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #3b82f6;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+        }
+
+        strong {
+            color: #1e293b;
+        }
+
+        /* Responsive */
         @media (max-width: 1024px) {
+            body {
+                padding: 0;
+            }
             .presentation-container {
                 width: 100vw;
-                height: 75vw;
-                max-height: 100vh;
+                height: 100vh;
                 border-radius: 0;
             }
-
             .slide-content {
-                padding: 30px 40px;
+                padding: 24px;
             }
-
             .tool-grid {
                 grid-template-columns: 1fr;
             }
@@ -533,15 +439,12 @@
     </style>
 </head>
 <body>
-    <!-- Particles background -->
-    <div class="particles" id="particles"></div>
-
     <div class="presentation-container">
         <!-- Slide 1: Title -->
         <div class="slide slide-1 active">
             <div class="slide-content">
                 <h1>Validating Your OWL Ontology</h1>
-                <h2>Development Tools & Best Practices</h2>
+                <h2>Chapter 6: Development Tools & Best Practices</h2>
                 <h3>Eng. Dr. Tiroshan Madushanka</h3>
             </div>
         </div>
@@ -623,26 +526,26 @@
 
                 <div class="tool-grid">
                     <div class="tool-card">
-                        <h4>Protégé</h4>
-                        <p><strong>http://protege.stanford.edu/</strong></p>
+                        <h4>🦉 Protégé</h4>
+                        <p>http://protege.stanford.edu/</p>
                         <p style="margin-top: 8px;">Protégé-OWL editor: Create ontology documents in a variety of formats. One of the most popular and full-featured editors.</p>
                     </div>
 
                     <div class="tool-card">
-                        <h4>Swoop</h4>
-                        <p><strong>http://www.mindswap.org/2004/SWOOP/</strong></p>
+                        <h4>🔍 Swoop</h4>
+                        <p>http://www.mindswap.org/2004/SWOOP/</p>
                         <p style="margin-top: 8px;">Swoop ontology editor with browser-like interface and excellent visualization capabilities.</p>
                     </div>
 
                     <div class="tool-card">
-                        <h4>OilEd</h4>
-                        <p><strong>http://oiled.man.ac.uk/</strong></p>
+                        <h4>🛢️ OilEd</h4>
+                        <p>http://oiled.man.ac.uk/</p>
                         <p style="margin-top: 8px;">Editor specifically designed for ontology documents with focus on OWL.</p>
                     </div>
 
                     <div class="tool-card">
-                        <h4>RDF Instance Creator</h4>
-                        <p><strong>http://www.mindswap.org</strong></p>
+                        <h4>📝 RDF Instance Creator</h4>
+                        <p>http://www.mindswap.org</p>
                         <p style="margin-top: 8px;">Create RDF statements from existing ontologies, making instance creation easier.</p>
                     </div>
                 </div>
@@ -663,26 +566,26 @@
 
                 <div class="tool-grid">
                     <div class="tool-card">
-                        <h4>W3C RDF Validation Service</h4>
-                        <p><strong>http://www.w3.org/RDF/Validator/</strong></p>
+                        <h4>✅ W3C RDF Validation Service</h4>
+                        <p>http://www.w3.org/RDF/Validator/</p>
                         <p style="margin-top: 8px;">Official RDF document validation provided by W3C. We used this in Chapter 3.</p>
                     </div>
 
                     <div class="tool-card">
-                        <h4>OWL Ontology Validator</h4>
-                        <p><strong>http://phoebus.cs.man.ac.uk:9999/OWL/Validator</strong></p>
+                        <h4>🔬 OWL Ontology Validator</h4>
+                        <p>http://phoebus.cs.man.ac.uk:9999/OWL/Validator</p>
                         <p style="margin-top: 8px;">OWL ontology validator developed by University of Manchester. Quite commonly used and comprehensive.</p>
                     </div>
 
                     <div class="tool-card">
-                        <h4>OWL Validator (VOWLidator)</h4>
-                        <p><strong>http://projects.semwebcentral.org/projects/vowlidator/</strong></p>
+                        <h4>🧪 OWL Validator (VOWLidator)</h4>
+                        <p>http://projects.semwebcentral.org/projects/vowlidator/</p>
                         <p style="margin-top: 8px;">Another OWL validation tool with good error reporting.</p>
                     </div>
 
                     <div class="tool-card">
-                        <h4>SMORE</h4>
-                        <p><strong>Markup Tool</strong></p>
+                        <h4>🏷️ SMORE</h4>
+                        <p>Markup Tool</p>
                         <p style="margin-top: 8px;">Creates OWL markup for HTML Web pages, helping add semantic metadata to existing content.</p>
                     </div>
                 </div>
@@ -704,32 +607,32 @@
 
                 <div class="tool-grid">
                     <div class="tool-card">
-                        <h4>Jena</h4>
-                        <p><strong>http://jena.sourceforge.net/</strong></p>
+                        <h4>☕ Jena</h4>
+                        <p>http://jena.sourceforge.net/</p>
                         <p style="margin-top: 8px;">Developed by HP Labs. Java framework providing support for RDF, RDFS, and OWL with built-in reasoning engine. Excellent documentation!</p>
                     </div>
 
                     <div class="tool-card">
-                        <h4>Pellet</h4>
-                        <p><strong>http://www.mindswap.org/2003/pellet/</strong></p>
+                        <h4>💎 Pellet</h4>
+                        <p>http://www.mindswap.org/2003/pellet/</p>
                         <p style="margin-top: 8px;">Open-source Java-based OWL DL reasoner provided by Mindswap. Fast and complete reasoning.</p>
                     </div>
 
                     <div class="tool-card">
-                        <h4>Sesame</h4>
-                        <p><strong>http://www.openrdf.org/</strong></p>
+                        <h4>🌊 Sesame</h4>
+                        <p>http://www.openrdf.org/</p>
                         <p style="margin-top: 8px;">Provides support for RDF schema reasoning with excellent storage and query capabilities.</p>
                     </div>
 
                     <div class="tool-card">
-                        <h4>Euler</h4>
-                        <p><strong>http://www.agfa.com/w3c/euler/</strong></p>
+                        <h4>🔢 Euler</h4>
+                        <p>http://www.agfa.com/w3c/euler/</p>
                         <p style="margin-top: 8px;">Inference engine supporting logic-based proof methods and reasoning.</p>
                     </div>
                 </div>
 
-                <div class="highlight-box" style="margin-top: 20px;">
-                    <h3>Redland - Storage & Query</h3>
+                <div class="highlight-box" style="margin-top: 16px;">
+                    <h3>📦 Redland - Storage & Query</h3>
                     <p><strong>http://librdf.org/</strong></p>
                     <p style="margin-top: 10px;">Capable of manipulating triples, URIs, and graphs. Provides rich API for application development. While inference engines can handle storage/query, Redland specializes in it.</p>
                 </div>
@@ -753,13 +656,11 @@
                     </ul>
                 </div>
 
-                <div class="code-block">
-&lt;owl:Class rdf:ID="PointAndShoot"&gt;
+                <div class="code-block">&lt;owl:Class rdf:ID="PointAndShoot"&gt;
   &lt;rdfs:subClassOf rdf:resource="#Digital"/&gt;
 &lt;/owl:Class&gt;
 
-&lt;!-- Digital class must be defined somewhere! --&gt;
-                </div>
+&lt;!-- Digital class must be defined somewhere! --&gt;</div>
 
                 <div class="content-block">
                     <h3>Part 2: Semantic Validation</h3>
@@ -800,7 +701,7 @@
                     <h3>Two Input Methods</h3>
                     <p><strong>1. Direct Input:</strong> Cut-and-paste your OWL document into the RDF window</p>
                     <p style="margin-top: 8px;"><strong>2. URL Input:</strong> Specify a link pointing to your OWL ontology document</p>
-                    <p style="margin-top: 15px; color: #00ff88;">💡 During development, direct input is often preferred - no need to upload to web server until stable!</p>
+                    <p style="margin-top: 15px; color: #3b82f6;">💡 During development, direct input is often preferred - no need to upload to web server until stable!</p>
                 </div>
 
                 <div class="key-points">
@@ -835,8 +736,7 @@
                     <p style="margin-top: 8px;"><strong>4. Property Summary:</strong> All defined properties with domains/ranges</p>
                 </div>
 
-                <div class="code-block">
-&lt;!-- Example: Our Camera Ontology Result --&gt;
+                <div class="code-block">&lt;!-- Example: Our Camera Ontology Result --&gt;
 Input file: Camera.owl
 OWL Species: Full
 DL Expressivity: SROIF(D)
@@ -854,8 +754,7 @@ Classification:
   ○ camera:Person
     ■ camera:Photographer
       • camera:Professional
-      • camera:Amateur
-                </div>
+      • camera:Amateur</div>
             </div>
         </div>
 
@@ -872,8 +771,7 @@ Classification:
                     <p style="margin-top: 10px;">Shows complete structure including all classes and properties defined in your ontology. Helps confirm the ontology expresses what you intended.</p>
                 </div>
 
-                <div class="code-block" style="font-size: 0.75em;">
-Namespace(rdf = &lt;http://www.w3.org/.../rdf-syntax-ns#&gt;)
+                <div class="code-block" style="font-size: 0.75rem;">Namespace(rdf = &lt;http://www.w3.org/.../rdf-syntax-ns#&gt;)
 Namespace(owl = &lt;http://www.w3.org/2002/07/owl#&gt;)
 Namespace(a = &lt;http://www.yuchen.net/photography/Camera.owl#&gt;)
 
@@ -898,8 +796,7 @@ Ontology( &lt;http://www.yuchen.net/photography/Camera.owl&gt;
   
   DisjointClasses(a:SLR a:PointAndShoot)
   DisjointClasses(a:Professional a:Amateur)
-)
-                </div>
+)</div>
 
                 <div class="highlight-box">
                     <h3>Rich Semantics Confirmed</h3>
@@ -957,18 +854,15 @@ Ontology( &lt;http://www.yuchen.net/photography/Camera.owl&gt;
                     <p>Typical imports when working with Jena ontology APIs:</p>
                 </div>
 
-                <div class="code-block">
-import com.hp.hpl.jena.ontology.*;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-                </div>
+                <div class="code-block">import com.hp.hpl.jena.ontology.*;
+import com.hp.hpl.jena.rdf.model.ModelFactory;</div>
 
                 <div class="content-block">
                     <h3>CLASSPATH Configuration</h3>
                     <p>Must set CLASSPATH to include all Jena JAR files. Example from .cshrc file:</p>
                 </div>
 
-                <div class="code-block" style="font-size: 0.8em;">
-setenv CLASSPATH $JENA_DIR/lib/antlr.jar:
+                <div class="code-block" style="font-size: 0.75rem;">setenv CLASSPATH $JENA_DIR/lib/antlr.jar:
                  $JENA_DIR/lib/commons-logging.jar:
                  $JENA_DIR/lib/concurrent.jar:
                  $JENA_DIR/lib/icu4j.jar:
@@ -977,8 +871,7 @@ setenv CLASSPATH $JENA_DIR/lib/antlr.jar:
                  $JENA_DIR/lib/junit.jar:
                  $JENA_DIR/lib/log4j-1.2.7.jar:
                  $JENA_DIR/lib/xercesImpl.jar:
-                 $JENA_DIR/lib/xml-apis.jar:.
-                </div>
+                 $JENA_DIR/lib/xml-apis.jar:.</div>
 
                 <div class="highlight-box">
                     <h3>Important Note</h3>
@@ -1015,7 +908,7 @@ setenv CLASSPATH $JENA_DIR/lib/antlr.jar:
                         <li><strong>Enumerate classes:</strong> Call API to list all defined classes</li>
                         <li><strong>List properties:</strong> Call API to show all properties</li>
                     </ul>
-                    <p style="margin-top: 15px; color: #00ff88;">These steps aren't required for validation but satisfy curiosity and provide viewing pleasure! 😊</p>
+                    <p style="margin-top: 15px; color: #3b82f6;">These steps aren't required for validation but satisfy curiosity and provide viewing pleasure! 😊</p>
                 </div>
 
                 <div class="content-block">
@@ -1037,8 +930,7 @@ setenv CLASSPATH $JENA_DIR/lib/antlr.jar:
                     <p>After Jena reads your ontology, it <strong>converts to long form</strong> - expanding all namespace prefixes to full URIs.</p>
                 </div>
 
-                <div class="code-block" style="font-size: 0.75em;">
-&lt;rdf:RDF
+                <div class="code-block" style="font-size: 0.7rem;">&lt;rdf:RDF
   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
@@ -1066,8 +958,7 @@ setenv CLASSPATH $JENA_DIR/lib/antlr.jar:
     rdf:resource="http://www.yetAnotherOne.com#SingleLensReflex"/&gt;
   &lt;rdfs:subClassOf 
     rdf:resource="http://www.yuchen.net/photography/Camera.owl#Digital"/&gt;
-&lt;/rdf:Description&gt;
-                </div>
+&lt;/rdf:Description&gt;</div>
             </div>
         </div>
 
@@ -1083,8 +974,7 @@ setenv CLASSPATH $JENA_DIR/lib/antlr.jar:
                     <p>Jena can output all classes defined in your ontology - including equivalent classes from other ontologies:</p>
                 </div>
 
-                <div class="code-block" style="font-size: 0.8em;">
-http://www.yuchen.net/photography/Camera.owl#SLR
+                <div class="code-block" style="font-size: 0.8rem;">http://www.yuchen.net/photography/Camera.owl#SLR
 http://www.yuchen.net/photography/Camera.owl#PointAndShoot
 http://www.yuchen.net/photography/Camera.owl#Specifications
 http://www.yuchen.net/photography/Camera.owl#Film
@@ -1097,11 +987,10 @@ http://www.yuchen.net/photography/Camera.owl#Amateur
 http://www.yuchen.net/photography/Camera.owl#Digital
 http://www.yetAnotherOne.com#SingleLensReflex
 http://www.yetAnotherOne.com#DigitalCamera
-http://www.someStandard.org#MegaPixel
-                </div>
+http://www.someStandard.org#MegaPixel</div>
 
                 <div class="highlight-box">
-                    <h3>Validation Confirmed!</h3>
+                    <h3>✅ Validation Confirmed!</h3>
                     <p>Having all these outputs from Jena APIs, we can be assured that our Camera ontology is valid and correctly structured.</p>
                 </div>
 
@@ -1170,17 +1059,6 @@ http://www.someStandard.org#MegaPixel
     </div>
 
     <script>
-        // Initialize particles
-        const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 50; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 20 + 's';
-            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
-            particlesContainer.appendChild(particle);
-        }
-
         // Slide navigation
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
@@ -1228,7 +1106,8 @@ http://www.someStandard.org#MegaPixel
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') {
                 prevBtn.click();
-            } else if (e.key === 'ArrowRight') {
+            } else if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
                 nextBtn.click();
             }
         });

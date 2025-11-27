@@ -4,934 +4,704 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Semantic Web - Lecture Slides</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #f8fafc; 
+            color: #334155; 
+            min-height: 100vh; 
         }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+        a { text-decoration: none; }
 
-        body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0e27;
-            min-height: 100vh;
-            color: #ffffff;
-            overflow-x: hidden;
-            position: relative;
-        }
+        /* Navigation */
+        .nav { background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 50; }
+        .nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+        .nav-logo { display: flex; align-items: center; gap: 0.75rem; }
+        .nav-logo-icon { font-size: 1.5rem; }
+        .nav-logo-title { font-weight: 700; color: #1e293b; font-size: 1.125rem; }
+        .nav-logo-subtitle { font-size: 0.75rem; color: #64748b; }
+        .nav-tabs { display: flex; align-items: center; gap: 0.5rem; }
+        .nav-tab { padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #475569; transition: all 0.15s; }
+        .nav-tab:hover { background: #f1f5f9; }
+        .nav-tab.active { background: #dbeafe; color: #1d4ed8; }
+        .progress-text { font-size: 0.875rem; color: #475569; }
+        .progress-value { font-weight: 700; color: #059669; }
 
-        /* Animated Background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(138, 43, 226, 0.06) 0%, transparent 50%);
-            z-index: -1;
-            animation: backgroundShift 15s ease-in-out infinite;
-        }
+        /* Layout */
+        .main-layout { display: flex; min-height: calc(100vh - 64px); }
+        .sidebar { width: 280px; background: white; border-right: 1px solid #e2e8f0; padding: 1.5rem; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }
+        .main-content { flex: 1; overflow: auto; }
+        .content-area { max-width: 1100px; margin: 0 auto; padding: 2rem; }
 
-        @keyframes backgroundShift {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 0.8; }
-        }
+        /* Sidebar */
+        .sidebar-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
+        .sidebar-title { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .sidebar-title-icon { font-size: 1.25rem; }
+        .sidebar-title-text { font-weight: 700; color: #1e293b; font-size: 1rem; }
+        .sidebar-desc { font-size: 0.875rem; color: #64748b; line-height: 1.5; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 0.25rem; }
+        .sidebar-btn { width: 100%; text-align: left; padding: 0.625rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #475569; transition: all 0.15s; display: flex; align-items: center; gap: 0.5rem; }
+        .sidebar-btn:hover { background: #f8fafc; }
+        .sidebar-btn.active { background: #eff6ff; color: #1d4ed8; }
+        .sidebar-section { margin-top: 1.5rem; }
+        .sidebar-section-title { font-size: 0.75rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; padding-left: 0.75rem; }
+        .week-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #475569; border-radius: 0.375rem; transition: all 0.15s; cursor: pointer; }
+        .week-item:hover { background: #f8fafc; }
+        .week-item.completed { color: #047857; }
+        .week-item.coming-soon { color: #94a3b8; }
+        .week-check { color: #10b981; font-size: 0.875rem; }
+        .week-num { color: #cbd5e1; font-size: 0.75rem; min-width: 1.5rem; }
+        .week-lock { color: #cbd5e1; font-size: 0.75rem; }
 
-        /* Floating particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
+        /* Cards */
+        .card { background: white; border-radius: 0.75rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; }
+        .card-header { padding: 1.5rem; border-bottom: 1px solid #f1f5f9; }
+        .card-body { padding: 1.5rem; }
 
-        .particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: rgba(0, 255, 136, 0.3);
-            border-radius: 50%;
-            animation: float 20s infinite;
-        }
+        /* Header Card */
+        .header-card { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #0ea5e9 100%); color: white; margin-bottom: 2rem; }
+        .header-card .card-body { padding: 3rem 2rem; text-align: center; }
+        .header-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem; letter-spacing: -0.025em; }
+        .header-subtitle { font-size: 1.125rem; opacity: 0.9; margin-bottom: 0.5rem; }
+        .header-instructor { font-size: 1rem; opacity: 0.85; margin-top: 1rem; }
+        .header-badges { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
+        .badge { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; background: rgba(255,255,255,0.2); border-radius: 9999px; font-size: 0.875rem; font-weight: 500; backdrop-filter: blur(4px); }
 
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(100px);
-                opacity: 0;
-            }
-        }
+        /* Buttons */
+        .btn { padding: 0.625rem 1.25rem; border-radius: 0.5rem; font-weight: 500; font-size: 0.875rem; transition: all 0.15s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-outline { background: transparent; color: #3b82f6; border: 1px solid #3b82f6; }
+        .btn-outline:hover { background: #eff6ff; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Glassmorphism Header */
-        header {
-            text-align: center;
-            padding: 80px 40px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 60px;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #00ff88, transparent);
-            animation: scanline 3s linear infinite;
-        }
-
-        @keyframes scanline {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        header h1 {
-            font-size: 4em;
-            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 20px;
-            font-weight: 800;
-            letter-spacing: -2px;
-            animation: gradientShift 8s ease infinite;
-            background-size: 200% 200%;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        header p {
-            font-size: 1.4em;
-            color: #b4b4b4;
-            margin-bottom: 15px;
-            font-weight: 300;
-        }
-
-        .instructor {
-            font-size: 1.2em;
-            color: #00ff88;
-            margin-top: 25px;
-            font-weight: 500;
-        }
-
-        /* Modern Badge Design */
-        .badge {
-            display: inline-block;
-            padding: 8px 20px;
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            border-radius: 25px;
-            font-size: 0.9em;
-            color: #00ff88;
-            margin: 5px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .badge:hover {
-            background: rgba(0, 255, 136, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
-        }
+        /* Info Section */
+        .info-section { margin-bottom: 2rem; }
+        .info-section-title { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .info-section p { color: #64748b; line-height: 1.7; margin-bottom: 0.75rem; font-size: 0.9375rem; }
+        .info-section strong { color: #1e293b; font-weight: 600; }
 
         /* Lectures Grid */
-        .lectures-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 30px;
-            margin-bottom: 60px;
-        }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+        .lectures-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
 
-        .lecture-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            padding: 35px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-
-        .lecture-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(0, 212, 255, 0.05) 100%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .lecture-card:hover::before {
-            opacity: 1;
-        }
-
-        .lecture-card:hover {
-            transform: translateY(-15px) scale(1.02);
-            border-color: rgba(0, 255, 136, 0.5);
-            box-shadow: 
-                0 20px 60px rgba(0, 255, 136, 0.2),
-                0 0 40px rgba(0, 212, 255, 0.1);
-        }
-
-        /* Holographic number effect */
-        .lecture-number {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            font-size: 4em;
-            font-weight: 900;
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            opacity: 0.3;
-            transition: all 0.3s ease;
-        }
-
-        .lecture-card:hover .lecture-number {
-            opacity: 0.6;
-            transform: scale(1.1);
-        }
-
-        .lecture-card h2 {
-            color: #ffffff;
-            font-size: 1.6em;
-            margin-bottom: 15px;
-            font-weight: 700;
-            position: relative;
-            z-index: 1;
-        }
-
-        .lecture-card h2::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(90deg, #00ff88, #00d4ff);
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
-        .lecture-card:hover h2::after {
-            width: 100px;
-        }
-
-        .lecture-card p {
-            color: #a0a0a0;
-            line-height: 1.7;
-            margin-bottom: 25px;
-            font-size: 0.95em;
-        }
-
-        .topics {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 25px;
-        }
-
-        .topics li {
-            padding: 10px 0;
-            padding-left: 30px;
-            position: relative;
-            color: #c0c0c0;
-            font-size: 0.92em;
-            transition: all 0.3s ease;
-        }
-
-        .topics li::before {
-            content: "▸";
-            position: absolute;
-            left: 0;
-            color: #00ff88;
-            font-weight: bold;
-            font-size: 1.2em;
-            transition: all 0.3s ease;
-        }
-
-        .topics li:hover {
-            color: #ffffff;
-            padding-left: 35px;
-        }
-
-        .topics li:hover::before {
-            color: #00d4ff;
-            transform: translateX(3px);
-        }
-
-        /* Futuristic Buttons */
-        .slide-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 25px;
-        }
-
-        .slide-btn {
-            padding: 14px 32px;
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
-            color: #00ff88;
-            text-decoration: none;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            font-weight: 600;
-            font-size: 0.95em;
-            transition: all 0.3s ease;
-            display: inline-block;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .slide-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(0, 255, 136, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .slide-btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .slide-btn:hover {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
-            border-color: #00ff88;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
-        }
-
-        .slide-btn span {
-            position: relative;
-            z-index: 1;
-        }
-
-        .slide-btn.primary {
-            background: linear-gradient(135deg, #00ff88, #00d4ff);
-            color: #000000;
-            border: none;
-        }
-
-        .slide-btn.primary:hover {
-            background: linear-gradient(135deg, #00d4ff, #00ff88);
-            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
-        }
-
-        /* Info Sections */
-        .info-section {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            padding: 40px;
-            margin-bottom: 50px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .info-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(180deg, #00ff88, #00d4ff, #a855f7);
-        }
-
-        .info-section h2 {
-            color: #ffffff;
-            font-size: 2.2em;
-            margin-bottom: 25px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #00ff88, #00d4ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .info-section p {
-            color: #b0b0b0;
-            line-height: 1.9;
-            margin-bottom: 20px;
-            font-size: 1.05em;
-        }
-
-        .info-section strong {
-            color: #00ff88;
-            font-weight: 600;
-        }
+        /* Lecture Card */
+        .lecture-card { background: white; border-radius: 0.75rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; overflow: hidden; }
+        .lecture-card:hover { border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); transform: translateY(-2px); }
+        .lecture-card.coming-soon { opacity: 0.6; }
+        .lecture-card.coming-soon:hover { transform: none; border-color: #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .lecture-card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+        .lecture-number { font-size: 2rem; font-weight: 800; color: #e2e8f0; line-height: 1; }
+        .lecture-card:hover .lecture-number { color: #bfdbfe; }
+        .lecture-title { font-size: 1.0625rem; font-weight: 600; color: #1e293b; margin-bottom: 0.375rem; line-height: 1.4; }
+        .lecture-subtitle { font-size: 0.875rem; color: #64748b; }
+        .lecture-card-body { padding: 1.25rem 1.5rem; }
+        .topics-list { list-style: none; margin-bottom: 1.25rem; }
+        .topics-list li { padding: 0.5rem 0; padding-left: 1.5rem; position: relative; color: #475569; font-size: 0.875rem; border-bottom: 1px solid #f8fafc; }
+        .topics-list li:last-child { border-bottom: none; }
+        .topics-list li::before { content: "→"; position: absolute; left: 0; color: #3b82f6; font-weight: 500; }
+        .lecture-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .coming-soon-badge { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem; background: #fef3c7; color: #b45309; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
 
         /* Resources Grid */
-        .resources-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
+        .resources-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .resource-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.5rem; text-align: center; transition: all 0.2s; }
+        .resource-card:hover { background: #eff6ff; border-color: #bfdbfe; }
+        .resource-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+        .resource-card h3 { font-size: 0.9375rem; font-weight: 600; color: #1e293b; margin-bottom: 0.375rem; }
+        .resource-card p { font-size: 0.8125rem; color: #64748b; }
 
-        .resource-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
+        /* Learning Path */
+        .learning-path { display: flex; flex-direction: column; gap: 0.75rem; }
+        .path-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem; border-left: 3px solid #3b82f6; }
+        .path-phase { font-weight: 600; color: #1d4ed8; font-size: 0.875rem; min-width: 100px; }
+        .path-desc { color: #475569; font-size: 0.875rem; line-height: 1.5; }
 
-        .resource-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(
-                transparent,
-                rgba(0, 255, 136, 0.1),
-                transparent 30%
-            );
-            animation: rotate 4s linear infinite;
-        }
-
-        @keyframes rotate {
-            100% { transform: rotate(1turn); }
-        }
-
-        .resource-card::after {
-            content: '';
-            position: absolute;
-            inset: 2px;
-            background: #0a0e27;
-            border-radius: 18px;
-            z-index: 1;
-        }
-
-        .resource-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(0, 255, 136, 0.5);
-            box-shadow: 0 15px 40px rgba(0, 255, 136, 0.2);
-        }
-
-        .resource-icon {
-            font-size: 3em;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 2;
-            filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.5));
-        }
-
-        .resource-card h3 {
-            color: #00ff88;
-            margin-bottom: 12px;
-            font-weight: 600;
-            position: relative;
-            z-index: 2;
-        }
-
-        .resource-card p {
-            color: #909090;
-            font-size: 0.95em;
-            position: relative;
-            z-index: 2;
-        }
-
-        /* Section Titles */
-        .section-title {
-            color: #ffffff;
-            font-size: 2.8em;
-            margin-bottom: 40px;
-            text-align: center;
-            font-weight: 800;
-            position: relative;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .section-title::before {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, #00ff88, transparent);
-            border-radius: 2px;
-        }
-
-        /* Coming Soon Effect */
-        .coming-soon {
-            opacity: 0.5;
-            position: relative;
-        }
-
-        .coming-soon::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(3px);
-            border-radius: 25px;
-            pointer-events: none;
-        }
-
-        .coming-soon .lecture-card {
-            border-color: rgba(100, 100, 100, 0.3);
-        }
+        /* Progress Bar */
+        .progress-container { margin-bottom: 2rem; }
+        .progress-label { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.875rem; }
+        .progress-label-text { color: #64748b; }
+        .progress-label-value { font-weight: 600; color: #059669; }
+        .progress-bar { width: 100%; height: 0.5rem; background: #e2e8f0; border-radius: 9999px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 9999px; transition: width 0.5s; }
 
         /* Footer */
-        footer {
-            text-align: center;
-            padding: 60px 40px;
-            color: #707070;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 80px;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(10px);
-        }
+        footer { background: white; border-top: 1px solid #e2e8f0; padding: 2rem; text-align: center; margin-top: 2rem; }
+        footer p { color: #64748b; font-size: 0.875rem; margin-bottom: 0.5rem; }
+        footer a { color: #3b82f6; font-weight: 500; transition: color 0.15s; }
+        footer a:hover { color: #1d4ed8; }
+        .footer-links { display: flex; gap: 1.5rem; justify-content: center; margin-top: 1rem; }
 
-        footer a {
-            color: #00ff88;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
+        /* Utilities */
+        .text-center { text-align: center; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-6 { margin-top: 1.5rem; }
 
-        footer a:hover {
-            color: #00d4ff;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
+        /* Animation */
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Scroll Progress Bar */
-        .progress-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #00ff88, #00d4ff, #a855f7);
-            z-index: 1000;
-            transition: width 0.1s ease;
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .main-layout { display: block; }
         }
-
-        /* Responsive Design */
         @media (max-width: 768px) {
-            header h1 {
-                font-size: 2.5em;
-            }
-
-            .lectures-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .lecture-number {
-                font-size: 3em;
-            }
-
-            .section-title {
-                font-size: 2em;
-            }
-
-            .info-section {
-                padding: 25px;
-            }
-        }
-
-        /* Loading Animation */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.8s ease forwards;
+            .header-title { font-size: 1.75rem; }
+            .lectures-grid { grid-template-columns: 1fr; }
+            .nav-tabs { display: none; }
         }
     </style>
 </head>
 <body>
-    <!-- Animated particles -->
-    <div class="particles" id="particles"></div>
-
-    <!-- Scroll Progress Bar -->
-    <div class="progress-bar" id="progressBar"></div>
-
-    <div class="container">
-        <header class="fade-in">
-            <h1>Semantic Web & Ontology</h1>
-            <p>Building Knowledge-Driven Systems</p>
-            <p class="instructor">Eng. Dr. Tiroshan Madushanka</p>
-            <div style="margin-top: 25px;">
-                <span class="badge">14-Week Course</span>
-                <span class="badge">RDF • RDFS • OWL • SPARQL</span>
-            </div>
-        </header>
-
-        <div class="info-section fade-in" style="animation-delay: 0.1s">
-            <h2>📚 Course Overview</h2>
-            <p>This course explores the Semantic Web stack, from fundamental concepts to practical implementation. Through hands-on projects, you'll master RDF, RDFS, OWL, and SPARQL to create intelligent, queryable knowledge systems.</p>
-            <!-- <p><strong>Project Focus:</strong> Building a Resilient City Knowledge Graph capable of automated inference and intelligent decision-making.</p> -->
-        </div>
-
-        <h2 class="section-title fade-in" style="animation-delay: 0.2s">📖 Lecture Slides</h2>
-
-        <div class="lectures-grid">
-            <!-- Week 1 -->
-            <div class="lecture-card fade-in" style="animation-delay: 0.3s">
-                <div class="lecture-number">1</div>
-                <h2>Week 1: Introduction & Project Mission</h2>
-                <p>Transitioning from Traditional Web to Knowledge-Driven Systems</p>
-                <ul class="topics">
-                    <li>Traditional vs. Semantic Web</li>
-                    <li>Knowledge Graphs & RDF Triples</li>
-                    <li>Linked Data Principles</li>
-                    <li>Project Architecture Overview</li>
-                    <li>Lab Setup & Environment</li>
-                </ul>
-                <div class="slide-links">
-                    <a href="docs/ch1.html" class="slide-btn primary"><span>View Slides</span></a>
-                    <a href="docs/Chapters/sw1.pdf" class="slide-btn primary"><span>Download Chapter</span></a>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <div class="nav-logo">
+                <span class="nav-logo-icon">🌐</span>
+                <div>
+                    <div class="nav-logo-title">Semantic Web & Ontology</div>
+                    <div class="nav-logo-subtitle">SENG-42273 Course Materials</div>
                 </div>
             </div>
-
-            <!-- Week 2 -->
-            <div class="lecture-card fade-in" style="animation-delay: 0.4s">
-                <div class="lecture-number">2</div>
-                <h2>Week 2: The Problem with Traditional Web</h2>
-                <p>Understanding the Machine's Dilemma in the Web of Documents</p>
-                <ul class="topics">
-                    <li>Web of Documents vs. Web of Data</li>
-                    <li>Keyword Search Limitations</li>
-                    <li>The Ambiguity Challenge</li>
-                    <li>Interactive Disambiguation Demo</li>
-                    <li>Semantic Web Solutions</li>
-                </ul>
-                <div class="slide-links">
-                    <a href="docs/ch2.html" class="slide-btn primary"><span>View Slides</span></a>
-                    <a href="docs/Chapters/sw2.pdf" class="slide-btn primary"><span>Download Chapter</span></a>
-                </div>
+            <div class="nav-tabs">
+                <a href="#" class="nav-tab active">Lectures</a>
+                <a href="#" class="nav-tab">Resources</a>
+                <a href="#" class="nav-tab">Documentation</a>
             </div>
-
-            <!-- Week 3 -->
-            <div class="lecture-card fade-in" style="animation-delay: 0.5s">
-                <div class="lecture-number">3</div>
-                <h2>Week 3: RDF Fundamentals</h2>
-                <p>Resource Description Framework & Triple Structure</p>
-                <ul class="topics">
-                    <li>RDF Syntax & Serialization</li>
-                    <li>Subject-Predicate-Object Model</li>
-                    <li>URIs & Namespaces</li>
-                    <li>Literals & Data Types</li>
-                    <li>Creating Your First RDF Graph</li>
-                </ul>
-                <div class="slide-links">
-                    <a href="docs/ch3.html" class="slide-btn primary"><span>View Slides</span></a>
-                    <a href="docs/Chapters/sw3.pdf" class="slide-btn primary"><span>Download Chapter</span></a>
-                </div>
-            </div>
-
-            <!-- Week 4 -->
-            <div class="lecture-card fade-in" style="animation-delay: 0.6s">
-                <div class="lecture-number">4</div>
-                <h2>Week 4: RDF Schema (RDFS)</h2>
-                <p>Building Taxonomies and Class Hierarchies</p>
-                <ul class="topics">
-                    <li>RDFS Classes & Properties</li>
-                    <li>Domain & Range Definitions</li>
-                    <li>Inheritance & Hierarchies</li>
-                    <li>Schema Design Patterns</li>
-                    <li>City Infrastructure Schema</li>
-                </ul>
-                <div class="slide-links">
-                    <a href="docs/ch4.html" class="slide-btn primary"><span>View Slides</span></a>
-                    <a href="docs/Chapters/sw4.pdf" class="slide-btn primary"><span>Download Chapter</span></a>
-                </div>
-            </div>
-
-            <!-- Week 5 -->
-            <div class="lecture-card fade-in" style="animation-delay: 0.7s">
-                <div class="lecture-number">5</div>
-                <h2>Week 5: OWL - Web Ontology Language</h2>
-                <p>Advanced Semantic Modeling & Reasoning</p>
-                <ul class="topics">
-                    <li>OWL Classes & Properties</li>
-                    <li>Restrictions & Axioms</li>
-                    <li>Logical Inference Rules</li>
-                    <li>Ontology Design Patterns</li>
-                    <li>Building Resilient City Ontology</li>
-                </ul>
-                <div class="slide-links">
-                    <a href="docs/ch5.html" class="slide-btn primary"><span>View Slides</span></a>
-                    <a href="docs/Chapters/sw5.pdf" class="slide-btn primary"><span>Download Chapter</span></a>
-                </div>
-            </div>
-
-            <!-- Week 6 -->
-            <div class="lecture-card fade-in" style="animation-delay: 0.8s">
-                <div class="lecture-number">6</div>
-                <h2>Week 6: SPARQL Query Language</h2>
-                <p>Querying Knowledge Graphs</p>
-                <ul class="topics">
-                    <li>SPARQL Syntax & Patterns</li>
-                    <li>Basic Graph Patterns</li>
-                    <li>Filtering & Aggregation</li>
-                    <li>Complex Queries</li>
-                    <li>Triple Store Integration</li>
-                </ul>
-                <div class="slide-links">
-                    <a href="docs/ch6.html" class="slide-btn primary"><span>View Slides</span></a>
-                    <a href="docs/Chapters/sw6.pdf" class="slide-btn primary"><span>Download Chapter</span></a>
-                </div>
-            </div>
-
-            <!-- Week 7 - Coming Soon -->
-            <div class="lecture-card coming-soon fade-in" style="animation-delay: 0.9s">
-                <div class="lecture-number">7</div>
-                <h2>Week 7: Advanced SPARQL <span class="badge">Coming Soon</span></h2>
-                <p>Advanced Query Patterns & Optimization</p>
-                <ul class="topics">
-                    <li>Property Paths</li>
-                    <li>OPTIONAL & UNION</li>
-                    <li>Subqueries & Federated Queries</li>
-                    <li>Query Optimization</li>
-                    <li>Real-World Query Patterns</li>
-                </ul>
-            </div>
-
-            <!-- Week 8 - Coming Soon -->
-            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1s">
-                <div class="lecture-number">8</div>
-                <h2>Week 8: Semantic Agents & Validation <span class="badge">Coming Soon</span></h2>
-                <p>Building Intelligent Automation & Ontology Validation</p>
-                <ul class="topics">
-                    <li>Agent Architecture Patterns</li>
-                    <li>Python & RDFLib Integration</li>
-                    <li>OWL Ontology Validation Tools</li>
-                    <li>Jena Programming API</li>
-                    <li>Automated Reasoning & Alerts</li>
-                </ul>
-            </div>
-
-            <!-- Week 9 - Coming Soon -->
-            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.1s">
-                <div class="lecture-number">9</div>
-                <h2>Week 9: Semantic Markup & FOAF <span class="badge">Coming Soon</span></h2>
-                <p>Connecting Documents to the Semantic Web</p>
-                <ul class="topics">
-                    <li>Semantic Markup Concepts</li>
-                    <li>Manual vs Automated Markup</li>
-                    <li>FOAF (Friend of a Friend)</li>
-                    <li>Social Network Ontologies</li>
-                    <li>Publishing Linked Data</li>
-                </ul>
-            </div>
-
-            <!-- Week 10 - Coming Soon -->
-            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.2s">
-                <div class="lecture-number">10</div>
-                <h2>Week 10: Semantic Search Engines <span class="badge">Coming Soon</span></h2>
-                <p>Beyond Keyword-Based Search</p>
-                <ul class="topics">
-                    <li>Semantic Search Architecture</li>
-                    <li>Vertical vs Horizontal Indexing</li>
-                    <li>Query Processing Strategies</li>
-                    <li>Swoogle & Semantic Discovery</li>
-                    <li>Building Search Prototypes</li>
-                </ul>
-            </div>
-
-            <!-- Week 11 - Coming Soon -->
-            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.3s">
-                <div class="lecture-number">11</div>
-                <h2>Week 11: Web Services Fundamentals <span class="badge">Coming Soon</span></h2>
-                <p>From Traditional to Semantic Web Services</p>
-                <ul class="topics">
-                    <li>Web Service Architecture</li>
-                    <li>WSDL & SOAP Protocols</li>
-                    <li>UDDI Registry & Discovery</li>
-                    <li>Service Integration Patterns</li>
-                    <li>Need for Semantic Services</li>
-                </ul>
-            </div>
-
-            <!-- Week 12 - Coming Soon -->
-            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.4s">
-                <div class="lecture-number">12</div>
-                <h2>Week 12: OWL-S & Semantic Services <span class="badge">Coming Soon</span></h2>
-                <p>Ontology-Based Service Description</p>
-                <ul class="topics">
-                    <li>OWL-S Upper Ontology</li>
-                    <li>Service Profile Ontology</li>
-                    <li>Process Model & Grounding</li>
-                    <li>Service Composition</li>
-                    <li>Automated Service Discovery</li>
-                </ul>
-            </div>
-
-            <!-- Week 13 - Coming Soon -->
-            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.5s">
-                <div class="lecture-number">13</div>
-                <h2>Week 13: Semantic Service Description <span class="badge">Coming Soon</span></h2>
-                <p>WSDL-S and Service Annotation</p>
-                <ul class="topics">
-                    <li>WSDL-S Overview</li>
-                    <li>Semantic Annotations</li>
-                    <li>OWL-S to UDDI Mapping</li>
-                    <li>Matchmaking Algorithms</li>
-                    <li>Service Ranking & Selection</li>
-                </ul>
-            </div>
-
-            <!-- Week 14 - Coming Soon -->
-            <div class="lecture-card coming-soon fade-in" style="animation-delay: 1.6s">
-                <div class="lecture-number">14</div>
-                <h2>Week 14: Semantic Service Search Engine <span class="badge">Coming Soon</span></h2>
-                <p>Building Intelligent Service Discovery Systems</p>
-                <ul class="topics">
-                    <li>Search Engine Architecture</li>
-                    <li>Semantic Crawling Strategies</li>
-                    <li>Service Repository Design</li>
-                    <li>Implementation with Java/Jena</li>
-                    <li>Final Project Presentations</li>
-                </ul>
+            <div class="progress-text">
+                Progress: <span class="progress-value">6/14 Weeks</span>
             </div>
         </div>
+    </nav>
 
-        <div class="info-section fade-in" style="animation-delay: 1.7s">
-            <h2>🛠️ Additional Resources</h2>
-            <div class="resources-grid">
-                <div class="resource-card">
-                    <div class="resource-icon">📘</div>
-                    <h3>Documentation</h3>
-                    <p>Course guides, tutorials, and technical references</p>
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <span class="sidebar-title-icon">📚</span>
+                    <span class="sidebar-title-text">Course Navigation</span>
                 </div>
-                <div class="resource-card">
-                    <div class="resource-icon">💻</div>
-                    <h3>Code Examples</h3>
-                    <p>Sample implementations and project templates</p>
-                </div>
-                <!-- <div class="resource-card">
-                    <div class="resource-icon">🎯</div>
-                    <h3>Practice Labs</h3>
-                    <p>Hands-on exercises and assignments</p>
-                </div>
-                <div class="resource-card">
-                    <div class="resource-icon">📊</div>
-                    <h3>Project Files</h3>
-                    <p>Resilient City KG development files</p>
-                </div> -->
+                <p class="sidebar-desc">14-week course covering RDF, RDFS, OWL, SPARQL and Semantic Web Services</p>
             </div>
-        </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#overview" class="sidebar-btn active">
+                    <span>📋</span> Course Overview
+                </a>
+                <a href="#lectures" class="sidebar-btn">
+                    <span>📖</span> Lecture Slides
+                </a>
+                <a href="#resources" class="sidebar-btn">
+                    <span>🛠️</span> Resources
+                </a>
+                <a href="#learning-path" class="sidebar-btn">
+                    <span>🎯</span> Learning Path
+                </a>
+            </nav>
 
-        <div class="info-section fade-in" style="animation-delay: 1.8s">
-            <h2>🎯 Learning Path</h2>
-            <p><strong>Phase 1 (Weeks 1-4):</strong> Foundation - Understanding semantic web concepts, RDF basics, and RDFS schemas</p>
-            <p><strong>Phase 2 (Weeks 5-7):</strong> Advanced Modeling - Mastering OWL ontologies and SPARQL queries</p>
-            <p><strong>Phase 3 (Weeks 8-10):</strong> Practical Applications - Building agents, semantic markup, and search engines</p>
-            <p><strong>Phase 4 (Weeks 11-14):</strong> Semantic Web Services - From traditional web services to semantic service discovery and composition</p>
-        </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Weekly Progress</div>
+                <div class="week-item completed">
+                    <span class="week-check">✓</span>
+                    <span>Week 1: Introduction</span>
+                </div>
+                <div class="week-item completed">
+                    <span class="week-check">✓</span>
+                    <span>Week 2: Traditional Web</span>
+                </div>
+                <div class="week-item completed">
+                    <span class="week-check">✓</span>
+                    <span>Week 3: RDF Fundamentals</span>
+                </div>
+                <div class="week-item completed">
+                    <span class="week-check">✓</span>
+                    <span>Week 4: RDF Schema</span>
+                </div>
+                <div class="week-item completed">
+                    <span class="week-check">✓</span>
+                    <span>Week 5: OWL</span>
+                </div>
+                <div class="week-item completed">
+                    <span class="week-check">✓</span>
+                    <span>Week 6: SPARQL</span>
+                </div>
+                <div class="week-item coming-soon">
+                    <span class="week-lock">🔒</span>
+                    <span>Week 7: Advanced SPARQL</span>
+                </div>
+                <div class="week-item coming-soon">
+                    <span class="week-lock">🔒</span>
+                    <span>Week 8-14: Coming Soon</span>
+                </div>
+            </div>
+        </aside>
 
-        <div class="info-section fade-in" style="animation-delay: 1.9s">
-            <h2>📋 Course Structure</h2>
-            <p><strong>Part 1: Foundations (Weeks 1-2)</strong> - Traditional Web limitations and Semantic Web vision</p>
-            <p><strong>Part 2: Core Technologies (Weeks 3-8)</strong> - RDF, RDFS, OWL, SPARQL, and validation tools</p>
-            <p><strong>Part 3: Real-World Applications (Weeks 9-10)</strong> - Semantic markup, FOAF, and search engines</p>
-            <p><strong>Part 4: Semantic Web Services (Weeks 11-14)</strong> - Web services, OWL-S, service description, and discovery</p>
-        </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-area">
+                <!-- Header -->
+                <div class="card header-card fade-in">
+                    <div class="card-body">
+                        <h1 class="header-title">Semantic Web & Ontology</h1>
+                        <p class="header-subtitle">Building Knowledge-Driven Systems</p>
+                        <p class="header-instructor">Eng. Dr. Tiroshan Madushanka</p>
+                        <div class="header-badges">
+                            <span class="badge">📅 14-Week Course</span>
+                            <span class="badge">🔗 RDF • RDFS • OWL • SPARQL</span>
+                        </div>
+                    </div>
+                </div>
 
-        <footer class="fade-in" style="animation-delay: 2s">
-            <p>🌐 Semantic Web & Ontology Course</p>
-            <p>Built with modern web technologies • No external dependencies</p>
-            <p style="margin-top: 20px;">
-                <a href="https://github.com/tiroshanm/SENG-42273.git" target="_blank">GitHub Repository</a> •
-                <a href="README.md">Documentation</a> •
-                <a href="PRESENTATION_GUIDE.md">Presentation Guide</a>
-            </p>
-            <p style="margin-top: 30px; color: #505050;">
-                © 2024 Semantic Web Course • All presentations are self-contained HTML files
-            </p>
-        </footer>
+                <!-- Progress -->
+                <div class="progress-container fade-in">
+                    <div class="progress-label">
+                        <span class="progress-label-text">Course Completion</span>
+                        <span class="progress-label-value">43% Complete</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 43%;"></div>
+                    </div>
+                </div>
+
+                <!-- Course Overview -->
+                <section id="overview" class="info-section card fade-in">
+                    <div class="card-body">
+                        <h2 class="info-section-title">📚 Course Overview</h2>
+                        <p>This course explores the Semantic Web stack, from fundamental concepts to practical implementation. Through hands-on projects, you'll master <strong>RDF</strong>, <strong>RDFS</strong>, <strong>OWL</strong>, and <strong>SPARQL</strong> to create intelligent, queryable knowledge systems.</p>
+                    </div>
+                </section>
+
+                <!-- Lecture Slides -->
+                <section id="lectures">
+                    <h2 class="section-title">📖 Lecture Slides</h2>
+                    
+                    <div class="lectures-grid">
+                        <!-- Week 1 -->
+                        <div class="lecture-card fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 1: Introduction & Project Mission</div>
+                                    <div class="lecture-subtitle">Transitioning from Traditional Web to Knowledge-Driven Systems</div>
+                                </div>
+                                <div class="lecture-number">01</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>Traditional vs. Semantic Web</li>
+                                    <li>Knowledge Graphs & RDF Triples</li>
+                                    <li>Linked Data Principles</li>
+                                    <li>Project Architecture Overview</li>
+                                    <li>Lab Setup & Environment</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <a href="docs/ch1.html" class="btn btn-primary">View Slides</a>
+                                    <a href="docs/Chapters/sw1.pdf" class="btn btn-secondary">Download PDF</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 2 -->
+                        <div class="lecture-card fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 2: The Problem with Traditional Web</div>
+                                    <div class="lecture-subtitle">Understanding the Machine's Dilemma</div>
+                                </div>
+                                <div class="lecture-number">02</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>Web of Documents vs. Web of Data</li>
+                                    <li>Keyword Search Limitations</li>
+                                    <li>The Ambiguity Challenge</li>
+                                    <li>Interactive Disambiguation Demo</li>
+                                    <li>Semantic Web Solutions</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <a href="docs/ch2.html" class="btn btn-primary">View Slides</a>
+                                    <a href="docs/Chapters/sw2.pdf" class="btn btn-secondary">Download PDF</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 3 -->
+                        <div class="lecture-card fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 3: RDF Fundamentals</div>
+                                    <div class="lecture-subtitle">Resource Description Framework & Triple Structure</div>
+                                </div>
+                                <div class="lecture-number">03</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>RDF Syntax & Serialization</li>
+                                    <li>Subject-Predicate-Object Model</li>
+                                    <li>URIs & Namespaces</li>
+                                    <li>Literals & Data Types</li>
+                                    <li>Creating Your First RDF Graph</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <a href="docs/ch3.html" class="btn btn-primary">View Slides</a>
+                                    <a href="docs/Chapters/sw3.pdf" class="btn btn-secondary">Download PDF</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 4 -->
+                        <div class="lecture-card fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 4: RDF Schema (RDFS)</div>
+                                    <div class="lecture-subtitle">Building Taxonomies and Class Hierarchies</div>
+                                </div>
+                                <div class="lecture-number">04</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>RDFS Classes & Properties</li>
+                                    <li>Domain & Range Definitions</li>
+                                    <li>Inheritance & Hierarchies</li>
+                                    <li>Schema Design Patterns</li>
+                                    <li>City Infrastructure Schema</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <a href="docs/ch4.html" class="btn btn-primary">View Slides</a>
+                                    <a href="docs/Chapters/sw4.pdf" class="btn btn-secondary">Download PDF</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 5 -->
+                        <div class="lecture-card fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 5: OWL - Web Ontology Language</div>
+                                    <div class="lecture-subtitle">Advanced Semantic Modeling & Reasoning</div>
+                                </div>
+                                <div class="lecture-number">05</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>OWL Classes & Properties</li>
+                                    <li>Restrictions & Axioms</li>
+                                    <li>Logical Inference Rules</li>
+                                    <li>Ontology Design Patterns</li>
+                                    <li>Building Resilient City Ontology</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <a href="docs/ch5.html" class="btn btn-primary">View Slides</a>
+                                    <a href="docs/Chapters/sw5.pdf" class="btn btn-secondary">Download PDF</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 6 -->
+                        <div class="lecture-card fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 6: SPARQL Query Language</div>
+                                    <div class="lecture-subtitle">Querying Knowledge Graphs</div>
+                                </div>
+                                <div class="lecture-number">06</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>SPARQL Syntax & Patterns</li>
+                                    <li>Basic Graph Patterns</li>
+                                    <li>Filtering & Aggregation</li>
+                                    <li>Complex Queries</li>
+                                    <li>Triple Store Integration</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <a href="docs/ch6.html" class="btn btn-primary">View Slides</a>
+                                    <a href="docs/Chapters/sw6.pdf" class="btn btn-secondary">Download PDF</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 7 - Coming Soon -->
+                        <div class="lecture-card coming-soon fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 7: Advanced SPARQL</div>
+                                    <div class="lecture-subtitle">Advanced Query Patterns & Optimization</div>
+                                </div>
+                                <div class="lecture-number">07</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>Property Paths</li>
+                                    <li>OPTIONAL & UNION</li>
+                                    <li>Subqueries & Federated Queries</li>
+                                    <li>Query Optimization</li>
+                                    <li>Real-World Query Patterns</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <span class="coming-soon-badge">🔒 Coming Soon</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 8 - Coming Soon -->
+                        <div class="lecture-card coming-soon fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 8: Semantic Agents & Validation</div>
+                                    <div class="lecture-subtitle">Building Intelligent Automation</div>
+                                </div>
+                                <div class="lecture-number">08</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>Agent Architecture Patterns</li>
+                                    <li>Python & RDFLib Integration</li>
+                                    <li>OWL Ontology Validation Tools</li>
+                                    <li>Jena Programming API</li>
+                                    <li>Automated Reasoning & Alerts</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <span class="coming-soon-badge">🔒 Coming Soon</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 9 - Coming Soon -->
+                        <div class="lecture-card coming-soon fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 9: Semantic Markup & FOAF</div>
+                                    <div class="lecture-subtitle">Connecting Documents to the Semantic Web</div>
+                                </div>
+                                <div class="lecture-number">09</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>Semantic Markup Concepts</li>
+                                    <li>Manual vs Automated Markup</li>
+                                    <li>FOAF (Friend of a Friend)</li>
+                                    <li>Social Network Ontologies</li>
+                                    <li>Publishing Linked Data</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <span class="coming-soon-badge">🔒 Coming Soon</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 10 - Coming Soon -->
+                        <div class="lecture-card coming-soon fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 10: Semantic Search Engines</div>
+                                    <div class="lecture-subtitle">Beyond Keyword-Based Search</div>
+                                </div>
+                                <div class="lecture-number">10</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>Semantic Search Architecture</li>
+                                    <li>Vertical vs Horizontal Indexing</li>
+                                    <li>Query Processing Strategies</li>
+                                    <li>Swoogle & Semantic Discovery</li>
+                                    <li>Building Search Prototypes</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <span class="coming-soon-badge">🔒 Coming Soon</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 11 - Coming Soon -->
+                        <div class="lecture-card coming-soon fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 11: Web Services Fundamentals</div>
+                                    <div class="lecture-subtitle">From Traditional to Semantic Services</div>
+                                </div>
+                                <div class="lecture-number">11</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>Web Service Architecture</li>
+                                    <li>WSDL & SOAP Protocols</li>
+                                    <li>UDDI Registry & Discovery</li>
+                                    <li>Service Integration Patterns</li>
+                                    <li>Need for Semantic Services</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <span class="coming-soon-badge">🔒 Coming Soon</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 12 - Coming Soon -->
+                        <div class="lecture-card coming-soon fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 12: OWL-S & Semantic Services</div>
+                                    <div class="lecture-subtitle">Ontology-Based Service Description</div>
+                                </div>
+                                <div class="lecture-number">12</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>OWL-S Upper Ontology</li>
+                                    <li>Service Profile Ontology</li>
+                                    <li>Process Model & Grounding</li>
+                                    <li>Service Composition</li>
+                                    <li>Automated Service Discovery</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <span class="coming-soon-badge">🔒 Coming Soon</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 13 - Coming Soon -->
+                        <div class="lecture-card coming-soon fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 13: Semantic Service Description</div>
+                                    <div class="lecture-subtitle">WSDL-S and Service Annotation</div>
+                                </div>
+                                <div class="lecture-number">13</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>WSDL-S Overview</li>
+                                    <li>Semantic Annotations</li>
+                                    <li>OWL-S to UDDI Mapping</li>
+                                    <li>Matchmaking Algorithms</li>
+                                    <li>Service Ranking & Selection</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <span class="coming-soon-badge">🔒 Coming Soon</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Week 14 - Coming Soon -->
+                        <div class="lecture-card coming-soon fade-in">
+                            <div class="lecture-card-header">
+                                <div>
+                                    <div class="lecture-title">Week 14: Semantic Service Search Engine</div>
+                                    <div class="lecture-subtitle">Building Intelligent Service Discovery</div>
+                                </div>
+                                <div class="lecture-number">14</div>
+                            </div>
+                            <div class="lecture-card-body">
+                                <ul class="topics-list">
+                                    <li>Search Engine Architecture</li>
+                                    <li>Semantic Crawling Strategies</li>
+                                    <li>Service Repository Design</li>
+                                    <li>Implementation with Java/Jena</li>
+                                    <li>Final Project Presentations</li>
+                                </ul>
+                                <div class="lecture-actions">
+                                    <span class="coming-soon-badge">🔒 Coming Soon</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Resources -->
+                <section id="resources" class="info-section card fade-in">
+                    <div class="card-body">
+                        <h2 class="info-section-title">🛠️ Additional Resources</h2>
+                        <div class="resources-grid">
+                            <div class="resource-card">
+                                <div class="resource-icon">📘</div>
+                                <h3>Documentation</h3>
+                                <p>Course guides, tutorials, and technical references</p>
+                            </div>
+                            <div class="resource-card">
+                                <div class="resource-icon">💻</div>
+                                <h3>Code Examples</h3>
+                                <p>Sample implementations and project templates</p>
+                            </div>
+                            <div class="resource-card">
+                                <div class="resource-icon">🎯</div>
+                                <h3><a href="semantic-web-lab.html"> Practice Labs</a></h3>
+                                
+                                <p>Hands-on exercises and assignments</p>
+                            </div>
+                            <div class="resource-card">
+                                <div class="resource-icon">📊</div>
+                                <h3><a href="project.html">Project Files</a></h3>
+                                <p>Create a complete Semantic Web application using real movie data</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Learning Path -->
+                <section id="learning-path" class="info-section card fade-in">
+                    <div class="card-body">
+                        <h2 class="info-section-title">🎯 Learning Path</h2>
+                        <div class="learning-path">
+                            <div class="path-item">
+                                <span class="path-phase">Phase 1</span>
+                                <span class="path-desc"><strong>Weeks 1-4:</strong> Foundation — Understanding semantic web concepts, RDF basics, and RDFS schemas</span>
+                            </div>
+                            <div class="path-item">
+                                <span class="path-phase">Phase 2</span>
+                                <span class="path-desc"><strong>Weeks 5-7:</strong> Advanced Modeling — Mastering OWL ontologies and SPARQL queries</span>
+                            </div>
+                            <div class="path-item">
+                                <span class="path-phase">Phase 3</span>
+                                <span class="path-desc"><strong>Weeks 8-10:</strong> Practical Applications — Building agents, semantic markup, and search engines</span>
+                            </div>
+                            <div class="path-item">
+                                <span class="path-phase">Phase 4</span>
+                                <span class="path-desc"><strong>Weeks 11-14:</strong> Semantic Web Services — From traditional web services to semantic service discovery and composition</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Course Structure -->
+                <section class="info-section card fade-in">
+                    <div class="card-body">
+                        <h2 class="info-section-title">📋 Course Structure</h2>
+                        <p><strong>Part 1: Foundations (Weeks 1-2)</strong> — Traditional Web limitations and Semantic Web vision</p>
+                        <p><strong>Part 2: Core Technologies (Weeks 3-8)</strong> — RDF, RDFS, OWL, SPARQL, and validation tools</p>
+                        <p><strong>Part 3: Real-World Applications (Weeks 9-10)</strong> — Semantic markup, FOAF, and search engines</p>
+                        <p><strong>Part 4: Semantic Web Services (Weeks 11-14)</strong> — Web services, OWL-S, service description, and discovery</p>
+                    </div>
+                </section>
+
+                <!-- Footer -->
+                <footer>
+                    <p>🌐 <strong>Semantic Web & Ontology Course</strong></p>
+                    <p>Built with modern web technologies • No external dependencies</p>
+                    <div class="footer-links">
+                        <a href="https://github.com/tiroshanm/SENG-42273.git" target="_blank">GitHub Repository</a>
+                        <a href="README.md">Documentation</a>
+                        <a href="PRESENTATION_GUIDE.md">Presentation Guide</a>
+                    </div>
+                    <p style="margin-top: 1rem; color: #94a3b8;">© 2024 Semantic Web Course • All presentations are self-contained HTML files</p>
+                </footer>
+            </div>
+        </main>
     </div>
 
     <script>
-        // Generate floating particles
-        const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 50; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 20 + 's';
-            particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-            particlesContainer.appendChild(particle);
-        }
-
-        // Scroll progress bar
-        window.addEventListener('scroll', () => {
-            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrolled = (winScroll / height) * 100;
-            document.getElementById('progressBar').style.width = scrolled + '%';
-        });
-
-        // Smooth scroll
+        // Smooth scroll for navigation
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
@@ -940,7 +710,16 @@
             });
         });
 
-        // Intersection Observer for animations
+        // Active sidebar link highlighting
+        const sidebarBtns = document.querySelectorAll('.sidebar-btn');
+        sidebarBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                sidebarBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Intersection Observer for fade-in animations
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
@@ -955,39 +734,11 @@
             });
         }, observerOptions);
 
-        // Observe all animated elements
         document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
             observer.observe(el);
-        });
-
-        // Add ripple effect to buttons
-        document.querySelectorAll('.slide-btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                const ripple = document.createElement('span');
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size / 2;
-                const y = e.clientY - rect.top - size / 2;
-                
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = x + 'px';
-                ripple.style.top = y + 'px';
-                ripple.classList.add('ripple');
-                
-                this.appendChild(ripple);
-                
-                setTimeout(() => ripple.remove(), 600);
-            });
-        });
-
-        // Parallax effect for header
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const header = document.querySelector('header');
-            if (header) {
-                header.style.transform = `translateY(${scrolled * 0.5}px)`;
-                header.style.opacity = 1 - scrolled / 500;
-            }
         });
     </script>
 </body>
