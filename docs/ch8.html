@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 8: FOAF - Friend of a Friend</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #f8fafc; 
+            color: #334155; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+        /* Presentation Container */
+        .presentation-container {
+            width: 960px;
+            height: 720px;
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Slides */
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+
+        /* Slide Header */
+        .slide-header {
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            padding: 24px 40px;
+            border-bottom: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+
+        .slide-header h1 {
+            color: #1e293b;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .slide-header .subtitle {
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Slide Content */
+        .slide-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 40px;
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Title Slide */
+        .slide-1 .slide-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .slide-1 h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .slide-1 h2 {
+            font-size: 1.25rem;
+            color: #475569;
+            margin-bottom: 16px;
+            font-weight: 400;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .slide-1 h3 {
+            font-size: 1rem;
+            color: #3b82f6;
+            font-weight: 600;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        /* Content Block */
+        .content-block {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.2s ease;
+        }
+
+        .content-block:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .content-block h3 {
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .content-block p, .content-block li {
+            color: #475569;
+            line-height: 1.6;
+            font-size: 0.9375rem;
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            border: 1px solid #c7d2fe;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+        }
+
+        .highlight-box h3 {
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .highlight-box p {
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        .highlight-box strong {
+            color: #3b82f6;
+        }
+
+        /* Key Points */
+        .key-points {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .key-points h3 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: #475569;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+        }
+
+        .key-points li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .key-points li:hover {
+            padding-left: 28px;
+            color: #1e293b;
+        }
+
+        .key-points li:hover::before {
+            color: #2563eb;
+            transform: translateX(2px);
+        }
+
+        /* Discussion Prompt */
+        .discussion-prompt {
+            background: #fefce8;
+            border: 1px solid #fef08a;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+
+        .discussion-prompt h4 {
+            color: #a16207;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .discussion-prompt p {
+            color: #713f12;
+            line-height: 1.6;
+            font-size: 0.875rem;
+        }
+
+        /* Example Box */
+        .example-box {
+            background: #f0fdf4;
+            border: 1px dashed #86efac;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .example-box:hover {
+            border-style: solid;
+            background: #ecfdf5;
+        }
+
+        .example-box::before {
+            content: "💡 Example";
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: #f8fafc;
+            padding: 0 8px;
+            color: #059669;
+            font-weight: 600;
+            font-size: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .example-box h4 {
+            color: #047857;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .example-box p {
+            color: #065f46;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        /* Activity List */
+        .activity-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .activity-item {
+            padding: 16px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #3b82f6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .activity-item:hover {
+            background: #f8fafc;
+            transform: translateX(8px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .activity-item strong {
+            color: #1e293b;
+            font-size: 0.9375rem;
+        }
+
+        .activity-details {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            color: #475569;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .activity-details.show {
+            display: block;
+            animation: expandDown 0.3s ease;
+        }
+
+        .activity-details p {
+            margin-bottom: 8px;
+        }
+
+        .activity-details ul, .activity-details ol {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.6;
+            position: relative;
+            white-space: pre-wrap;
+        }
+
+        .code-block::before {
+            content: "RDF/XML";
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #64748b;
+            font-size: 0.6875rem;
+            font-weight: 500;
+        }
+
+        /* Comparison Container */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .comparison-box {
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid;
+            transition: all 0.2s ease;
+        }
+
+        .comparison-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .comparison-box h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .comparison-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comparison-box li {
+            padding: 6px 0;
+            font-size: 0.875rem;
+        }
+
+        .traditional-web {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .traditional-web h3 {
+            color: #b91c1c;
+        }
+
+        .traditional-web li {
+            color: #7f1d1d;
+        }
+
+        .semantic-web {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+        }
+
+        .semantic-web h3 {
+            color: #047857;
+        }
+
+        .semantic-web li {
+            color: #065f46;
+        }
+
+        /* Quiz Container */
+        .quiz-container {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 16px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .quiz-container > h3 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .quiz-question {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1e293b;
+        }
+
+        .quiz-option {
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #475569;
+            font-size: 0.875rem;
+        }
+
+        .quiz-option:hover:not(.correct):not(.incorrect) {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        .quiz-option.correct {
+            background: #ecfdf5;
+            border-color: #10b981;
+            color: #047857;
+        }
+
+        .quiz-option.incorrect {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #b91c1c;
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #ecfdf5;
+            color: #047857;
+            border-left: 4px solid #10b981;
+        }
+
+        .feedback.incorrect {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-left: 4px solid #ef4444;
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            width: 44px;
+            height: 44px;
+            border: 1px solid #e2e8f0;
+            border-radius: 50%;
+            background: white;
+            color: #475569;
+            font-size: 1.25rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover:not(:disabled) {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Slide Counter */
+        .slide-counter {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #f1f5f9;
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+            transition: width 0.3s ease;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes expandDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 500px; }
+        }
+
+        /* Lists */
+        ul {
+            margin-left: 20px;
+        }
+
+        li {
+            margin: 8px 0;
+            color: #475569;
+            line-height: 1.6;
+            font-size: 0.9375rem;
+        }
+
+        blockquote {
+            border-left: 4px solid #3b82f6;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-style: italic;
+            color: #475569;
+            background: #f8fafc;
+            border-radius: 0 8px 8px 0;
+        }
+
+        ol {
+            margin-left: 20px;
+        }
+
+        /* Flow Diagram */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+
+        .flow-step {
+            text-align: center;
+            flex: 1;
+        }
+
+        .flow-step .circle {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            margin: 0 auto 8px;
+        }
+
+        .flow-step p {
+            font-size: 0.75rem;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .flow-arrow {
+            color: #3b82f6;
+            font-size: 1.5rem;
+            padding: 0 8px;
+        }
+
+        /* Vocabulary Grid */
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .vocab-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .vocab-item:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .vocab-item.active {
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            border-color: #3b82f6;
+        }
+
+        .vocab-item code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .vocab-item p {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Property Card */
+        .property-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 12px 0;
+            transition: all 0.2s ease;
+        }
+
+        .property-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .property-card h4 {
+            color: #1e293b;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .property-card h4 code {
+            background: #eff6ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            color: #3b82f6;
+        }
+
+        .property-card p {
+            color: #475569;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .property-badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        /* Network Diagram */
+        .network-visual {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        .network-nodes {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 16px;
+        }
+
+        .network-node {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.75rem;
+            position: relative;
+        }
+
+        .network-node .icon {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        .network-link {
+            width: 60px;
+            height: 2px;
+            background: #3b82f6;
+            position: relative;
+        }
+
+        .network-link::after {
+            content: "knows";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6875rem;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        /* Architecture Steps */
+        .arch-steps {
+            margin: 16px 0;
+        }
+
+        .arch-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin: 8px 0;
+            transition: all 0.2s ease;
+        }
+
+        .arch-step:hover {
+            border-color: #3b82f6;
+            transform: translateX(4px);
+        }
+
+        .arch-step .step-num {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .arch-step .step-content h4 {
+            color: #1e293b;
+            font-size: 0.9375rem;
+            margin-bottom: 4px;
+        }
+
+        .arch-step .step-content p {
+            color: #64748b;
+            font-size: 0.8125rem;
+            line-height: 1.5;
+        }
+
+        /* Interactive Demo */
+        .interactive-demo {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .interactive-demo h3 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .foaf-builder {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .foaf-input-group {
+            margin-bottom: 12px;
+        }
+
+        .foaf-input-group label {
+            display: block;
+            font-size: 0.8125rem;
+            color: #64748b;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .foaf-input-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .foaf-input-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .foaf-output {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            body {
+                padding: 0;
+            }
+            .presentation-container {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+            .slide-content {
+                padding: 24px;
+            }
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+            .vocab-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide slide-1 active" data-slide="1">
+            <div class="slide-content">
+                <h1>FOAF - Friend of a Friend</h1>
+                <h2>Chapter 8 | Introduction to the Semantic Web</h2>
+                <h3>Eng. Dr. Tiroshan Madushanka</h3>
+            </div>
+        </div>
+
+        <!-- Slide 2: What is FOAF? -->
+        <div class="slide" data-slide="2">
+            <div class="slide-header">
+                <h1>What is FOAF?</h1>
+                <div class="subtitle">Friend of a Friend Vocabulary</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Official Definition</h3>
+                    <p>"FOAF is all about creating and using <strong>machine-readable homepages</strong> that describe people, the links between them, and the things they create and do."</p>
+                </div>
+
+                <div class="comparison-container">
+                    <div class="comparison-box traditional-web">
+                        <h3>❌ Traditional Web Pages</h3>
+                        <ul>
+                            <li>Personal info readable only by humans</li>
+                            <li>Cannot be processed automatically</li>
+                            <li>No standard format</li>
+                            <li>Isolated information islands</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-box semantic-web">
+                        <h3>✓ FOAF Documents</h3>
+                        <ul>
+                            <li>Machine-readable personal data</li>
+                            <li>Automatic agent processing</li>
+                            <li>Standard vocabulary (OWL)</li>
+                            <li>Aggregatable & cross-linkable</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Key Insight</h3>
+                    <p>FOAF is simply a <strong>vocabulary (ontology)</strong> written in OWL that includes standard terms to describe personal information. It serves as a standard for everyone who wants to markup their homepages in a machine-readable format.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Why FOAF Matters -->
+        <div class="slide" data-slide="3">
+            <div class="slide-header">
+                <h1>Why FOAF Matters</h1>
+                <div class="subtitle">The Power of Aggregation</div>
+            </div>
+            <div class="slide-content">
+                <div class="network-visual">
+                    <div class="network-nodes">
+                        <div class="network-node">
+                            <span class="icon">👤</span>
+                            <span>You</span>
+                        </div>
+                        <div class="network-link"></div>
+                        <div class="network-node">
+                            <span class="icon">👤</span>
+                            <span>Friend</span>
+                        </div>
+                        <div class="network-link"></div>
+                        <div class="network-node">
+                            <span class="icon">👤</span>
+                            <span>Friend</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.8125rem; color: #64748b;">A decentralized network of machine-readable personal data</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>Aggregation Magic</h4>
+                    <p>Suppose you publish a simple FOAF document with just your name and homepage. Your friend publishes her FOAF document using <code>foaf:knows</code> to link to you, and includes a <code>foaf:plan</code> describing your current life goals. After aggregation, your profile suddenly includes a plan you didn't even add!</p>
+                </div>
+
+                <div class="key-points">
+                    <h3>FOAF Benefits</h3>
+                    <ul>
+                        <li><strong>Decentralized Creation:</strong> Each individual controls their own data</li>
+                        <li><strong>Comprehensive Views:</strong> Aggregation combines distributed information</li>
+                        <li><strong>Community Navigation:</strong> Cross-link members and find similar interests</li>
+                        <li><strong>Search Enhancement:</strong> Engines can personalize results based on interests</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: FOAF Vocabulary Overview -->
+        <div class="slide" data-slide="4">
+            <div class="slide-header">
+                <h1>FOAF Vocabulary</h1>
+                <div class="subtitle">Core Terms for Personal Information</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>FOAF Namespace</h3>
+                    <p><code style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px;">http://xmlns.com/foaf/0.1/</code></p>
+                </div>
+
+                <div class="vocab-grid">
+                    <div class="vocab-item" onclick="toggleVocab(this)">
+                        <code>foaf:Person</code>
+                        <p>Core class</p>
+                    </div>
+                    <div class="vocab-item" onclick="toggleVocab(this)">
+                        <code>foaf:name</code>
+                        <p>Full name</p>
+                    </div>
+                    <div class="vocab-item" onclick="toggleVocab(this)">
+                        <code>foaf:nick</code>
+                        <p>Nickname</p>
+                    </div>
+                    <div class="vocab-item" onclick="toggleVocab(this)">
+                        <code>foaf:mbox</code>
+                        <p>Email address</p>
+                    </div>
+                    <div class="vocab-item" onclick="toggleVocab(this)">
+                        <code>foaf:homepage</code>
+                        <p>Personal website</p>
+                    </div>
+                    <div class="vocab-item" onclick="toggleVocab(this)">
+                        <code>foaf:knows</code>
+                        <p>Relationships</p>
+                    </div>
+                    <div class="vocab-item" onclick="toggleVocab(this)">
+                        <code>foaf:img</code>
+                        <p>Image</p>
+                    </div>
+                    <div class="vocab-item" onclick="toggleVocab(this)">
+                        <code>foaf:title</code>
+                        <p>Title (Dr, Mr)</p>
+                    </div>
+                    <div class="vocab-item" onclick="toggleVocab(this)">
+                        <code>foaf:depiction</code>
+                        <p>Picture of person</p>
+                    </div>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>📌 Vocabulary Scope</h4>
+                    <p>Today, the FOAF vocabulary also includes basic terms to describe documents, projects, groups, and organizations such as companies. It is the most frequently encountered RDF document on the Internet!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: foaf:mbox - Identifying People -->
+        <div class="slide" data-slide="5">
+            <div class="slide-header">
+                <h1>Identifying People</h1>
+                <div class="subtitle">The foaf:mbox Property</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>The Challenge</h3>
+                    <p>How do you uniquely identify a person without a central URI authority? FOAF uses <strong>email addresses</strong> as practical identifiers since friends typically know each other's emails.</p>
+                </div>
+
+                <div class="property-card">
+                    <h4><code>foaf:mbox</code> <span class="property-badge">INVERSE FUNCTIONAL</span></h4>
+                    <p>Defined as an <strong>inverse functional property</strong>, ensuring that at most one individual can own a specific email. If two FOAF documents have the same <code>foaf:mbox</code> value, they describe the <strong>same person</strong>.</p>
+                </div>
+
+                <div class="code-block">&lt;foaf:Person&gt;
+    &lt;foaf:name&gt;Liyang Yu&lt;/foaf:name&gt;
+    &lt;foaf:mbox rdf:resource="mailto:liyang910@yahoo.com"/&gt;
+&lt;/foaf:Person&gt;
+
+&lt;!-- In a friend's document: --&gt;
+&lt;foaf:Person&gt;
+    &lt;foaf:name&gt;lao yu&lt;/foaf:name&gt;
+    &lt;foaf:mbox rdf:resource="mailto:liyang910@yahoo.com"/&gt;
+    &lt;foaf:title&gt;Dr&lt;/foaf:title&gt;
+&lt;/foaf:Person&gt;
+
+&lt;!-- Agent concludes: Same person with two names! --&gt;</div>
+
+                <div class="property-card">
+                    <h4><code>foaf:mbox_sha1sum</code> <span class="property-badge">PRIVACY PROTECTION</span></h4>
+                    <p>A SHA1 hash representation of your email address. Long and ugly, but protects your privacy from spam while still uniquely identifying you!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: foaf:knows - Relationships -->
+        <div class="slide" data-slide="6">
+            <div class="slide-header">
+                <h1>Describing Relationships</h1>
+                <div class="subtitle">The foaf:knows Property</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>Connecting People</h3>
+                    <p>The <code>foaf:knows</code> property describes relationships between people. It creates the social graph that makes FOAF powerful.</p>
+                </div>
+
+                <div class="code-block">&lt;foaf:Person&gt;
+    &lt;foaf:name&gt;Liyang Yu&lt;/foaf:name&gt;
+    &lt;foaf:mbox rdf:resource="mailto:liyang910@yahoo.com"/&gt;
+    &lt;foaf:knows&gt;
+        &lt;foaf:Person&gt;
+            &lt;foaf:name&gt;Jin Chen&lt;/foaf:name&gt;
+            &lt;foaf:mbox rdf:resource="mailto:yuchen@yuchen.net"/&gt;
+        &lt;/foaf:Person&gt;
+    &lt;/foaf:knows&gt;
+&lt;/foaf:Person&gt;</div>
+
+                <div class="discussion-prompt">
+                    <h4>⚠️ Important Note</h4>
+                    <p><code>foaf:knows</code> is <strong>NOT symmetric</strong>! "I know Jin Chen" does not imply "Jin Chen knows me." Check the FOAF vocabulary definition to confirm this.</p>
+                </div>
+
+                <div class="property-card">
+                    <h4><code>rdfs:seeAlso</code> <span class="property-badge">HYPERLINK OF FOAF</span></h4>
+                    <p>Acts as a hyperlink to another FOAF document. This is how the crawler (called <strong>scutter</strong>) discovers and builds the network of FOAF documents. Essential for connecting your document to the wider FOAF circle!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Pictures in FOAF -->
+        <div class="slide" data-slide="7">
+            <div class="slide-header">
+                <h1>Pictures in FOAF</h1>
+                <div class="subtitle">foaf:depiction vs foaf:depicts</div>
+            </div>
+            <div class="slide-content">
+                <div class="comparison-container">
+                    <div class="comparison-box semantic-web">
+                        <h3>foaf:depiction</h3>
+                        <ul>
+                            <li>Entity → Image relationship</li>
+                            <li>"This person is shown in this image"</li>
+                            <li>Used FROM the Person object</li>
+                            <li style="font-family: monospace; font-size: 0.75rem; margin-top: 8px;">foaf:depiction rdf:resource="photo.jpg"</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-box" style="background: #fef3c7; border-color: #fcd34d;">
+                        <h3 style="color: #92400e;">foaf:depicts</h3>
+                        <ul style="color: #78350f;">
+                            <li>Image → Entity relationship</li>
+                            <li>"This image shows this person"</li>
+                            <li>Inverse of depiction</li>
+                            <li style="font-family: monospace; font-size: 0.75rem; margin-top: 8px;">foaf:depicts rdf:resource="#person"</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="code-block">&lt;foaf:Person&gt;
+    &lt;foaf:name&gt;Liyang Yu&lt;/foaf:name&gt;
+    &lt;foaf:mbox rdf:resource="mailto:liyang910@yahoo.com"/&gt;
+    &lt;foaf:depiction rdf:resource="http://www.yuchen.net/yu.jpg"/&gt;
+&lt;/foaf:Person&gt;</div>
+
+                <div class="example-box">
+                    <h4>Understanding the Difference</h4>
+                    <p><strong>depiction:</strong> "I (the person) am depicted in this image"<br>
+                    <strong>depicts:</strong> "This image depicts me (the person)"<br>
+                    They are inverse properties - choose based on your starting point!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: The FOAF Circle Architecture -->
+        <div class="slide" data-slide="8">
+            <div class="slide-header">
+                <h1>The FOAF Circle</h1>
+                <div class="subtitle">How the Architecture Works</div>
+            </div>
+            <div class="slide-content">
+                <div class="arch-steps">
+                    <div class="arch-step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>Create Your FOAF Document</h4>
+                            <p>Use the FOAF vocabulary. Remember to use <code>foaf:knows</code> to connect with friends and <code>rdfs:seeAlso</code> to link to other documents.</p>
+                        </div>
+                    </div>
+                    <div class="arch-step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>Link Your Homepage</h4>
+                            <p>Add a link from your HTML homepage to your FOAF document. Make the document accessible online.</p>
+                        </div>
+                    </div>
+                    <div class="arch-step">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <h4>Scutter Crawls the Web</h4>
+                            <p>The FOAF crawler (called <strong>scutter</strong>) visits the Web, finds FOAF files, and follows <code>rdfs:seeAlso</code> links to build the network.</p>
+                        </div>
+                    </div>
+                    <div class="arch-step">
+                        <div class="step-num">4</div>
+                        <div class="step-content">
+                            <h4>Central Repository Maintained</h4>
+                            <p>The framework stores all information in a centralized database, keeping it up to date by running the scutter periodically.</p>
+                        </div>
+                    </div>
+                    <div class="arch-step">
+                        <div class="step-num">5</div>
+                        <div class="step-content">
+                            <h4>User Interface for Exploration</h4>
+                            <p>Tools like FOAF Web view, FOAF Explorer, and foafnaut let you navigate and find friends in the circle.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Creating Your FOAF Document -->
+        <div class="slide" data-slide="9">
+            <div class="slide-header">
+                <h1>Creating Your FOAF Document</h1>
+                <div class="subtitle">Interactive FOAF Builder</div>
+            </div>
+            <div class="slide-content">
+                <div class="interactive-demo">
+                    <h3>🛠️ Build Your FOAF Profile</h3>
+                    <div class="foaf-builder">
+                        <div>
+                            <div class="foaf-input-group">
+                                <label>Your Name</label>
+                                <input type="text" id="foafName" placeholder="e.g., Liyang Yu" oninput="updateFOAF()">
+                            </div>
+                            <div class="foaf-input-group">
+                                <label>Email Address</label>
+                                <input type="email" id="foafEmail" placeholder="e.g., you@example.com" oninput="updateFOAF()">
+                            </div>
+                            <div class="foaf-input-group">
+                                <label>Homepage URL</label>
+                                <input type="url" id="foafHomepage" placeholder="e.g., http://yoursite.com" oninput="updateFOAF()">
+                            </div>
+                            <div class="foaf-input-group">
+                                <label>Friend's Name (optional)</label>
+                                <input type="text" id="foafFriend" placeholder="e.g., Jin Chen" oninput="updateFOAF()">
+                            </div>
+                        </div>
+                        <div class="foaf-output" id="foafOutput">&lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"&gt;
+  &lt;foaf:Person&gt;
+    &lt;foaf:name&gt;Your Name&lt;/foaf:name&gt;
+    &lt;foaf:mbox rdf:resource="mailto:you@example.com"/&gt;
+  &lt;/foaf:Person&gt;
+&lt;/rdf:RDF&gt;</div>
+                    </div>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>💡 Tools Available</h4>
+                    <p>The most popular tool for creating FOAF documents is <strong>FOAF-a-matic</strong>, a web-based authoring tool. You can also use a simple text editor with the FOAF vocabulary, then validate your document to ensure correct syntax.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Publishing Your FOAF -->
+        <div class="slide" data-slide="10">
+            <div class="slide-header">
+                <h1>Publishing Your FOAF</h1>
+                <div class="subtitle">Joining the Circle</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>Step 1: Link Your Homepage</h3>
+                    <p>Add a link tag in your HTML header pointing to your FOAF document:</p>
+                </div>
+
+                <div class="code-block" style="font-size: 0.75rem;">&lt;!-- In your homepage HTML --&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;link rel="meta" 
+          type="application/rdf+xml" 
+          title="FOAF" 
+          href="foaf.rdf"/&gt;
+&lt;/head&gt;
+&lt;body&gt;...&lt;/body&gt;
+&lt;/html&gt;</div>
+
+                <div class="key-points">
+                    <h3>Methods to Join the Circle</h3>
+                    <ul>
+                        <li><strong>FOAF Autodiscovery:</strong> Once you add the link tag, you're automatically linked to the circle!</li>
+                        <li><strong>Friend's rdfs:seeAlso:</strong> Ask a friend already in the circle to add a <code>rdfs:seeAlso</code> link to your document</li>
+                    </ul>
+                </div>
+
+                <div class="code-block" style="font-size: 0.75rem;">&lt;!-- Your friend adds this to their FOAF document --&gt;
+&lt;foaf:knows&gt;
+    &lt;foaf:Person&gt;
+        &lt;foaf:mbox rdf:resource="mailto:you@you.com"/&gt;
+        &lt;rdfs:seeAlso rdf:resource="http://path_to_your_foaf.rdf"/&gt;
+    &lt;/foaf:Person&gt;
+&lt;/foaf:knows&gt;</div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Reusing FOAF in Ontologies -->
+        <div class="slide" data-slide="11">
+            <div class="slide-header">
+                <h1>Reusing FOAF Vocabulary</h1>
+                <div class="subtitle">Updating the Camera Ontology</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>The Rule of Reuse</h3>
+                    <p>If an existing ontology has the terms you need, <strong>reuse it</strong>! This reduces duplicate ontologies and improves interoperability. Applications that understand one ontology will easily understand yours.</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>Camera Ontology + FOAF</h4>
+                    <p>Our camera ontology had a <code>Person</code> class. Since <code>foaf:Person</code> has the same semantics, we can make <code>Photographer</code> a direct subclass of <code>foaf:Person</code> instead of defining our own!</p>
+                </div>
+
+                <div class="code-block">&lt;!-- Before: Our own Person class --&gt;
+&lt;owl:Class rdf:ID="Person"/&gt;
+&lt;owl:Class rdf:ID="Photographer"&gt;
+    &lt;rdfs:subClassOf rdf:resource="#Person"/&gt;
+&lt;/owl:Class&gt;
+
+&lt;!-- After: Reusing FOAF --&gt;
+&lt;owl:Class rdf:ID="Photographer"&gt;
+    &lt;rdfs:subClassOf 
+        rdf:resource="http://xmlns.com/foaf/0.1/Person"/&gt;
+&lt;/owl:Class&gt;</div>
+
+                <div class="discussion-prompt">
+                    <h4>🎯 Benefits of Reuse</h4>
+                    <p>Fewer ontology documents = less ontology matching/merging headaches. Existing FOAF-aware applications will automatically understand your Photographer class!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: FOAF Applications -->
+        <div class="slide" data-slide="12">
+            <div class="slide-header">
+                <h1>FOAF Applications</h1>
+                <div class="subtitle">Real-World Use Cases</div>
+            </div>
+            <div class="slide-content">
+                <ul class="activity-list">
+                    <li class="activity-item" onclick="toggleDetails(this)">
+                        <strong>🔍 Enhanced Search Engines</strong>
+                        <div class="activity-details">
+                            <p>Search engines can locate your FOAF document and understand your interests, allowing them to rank results or exclude irrelevant pages.</p>
+                        </div>
+                    </li>
+                    <li class="activity-item" onclick="toggleDetails(this)">
+                        <strong>🛒 E-Commerce Personalization</strong>
+                        <div class="activity-details">
+                            <p>Online stores can read your FOAF file to recommend products based on your interests. They could even email your friends recommending products you bought!</p>
+                        </div>
+                    </li>
+                    <li class="activity-item" onclick="toggleDetails(this)">
+                        <strong>🎪 Conference Networking</strong>
+                        <div class="activity-details">
+                            <p>Navigate through FOAF documents to find participants with similar interests. Essential for large conferences with thousands of attendees!</p>
+                        </div>
+                    </li>
+                    <li class="activity-item" onclick="toggleDetails(this)">
+                        <strong>📊 Project Progress Reports</strong>
+                        <div class="activity-details">
+                            <p>Multiple research groups working on the same project can integrate their FOAF files to generate comprehensive, up-to-date progress reports automatically.</p>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="highlight-box">
+                    <h3>The Big Picture</h3>
+                    <p>Swoogle and FOAF are presented as Semantic Web examples to <strong>inspire you</strong> and demonstrate how the Semantic Web can be used in real-world applications. What will <strong>you</strong> create?</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Quiz -->
+        <div class="slide" data-slide="13">
+            <div class="slide-header">
+                <h1>Knowledge Check</h1>
+                <div class="subtitle">Test Your Understanding</div>
+            </div>
+            <div class="slide-content">
+                <div class="quiz-container">
+                    <h3>Quiz: FOAF Concepts</h3>
+                    
+                    <div class="quiz-question">Why is foaf:mbox defined as an inverse functional property?</div>
+                    <button class="quiz-option" onclick="checkAnswer(this, false)">To make emails searchable</button>
+                    <button class="quiz-option" onclick="checkAnswer(this, true)">To ensure one email uniquely identifies one person</button>
+                    <button class="quiz-option" onclick="checkAnswer(this, false)">To prevent spam</button>
+                    <button class="quiz-option" onclick="checkAnswer(this, false)">To validate email format</button>
+                    <div class="feedback correct" id="correctFeedback">✓ Correct! As an inverse functional property, if two FOAF documents share the same mbox value, they describe the same person.</div>
+                    <div class="feedback incorrect" id="incorrectFeedback">✗ Not quite. It's an inverse functional property so agents can identify the same person across different documents.</div>
+                </div>
+
+                <div class="quiz-container" style="margin-top: 16px;">
+                    <div class="quiz-question">What is the FOAF crawler called?</div>
+                    <button class="quiz-option" onclick="checkAnswer2(this, false)">Googlebot</button>
+                    <button class="quiz-option" onclick="checkAnswer2(this, false)">Swooglebot</button>
+                    <button class="quiz-option" onclick="checkAnswer2(this, true)">Scutter</button>
+                    <button class="quiz-option" onclick="checkAnswer2(this, false)">FOAFbot</button>
+                    <div class="feedback correct" id="correctFeedback2">✓ Correct! The scutter crawls the web, finds FOAF files, and follows rdfs:seeAlso links to build the network.</div>
+                    <div class="feedback incorrect" id="incorrectFeedback2">✗ Not quite. In the FOAF world, the crawler is specifically called a "scutter."</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Summary -->
+        <div class="slide" data-slide="14">
+            <div class="slide-header">
+                <h1>Chapter Summary</h1>
+                <div class="subtitle">Key Takeaways</div>
+            </div>
+            <div class="slide-content">
+                <div class="key-points">
+                    <h3>What We Learned</h3>
+                    <ul>
+                        <li><strong>FOAF</strong> is a vocabulary/ontology for describing personal information in machine-readable format</li>
+                        <li>Namespace: <code>http://xmlns.com/foaf/0.1/</code></li>
+                        <li><strong>foaf:mbox</strong> is an inverse functional property that uniquely identifies people</li>
+                        <li><strong>foaf:knows</strong> creates the social graph (NOT symmetric!)</li>
+                        <li><strong>rdfs:seeAlso</strong> acts as the hyperlink between FOAF documents</li>
+                        <li>The <strong>scutter</strong> crawler builds the network by following rdfs:seeAlso links</li>
+                        <li><strong>Reuse</strong> FOAF vocabulary in your own ontologies when applicable</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>FOAF in Practice</h3>
+                    <p>FOAF documents can be <strong>aggregated, explored, and cross-linked</strong> easily. This enables powerful applications from enhanced search to e-commerce personalization to conference networking.</p>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>🚀 Your Turn</h4>
+                    <p>Create your own FOAF document, link it to your homepage, and join the circle of friends! The Semantic Web is built by participation.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" onclick="prevSlide()">←</button>
+            <button class="control-btn" id="nextBtn" onclick="nextSlide()">→</button>
+        </div>
+
+        <!-- Slide Counter -->
+        <div class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">14</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 14;
+
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index + 1 < currentSlide) {
+                    slide.classList.add('prev');
+                } else if (index + 1 === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            document.getElementById('currentSlide').textContent = currentSlide;
+            
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        function toggleDetails(element) {
+            const details = element.querySelector('.activity-details');
+            details.classList.toggle('show');
+        }
+
+        function toggleVocab(element) {
+            document.querySelectorAll('.vocab-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function updateFOAF() {
+            const name = document.getElementById('foafName').value || 'Your Name';
+            const email = document.getElementById('foafEmail').value || 'you@example.com';
+            const homepage = document.getElementById('foafHomepage').value;
+            const friend = document.getElementById('foafFriend').value;
+
+            let output = `<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <foaf:Person>
+    <foaf:name>${name}</foaf:name>
+    <foaf:mbox rdf:resource="mailto:${email}"/>`;
+            
+            if (homepage) {
+                output += `\n    <foaf:homepage rdf:resource="${homepage}"/>`;
+            }
+            
+            if (friend) {
+                output += `\n    <foaf:knows>
+      <foaf:Person>
+        <foaf:name>${friend}</foaf:name>
+      </foaf:Person>
+    </foaf:knows>`;
+            }
+            
+            output += `\n  </foaf:Person>
+</rdf:RDF>`;
+            
+            document.getElementById('foafOutput').textContent = output;
+        }
+
+        function checkAnswer(button, isCorrect) {
+            const options = button.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.disabled = true;
+                if (opt === button) {
+                    opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+                }
+            });
+            
+            document.getElementById(isCorrect ? 'correctFeedback' : 'incorrectFeedback').classList.add('show');
+        }
+
+        function checkAnswer2(button, isCorrect) {
+            const options = button.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.disabled = true;
+                if (opt === button) {
+                    opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+                }
+            });
+            
+            document.getElementById(isCorrect ? 'correctFeedback2' : 'incorrectFeedback2').classList.add('show');
+        }
+
+        updateSlide();
+    </script>
+</body>
+</html>

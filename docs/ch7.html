@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 7: Swoogle - A Search Engine for Semantic Web Documents</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #f8fafc; 
+            color: #334155; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+        /* Presentation Container */
+        .presentation-container {
+            width: 960px;
+            height: 720px;
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Slides */
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+
+        /* Slide Header */
+        .slide-header {
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            padding: 24px 40px;
+            border-bottom: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+
+        .slide-header h1 {
+            color: #1e293b;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .slide-header .subtitle {
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Slide Content */
+        .slide-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 40px;
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Title Slide */
+        .slide-1 .slide-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .slide-1 h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .slide-1 h2 {
+            font-size: 1.25rem;
+            color: #475569;
+            margin-bottom: 16px;
+            font-weight: 400;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .slide-1 h3 {
+            font-size: 1rem;
+            color: #3b82f6;
+            font-weight: 600;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        /* Content Block */
+        .content-block {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.2s ease;
+        }
+
+        .content-block:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .content-block h3 {
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .content-block p, .content-block li {
+            color: #475569;
+            line-height: 1.6;
+            font-size: 0.9375rem;
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            border: 1px solid #c7d2fe;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+        }
+
+        .highlight-box h3 {
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .highlight-box p {
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        .highlight-box strong {
+            color: #3b82f6;
+        }
+
+        /* Key Points */
+        .key-points {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .key-points h3 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: #475569;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+        }
+
+        .key-points li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .key-points li:hover {
+            padding-left: 28px;
+            color: #1e293b;
+        }
+
+        .key-points li:hover::before {
+            color: #2563eb;
+            transform: translateX(2px);
+        }
+
+        /* Discussion Prompt */
+        .discussion-prompt {
+            background: #fefce8;
+            border: 1px solid #fef08a;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+
+        .discussion-prompt h4 {
+            color: #a16207;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .discussion-prompt p {
+            color: #713f12;
+            line-height: 1.6;
+            font-size: 0.875rem;
+        }
+
+        /* Example Box */
+        .example-box {
+            background: #f0fdf4;
+            border: 1px dashed #86efac;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .example-box:hover {
+            border-style: solid;
+            background: #ecfdf5;
+        }
+
+        .example-box::before {
+            content: "💡 Example";
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: #f8fafc;
+            padding: 0 8px;
+            color: #059669;
+            font-weight: 600;
+            font-size: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .example-box h4 {
+            color: #047857;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .example-box p {
+            color: #065f46;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        /* Activity List */
+        .activity-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .activity-item {
+            padding: 16px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #3b82f6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .activity-item:hover {
+            background: #f8fafc;
+            transform: translateX(8px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .activity-item strong {
+            color: #1e293b;
+            font-size: 0.9375rem;
+        }
+
+        .activity-details {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            color: #475569;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .activity-details.show {
+            display: block;
+            animation: expandDown 0.3s ease;
+        }
+
+        .activity-details p {
+            margin-bottom: 8px;
+        }
+
+        .activity-details ul, .activity-details ol {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+
+        /* Reveal Content */
+        .reveal-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .reveal-content.expanded {
+            max-height: 1000px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+        }
+
+        .reveal-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            margin: 12px 0;
+            transition: all 0.2s ease;
+        }
+
+        .reveal-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .reveal-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Interactive Demo */
+        .interactive-demo {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .interactive-demo h3 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 0.9375rem;
+            background: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-btn {
+            padding: 12px 24px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .search-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .search-results {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            display: none;
+            border: 1px solid #e2e8f0;
+        }
+
+        .search-results h4 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .result-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #3b82f6;
+            transition: all 0.2s ease;
+        }
+
+        .result-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .result-item strong {
+            color: #2563eb;
+            font-size: 0.875rem;
+        }
+
+        .result-item p {
+            color: #64748b;
+            font-size: 0.8125rem;
+            margin-top: 4px;
+        }
+
+        /* Comparison Container */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .comparison-box {
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid;
+            transition: all 0.2s ease;
+        }
+
+        .comparison-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .comparison-box h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .comparison-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comparison-box li {
+            padding: 6px 0;
+            font-size: 0.875rem;
+        }
+
+        .traditional-web {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .traditional-web h3 {
+            color: #b91c1c;
+        }
+
+        .traditional-web li {
+            color: #7f1d1d;
+        }
+
+        .semantic-web {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+        }
+
+        .semantic-web h3 {
+            color: #047857;
+        }
+
+        .semantic-web li {
+            color: #065f46;
+        }
+
+        /* Metadata Visual */
+        .metadata-visual {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .metadata-visual h4 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .metadata-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .metadata-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .metadata-label {
+            font-weight: 600;
+            color: #3b82f6;
+            min-width: 100px;
+            font-size: 0.875rem;
+        }
+
+        .metadata-value {
+            color: #475569;
+            font-size: 0.875rem;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.6;
+            position: relative;
+            white-space: pre-wrap;
+        }
+
+        .code-block::before {
+            content: "RDF/XML";
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #64748b;
+            font-size: 0.6875rem;
+            font-weight: 500;
+        }
+
+        /* Quiz Container */
+        .quiz-container {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 16px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .quiz-container > h3 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .quiz-question {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1e293b;
+        }
+
+        .quiz-option {
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #475569;
+            font-size: 0.875rem;
+        }
+
+        .quiz-option:hover:not(.correct):not(.incorrect) {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        .quiz-option.correct {
+            background: #ecfdf5;
+            border-color: #10b981;
+            color: #047857;
+        }
+
+        .quiz-option.incorrect {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #b91c1c;
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #ecfdf5;
+            color: #047857;
+            border-left: 4px solid #10b981;
+        }
+
+        .feedback.incorrect {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-left: 4px solid #ef4444;
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            width: 44px;
+            height: 44px;
+            border: 1px solid #e2e8f0;
+            border-radius: 50%;
+            background: white;
+            color: #475569;
+            font-size: 1.25rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover:not(:disabled) {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Slide Counter */
+        .slide-counter {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #f1f5f9;
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+            transition: width 0.3s ease;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes expandDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 500px; }
+        }
+
+        /* Lists */
+        ul {
+            margin-left: 20px;
+        }
+
+        li {
+            margin: 8px 0;
+            color: #475569;
+            line-height: 1.6;
+            font-size: 0.9375rem;
+        }
+
+        blockquote {
+            border-left: 4px solid #3b82f6;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-style: italic;
+            color: #475569;
+            background: #f8fafc;
+            border-radius: 0 8px 8px 0;
+        }
+
+        ol {
+            margin-left: 20px;
+        }
+
+        /* Architecture Diagram */
+        .architecture-diagram {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .arch-component {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .arch-component:hover {
+            border-color: #3b82f6;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+        }
+
+        .arch-component.highlight {
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            border-color: #3b82f6;
+        }
+
+        .arch-component h4 {
+            color: #1e293b;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .arch-component p {
+            color: #64748b;
+            font-size: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .arch-component .icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        /* Flow Diagram */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+
+        .flow-step {
+            text-align: center;
+            flex: 1;
+        }
+
+        .flow-step .circle {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            margin: 0 auto 8px;
+        }
+
+        .flow-step p {
+            font-size: 0.75rem;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .flow-arrow {
+            color: #3b82f6;
+            font-size: 1.5rem;
+            padding: 0 8px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-card .number {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .label {
+            font-size: 0.8125rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            body {
+                padding: 0;
+            }
+            .presentation-container {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+            .slide-content {
+                padding: 24px;
+            }
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide slide-1 active" data-slide="1">
+            <div class="slide-content">
+                <h1>Swoogle</h1>
+                <h2>Chapter 7 | Introduction to the Semantic Web</h2>
+                <h3>Eng. Dr. Tiroshan Madushanka</h3>
+            </div>
+        </div>
+
+        <!-- Slide 2: What is Swoogle? -->
+        <div class="slide" data-slide="2">
+            <div class="slide-header">
+                <h1>What is Swoogle?</h1>
+                <div class="subtitle">Understanding the Semantic Web Search Engine</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Definition</h3>
+                    <p>Swoogle is a <strong>crawler-based indexing and retrieval system</strong> specifically designed for Semantic Web Documents (SWDs). It views the Semantic Web as a collection of interconnected SWDs distributed across the Internet.</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>What is a Semantic Web Document (SWD)?</h3>
+                    <p>An SWD is an online document written in RDF or OWL, typically with extensions like:</p>
+                    <ul>
+                        <li><strong>.rdf</strong> - Resource Description Framework files</li>
+                        <li><strong>.owl</strong> - Web Ontology Language files</li>
+                        <li><strong>.rss, .n3, .daml</strong> - Other acceptable formats</li>
+                    </ul>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>💭 Key Insight</h4>
+                    <p>Unlike traditional search engines that return web pages, Swoogle returns links to specific documents (with extensions .rdf or .owl). This is a fundamental distinction!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Why Swoogle Matters -->
+        <div class="slide" data-slide="3">
+            <div class="slide-header">
+                <h1>Why Swoogle Matters</h1>
+                <div class="subtitle">The Vision Behind the Search Engine</div>
+            </div>
+            <div class="slide-content">
+                <div class="comparison-container">
+                    <div class="comparison-box traditional-web">
+                        <h3>❌ Without Swoogle</h3>
+                        <ul>
+                            <li>SWDs scattered randomly across the Web</li>
+                            <li>No systematic organization</li>
+                            <li>Difficult to find existing ontologies</li>
+                            <li>Limited interoperability between agents</li>
+                            <li>No shared understanding</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-box semantic-web">
+                        <h3>✓ With Swoogle</h3>
+                        <ul>
+                            <li>Organized repository of SWDs</li>
+                            <li>Easy searches and queries</li>
+                            <li>Ontology reuse enabled</li>
+                            <li>Facilitates intelligent decisions</li>
+                            <li>Supports agent/tool development</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>The Reuse Philosophy</h3>
+                    <p>Reusing ontologies is <strong>even more important</strong> than reusing URIs. Without ontology reuse, there would be no common language, no shared understanding, and no interoperability — effectively nullifying the Semantic Web's purpose.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Main Uses of Swoogle -->
+        <div class="slide" data-slide="4">
+            <div class="slide-header">
+                <h1>Main Uses of Swoogle</h1>
+                <div class="subtitle">Three Key Functionalities</div>
+            </div>
+            <div class="slide-content">
+                <ul class="activity-list">
+                    <li class="activity-item" onclick="toggleDetails(this)">
+                        <strong>1. Searching Ontologies for Reuse</strong>
+                        <div class="activity-details">
+                            <p>The most popular use of Swoogle! Search for existing ontologies that match your needs using specific terms.</p>
+                            <p><strong>How it works:</strong> Query Swoogle with specific terms → Get matching ontologies → Follow links to evaluate if they fit your needs.</p>
+                        </div>
+                    </li>
+                    <li class="activity-item" onclick="toggleDetails(this)">
+                        <strong>2. Finding Specific Instance Data</strong>
+                        <div class="activity-details">
+                            <p>Search SWDs for specific resources to enable URI reuse.</p>
+                            <p><strong>Example:</strong> Search for a friend named "Liyang" → Find their existing URI → Reuse it to add additional information about that person.</p>
+                        </div>
+                    </li>
+                    <li class="activity-item" onclick="toggleDetails(this)">
+                        <strong>3. Navigation in the Semantic Web</strong>
+                        <div class="activity-details">
+                            <p>Explore interdocument relations using collected metadata.</p>
+                            <p><strong>Features:</strong> Follow namespaces to find related documents, discover internal linkages, study how ontologies are referenced and connected.</p>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="example-box">
+                    <h4>Real-World Application: SPIRE Project</h4>
+                    <p>The NSF-supported SPIRE project uses Swoogle to find appropriate ontologies and terms to describe biological and ecological data and services. For example, searching for ontologies with keywords "before," "after," and "interval" to describe temporal relationships.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Swoogle Architecture -->
+        <div class="slide" data-slide="5">
+            <div class="slide-header">
+                <h1>Swoogle Architecture</h1>
+                <div class="subtitle">The Five Major Components</div>
+            </div>
+            <div class="slide-content">
+                <div class="architecture-diagram">
+                    <div class="arch-component" onclick="highlightComponent(this)">
+                        <div class="icon">🔍</div>
+                        <h4>SWD Discovery</h4>
+                        <p>Two web crawlers that discover SWDs distributed across the Internet</p>
+                    </div>
+                    <div class="arch-component" onclick="highlightComponent(this)">
+                        <div class="icon">📋</div>
+                        <h4>Metadata Creation</h4>
+                        <p>Collects metadata for navigation and computation</p>
+                    </div>
+                    <div class="arch-component" onclick="highlightComponent(this)">
+                        <div class="icon">📊</div>
+                        <h4>Data Analysis</h4>
+                        <p>Classifies relationships and calculates document ranks</p>
+                    </div>
+                    <div class="arch-component" onclick="highlightComponent(this)">
+                        <div class="icon">🗃️</div>
+                        <h4>Indexation & Retrieval</h4>
+                        <p>Core search engine functionality for finding SWDs</p>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>SWD Classification</h3>
+                    <p>Swoogle distinguishes between two types of SWDs:</p>
+                    <ul>
+                        <li><strong>SWO (Semantic Web Ontology)</strong> - Most statements declare classes, properties, and relationships</li>
+                        <li><strong>SWDB (Semantic Web Database)</strong> - Instance documents based on existing ontologies</li>
+                    </ul>
+                    <p style="margin-top: 12px;"><strong>ontoRatio:</strong> The fraction of individuals recognized as classes and properties. An SWD is considered a strict ontology if ontoRatio ≥ 0.8</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: SWD Discovery Process -->
+        <div class="slide" data-slide="6">
+            <div class="slide-header">
+                <h1>SWD Discovery Process</h1>
+                <div class="subtitle">How Swoogle Finds Semantic Web Documents</div>
+            </div>
+            <div class="slide-content">
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <div class="circle">1</div>
+                        <p>Google API<br>Seeds</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="circle">2</div>
+                        <p>Focused<br>Crawler</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="circle">3</div>
+                        <p>Swooglebot<br>Parser</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="circle">4</div>
+                        <p>User<br>Submissions</p>
+                    </div>
+                </div>
+
+                <div class="key-points">
+                    <h3>Three Discovery Methods</h3>
+                    <ul>
+                        <li><strong>Google Web Services:</strong> Find documents ending with .rdf, .owl, .daml (not .jpg, .html) as seed URLs</li>
+                        <li><strong>Focused Crawler:</strong> Visits websites containing seeds and directly linked pages</li>
+                        <li><strong>Swooglebot:</strong> Parses SWDs using Jena APIs, follows URIs, owl:imports, and rdfs:seeAlso links</li>
+                    </ul>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="number">500K+</div>
+                        <div class="label">SWDs (July 2004)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">11.7M+</div>
+                        <div class="label">SWDs (Feb 2007)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">10,000+</div>
+                        <div class="label">Ontologies</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Metadata Collection -->
+        <div class="slide" data-slide="7">
+            <div class="slide-header">
+                <h1>Metadata Collection</h1>
+                <div class="subtitle">Three Types of Metadata</div>
+            </div>
+            <div class="slide-content">
+                <div class="metadata-visual">
+                    <h4>Document Metadata</h4>
+                    <div class="metadata-item">
+                        <span class="metadata-label">URL</span>
+                        <span class="metadata-value">Location of the SWD</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Extension</span>
+                        <span class="metadata-value">.rdf, .owl, .daml, etc.</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Last Modified</span>
+                        <span class="metadata-value">Date of last update</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Date Discovered</span>
+                        <span class="metadata-value">When Swoogle found it</span>
+                    </div>
+                </div>
+
+                <div class="comparison-container">
+                    <div class="content-block">
+                        <h3>Content Metadata</h3>
+                        <p>Used for calculating <strong>ontoRatio</strong> to determine if an SWD is an ontology or instance document.</p>
+                    </div>
+                    <div class="content-block">
+                        <h3>Relation Metadata</h3>
+                        <p>Three interdocument relations:</p>
+                        <ul style="margin-left: 0;">
+                            <li>Import another SWD</li>
+                            <li>Use terms from another SWD</li>
+                            <li>Define new terms using others</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>💡 Purpose of Metadata</h4>
+                    <p>Metadata serves two key purposes: (1) Provides a navigational tool for users to find documents efficiently, and (2) Supplies information needed to rank pages and terms.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Ranking Algorithms -->
+        <div class="slide" data-slide="8">
+            <div class="slide-header">
+                <h1>Ranking Algorithms</h1>
+                <div class="subtitle">OntoRank and TermRank</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Why Ranking Matters</h3>
+                    <p>When a user searches for a term, multiple documents may match. Ranking determines which document appears first, helping users find the <strong>most important</strong> and <strong>relevant</strong> results.</p>
+                </div>
+
+                <div class="comparison-container">
+                    <div class="comparison-box semantic-web">
+                        <h3>OntoRank</h3>
+                        <ul>
+                            <li>Evaluates importance of ontology documents</li>
+                            <li>Inspired by Google's PageRank</li>
+                            <li>Based on interdocument relationships</li>
+                            <li>Uses collected metadata</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-box" style="background: #fef3c7; border-color: #fcd34d;">
+                        <h3 style="color: #92400e;">TermRank</h3>
+                        <ul style="color: #78350f;">
+                            <li>Ranks RDF terms from search queries</li>
+                            <li>Helps order term search results</li>
+                            <li>Considers term usage frequency</li>
+                            <li>Evaluates term relationships</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>How Rankings Work</h4>
+                    <p>Similar to how Google's PageRank uses link analysis to rank web pages, Swoogle's ranking algorithms analyze the relationships between SWDs to determine relative importance. Documents that are more widely referenced or imported receive higher rankings.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Indexation Strategy -->
+        <div class="slide" data-slide="9">
+            <div class="slide-header">
+                <h1>Indexation Strategy</h1>
+                <div class="subtitle">How Swoogle Indexes SWDs</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>The Challenge</h3>
+                    <p>Unlike traditional documents (streams of words), SWDs are collections of <strong>triples</strong>, each made up of three URIs. How do you index them effectively?</p>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>The Solution: URI Partitioning</h3>
+                    <p>Every URI has the form: <strong>namespace + localName</strong></p>
+                    <p style="margin-top: 10px;">Swoogle partitions each URI and indexes on <strong>both parts</strong>. This allows users to search using just the localName without knowing the namespace!</p>
+                </div>
+
+                <div class="code-block">&lt;rdfs:Class rdf:about="http://xmlns.com/foaf/0.1/Person"
+            rdfs:label="Person" 
+            rdfs:comment="A person."&gt;
+  ...
+&lt;/rdfs:Class&gt;
+
+<!-- Indexed under: "Person" (localName) -->
+<!-- Also indexed using rdfs:label and rdfs:comment values --></div>
+
+                <div class="key-points">
+                    <h3>Additional Indexing</h3>
+                    <ul>
+                        <li>rdfs:label values are also used as keywords</li>
+                        <li>rdfs:comment text is indexed for flexibility</li>
+                        <li>Users can simply type "person" to find Person class definitions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Interactive Demo -->
+        <div class="slide" data-slide="10">
+            <div class="slide-header">
+                <h1>Using Swoogle</h1>
+                <div class="subtitle">Interactive Search Demonstration</div>
+            </div>
+            <div class="slide-content">
+                <div class="interactive-demo">
+                    <h3>🔍 Try a Swoogle Search</h3>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Enter a term (e.g., person, camera, location)..." value="person">
+                    <button class="search-btn" onclick="simulateSearch()">Swoogle Search</button>
+                    
+                    <div class="search-results" id="searchResults">
+                        <h4>Search Results for "person"</h4>
+                        <div class="result-item">
+                            <strong>http://xmlns.com/foaf/0.1/index.rdf</strong>
+                            <p>[DEF] OnlineGamingAccount, Organization, <mark>Person</mark>, Personal, PersonalProfileDocument</p>
+                            <p style="font-size: 0.75rem; color: #94a3b8;">SemanticWebDocument, RDFXML, ontoRatio(1.00), metadata, cached</p>
+                        </div>
+                        <div class="result-item">
+                            <strong>http://swrc.ontoware.org/ontology</strong>
+                            <p>[DEF] MasterThesis, Meeting, Member, <mark>Person</mark>, PhDStudent</p>
+                            <p style="font-size: 0.75rem; color: #94a3b8;">SemanticWebDocument, RDFXML, ontoRatio(1.00), metadata, cached</p>
+                        </div>
+                        <div class="result-item">
+                            <strong>http://www.w3.org/2000/10/swap/pim/contact</strong>
+                            <p>[DEF] contact, contact-information, contact-<mark>person</mark></p>
+                            <p style="font-size: 0.75rem; color: #94a3b8;">SemanticWebDocument, RDFXML, ontoRatio(0.91), metadata, cached</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>📌 Note</h4>
+                    <p>Swoogle returns documents with their ontoRatio, metadata links, and cached versions. You can navigate through related namespaces and documents to explore the Semantic Web structure.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Step-by-Step Example -->
+        <div class="slide" data-slide="11">
+            <div class="slide-header">
+                <h1>Step-by-Step Example</h1>
+                <div class="subtitle">Finding an Ontology and Instance Document</div>
+            </div>
+            <div class="slide-content">
+                <div class="key-points">
+                    <h3>Goal: Find a "Person" class and an instance using it</h3>
+                    <ul>
+                        <li><strong>Step 1:</strong> Search "person" in Swoogle → Get ontology results</li>
+                        <li><strong>Step 2:</strong> Select http://xmlns.com/foaf/0.1/index.rdf → Click metadata link</li>
+                        <li><strong>Step 3:</strong> Navigate to "related namespaces" → Find http://xmlns.com/foaf/0.1/</li>
+                        <li><strong>Step 4:</strong> View namespace metadata → Click "related docs"</li>
+                        <li><strong>Step 5:</strong> Browse documents using that namespace → Find instance document</li>
+                    </ul>
+                </div>
+
+                <div class="code-block">&lt;foaf:Person&gt;
+    &lt;foaf:nick&gt;ahm&lt;/foaf:nick&gt;
+    &lt;rdfs:seeAlso
+        rdf:resource="http://ahm.livejournal.com/data/foaf"/&gt;
+    &lt;foaf:weblog rdf:resource="http://ahm.livejournal.com/"/&gt;
+&lt;/foaf:Person&gt;
+
+<!-- Instance document using the Person class --></div>
+
+                <div class="example-box">
+                    <h4>Mission Accomplished!</h4>
+                    <p>Found the FOAF ontology defining Person class, and discovered an instance document (http://www.livejournal.com/community/lj_dev/data/foaf) actually using that class.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Quiz -->
+        <div class="slide" data-slide="12">
+            <div class="slide-header">
+                <h1>Knowledge Check</h1>
+                <div class="subtitle">Test Your Understanding</div>
+            </div>
+            <div class="slide-content">
+                <div class="quiz-container">
+                    <h3>Quiz: Swoogle Concepts</h3>
+                    
+                    <div class="quiz-question">What is an SWD?</div>
+                    <button class="quiz-option" onclick="checkAnswer(this, false)">A web page with HTML content</button>
+                    <button class="quiz-option" onclick="checkAnswer(this, true)">An online document written in RDF or OWL</button>
+                    <button class="quiz-option" onclick="checkAnswer(this, false)">A JavaScript application</button>
+                    <button class="quiz-option" onclick="checkAnswer(this, false)">A database schema file</button>
+                    <div class="feedback correct" id="correctFeedback">✓ Correct! An SWD (Semantic Web Document) is written in RDF or OWL with extensions like .rdf or .owl.</div>
+                    <div class="feedback incorrect" id="incorrectFeedback">✗ Not quite. An SWD is an online document written in RDF or OWL.</div>
+                </div>
+
+                <div class="quiz-container" style="margin-top: 20px;">
+                    <div class="quiz-question">What does ontoRatio measure?</div>
+                    <button class="quiz-option" onclick="checkAnswer2(this, false)">Document file size</button>
+                    <button class="quiz-option" onclick="checkAnswer2(this, false)">Number of links in a document</button>
+                    <button class="quiz-option" onclick="checkAnswer2(this, true)">Fraction of individuals recognized as classes and properties</button>
+                    <button class="quiz-option" onclick="checkAnswer2(this, false)">Search ranking score</button>
+                    <div class="feedback correct" id="correctFeedback2">✓ Correct! ontoRatio determines whether an SWD is an ontology (≥0.8) or instance document.</div>
+                    <div class="feedback incorrect" id="incorrectFeedback2">✗ Not quite. ontoRatio measures the fraction of classes and properties in a document.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Summary -->
+        <div class="slide" data-slide="13">
+            <div class="slide-header">
+                <h1>Chapter Summary</h1>
+                <div class="subtitle">Key Takeaways</div>
+            </div>
+            <div class="slide-content">
+                <div class="key-points">
+                    <h3>What We Learned</h3>
+                    <ul>
+                        <li><strong>Swoogle</strong> is a specialized search engine for Semantic Web Documents (SWDs)</li>
+                        <li>It views the Semantic Web as a <strong>distributed repository</strong> of RDF and OWL documents</li>
+                        <li>Primary uses: ontology search, instance data finding, and navigation</li>
+                        <li>Architecture includes discovery, metadata, analysis, and indexation components</li>
+                        <li><strong>OntoRank</strong> and <strong>TermRank</strong> algorithms rank search results</li>
+                        <li>Indexing strategy partitions URIs into namespace + localName</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Current Limitations</h3>
+                    <p>Swoogle is primarily designed for <strong>researchers and developers</strong> in the Semantic Web community. For casual users wanting to find "the best hotel in Las Vegas," Swoogle won't help — it returns SWDs, not general web information.</p>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>🚀 Looking Ahead</h4>
+                    <p>In the next chapter, we'll explore FOAF (Friend of a Friend), another popular real-world example of the Semantic Web at work!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" onclick="prevSlide()">←</button>
+            <button class="control-btn" id="nextBtn" onclick="nextSlide()">→</button>
+        </div>
+
+        <!-- Slide Counter -->
+        <div class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">13</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 13;
+
+        function updateSlide() {
+            // Remove all active and prev classes
+            document.querySelectorAll('.slide').forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index + 1 < currentSlide) {
+                    slide.classList.add('prev');
+                } else if (index + 1 === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            // Update counter
+            document.getElementById('currentSlide').textContent = currentSlide;
+            
+            // Update progress bar
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Toggle activity details
+        function toggleDetails(element) {
+            const details = element.querySelector('.activity-details');
+            details.classList.toggle('show');
+        }
+
+        // Highlight architecture component
+        function highlightComponent(element) {
+            document.querySelectorAll('.arch-component').forEach(c => c.classList.remove('highlight'));
+            element.classList.toggle('highlight');
+        }
+
+        // Simulate search
+        function simulateSearch() {
+            const results = document.getElementById('searchResults');
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            
+            results.style.display = 'block';
+            results.querySelector('h4').textContent = `Search Results for "${input}"`;
+            
+            // Animate results
+            results.style.opacity = '0';
+            results.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                results.style.transition = 'all 0.3s ease';
+                results.style.opacity = '1';
+                results.style.transform = 'translateY(0)';
+            }, 100);
+        }
+
+        // Quiz functions
+        function checkAnswer(button, isCorrect) {
+            const options = button.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.disabled = true;
+                if (opt === button) {
+                    opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+                }
+            });
+            
+            document.getElementById(isCorrect ? 'correctFeedback' : 'incorrectFeedback').classList.add('show');
+        }
+
+        function checkAnswer2(button, isCorrect) {
+            const options = button.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.disabled = true;
+                if (opt === button) {
+                    opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+                }
+            });
+            
+            document.getElementById(isCorrect ? 'correctFeedback2' : 'incorrectFeedback2').classList.add('show');
+        }
+
+        // Reveal content toggle
+        function toggleReveal(btn) {
+            const content = btn.nextElementSibling;
+            content.classList.toggle('expanded');
+            btn.textContent = content.classList.contains('expanded') ? 'Hide Details ▲' : 'Show Details ▼';
+        }
+
+        // Initialize
+        updateSlide();
+    </script>
+</body>
+</html>
