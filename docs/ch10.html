@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 10: Semantic Web Search Engine Revisited</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #f8fafc; 
+            color: #334155; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+        .presentation-container {
+            width: 960px;
+            height: 720px;
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+
+        .slide-header {
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            padding: 24px 40px;
+            border-bottom: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+
+        .slide-header h1 {
+            color: #1e293b;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .slide-header .subtitle {
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .slide-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 40px;
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Title Slide */
+        .slide-1 .slide-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .slide-1 h1 {
+            font-size: 2.25rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .slide-1 h2 {
+            font-size: 1.25rem;
+            color: #475569;
+            margin-bottom: 16px;
+            font-weight: 400;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .slide-1 h3 {
+            font-size: 1rem;
+            color: #3b82f6;
+            font-weight: 600;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        /* Content Block */
+        .content-block {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.2s ease;
+        }
+
+        .content-block:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .content-block h3 {
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .content-block p, .content-block li {
+            color: #475569;
+            line-height: 1.6;
+            font-size: 0.9375rem;
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            border: 1px solid #c7d2fe;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+        }
+
+        .highlight-box h3 {
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .highlight-box p {
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        .highlight-box strong {
+            color: #3b82f6;
+        }
+
+        /* Key Points */
+        .key-points {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .key-points h3 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: #475569;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+        }
+
+        .key-points li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .key-points li:hover {
+            padding-left: 28px;
+            color: #1e293b;
+        }
+
+        .key-points li:hover::before {
+            color: #2563eb;
+            transform: translateX(2px);
+        }
+
+        /* Discussion Prompt */
+        .discussion-prompt {
+            background: #fefce8;
+            border: 1px solid #fef08a;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+
+        .discussion-prompt h4 {
+            color: #a16207;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .discussion-prompt p {
+            color: #713f12;
+            line-height: 1.6;
+            font-size: 0.875rem;
+        }
+
+        /* Example Box */
+        .example-box {
+            background: #f0fdf4;
+            border: 1px dashed #86efac;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .example-box:hover {
+            border-style: solid;
+            background: #ecfdf5;
+        }
+
+        .example-box::before {
+            content: "💡 Example";
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: #f8fafc;
+            padding: 0 8px;
+            color: #059669;
+            font-weight: 600;
+            font-size: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .example-box h4 {
+            color: #047857;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .example-box p {
+            color: #065f46;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        /* Activity List */
+        .activity-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .activity-item {
+            padding: 16px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #3b82f6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .activity-item:hover {
+            background: #f8fafc;
+            transform: translateX(8px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .activity-item strong {
+            color: #1e293b;
+            font-size: 0.9375rem;
+        }
+
+        .activity-details {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            color: #475569;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .activity-details.show {
+            display: block;
+            animation: expandDown 0.3s ease;
+        }
+
+        .activity-details p {
+            margin-bottom: 8px;
+        }
+
+        .activity-details ul, .activity-details ol {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+
+        /* Reveal Content */
+        .reveal-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .reveal-content.expanded {
+            max-height: 1000px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+        }
+
+        .reveal-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            margin: 12px 0;
+            transition: all 0.2s ease;
+        }
+
+        .reveal-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .reveal-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Comparison Container */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .comparison-box {
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid;
+            transition: all 0.2s ease;
+        }
+
+        .comparison-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .comparison-box h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .comparison-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comparison-box li {
+            padding: 6px 0;
+            font-size: 0.875rem;
+        }
+
+        .traditional-web {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .traditional-web h3 {
+            color: #b91c1c;
+        }
+
+        .traditional-web li {
+            color: #7f1d1d;
+        }
+
+        .semantic-web {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+        }
+
+        .semantic-web h3 {
+            color: #047857;
+        }
+
+        .semantic-web li {
+            color: #065f46;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            line-height: 1.6;
+            position: relative;
+            white-space: pre-wrap;
+        }
+
+        .code-block::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #64748b;
+            font-size: 0.6875rem;
+            font-weight: 500;
+        }
+
+        /* Quiz Container */
+        .quiz-container {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 16px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .quiz-container > h3 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .quiz-question {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1e293b;
+        }
+
+        .quiz-option {
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #475569;
+            font-size: 0.875rem;
+        }
+
+        .quiz-option:hover:not(.correct):not(.incorrect) {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        .quiz-option.correct {
+            background: #ecfdf5;
+            border-color: #10b981;
+            color: #047857;
+        }
+
+        .quiz-option.incorrect {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #b91c1c;
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #ecfdf5;
+            color: #047857;
+            border-left: 4px solid #10b981;
+        }
+
+        .feedback.incorrect {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-left: 4px solid #ef4444;
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            width: 44px;
+            height: 44px;
+            border: 1px solid #e2e8f0;
+            border-radius: 50%;
+            background: white;
+            color: #475569;
+            font-size: 1.25rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover:not(:disabled) {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Slide Counter */
+        .slide-counter {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #f1f5f9;
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+            transition: width 0.3s ease;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes expandDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 500px; }
+        }
+
+        /* Lists */
+        ul {
+            margin-left: 20px;
+        }
+
+        li {
+            margin: 8px 0;
+            color: #475569;
+            line-height: 1.6;
+            font-size: 0.9375rem;
+        }
+
+        blockquote {
+            border-left: 4px solid #3b82f6;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-style: italic;
+            color: #475569;
+            background: #f8fafc;
+            border-radius: 0 8px 8px 0;
+        }
+
+        ol {
+            margin-left: 20px;
+        }
+
+        /* Step Box */
+        .step-box {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 12px 0;
+            position: relative;
+            padding-left: 70px;
+            transition: all 0.2s ease;
+        }
+
+        .step-box:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transform: translateX(4px);
+        }
+
+        .step-number {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+
+        .step-box h4 {
+            color: #1e293b;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-box p {
+            color: #475569;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        /* Problem Cards */
+        .problem-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .problem-card {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .problem-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.15);
+        }
+
+        .problem-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .problem-card h4 {
+            color: #b91c1c;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .problem-card p {
+            color: #7f1d1d;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* Architecture Diagram */
+        .architecture-diagram {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+        }
+
+        .architecture-diagram h4 {
+            color: #1e293b;
+            margin-bottom: 16px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .arch-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .arch-box {
+            background: white;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 12px 20px;
+            text-align: center;
+            min-width: 120px;
+            transition: all 0.2s ease;
+        }
+
+        .arch-box:hover {
+            background: #eff6ff;
+            transform: scale(1.05);
+        }
+
+        .arch-box.highlight {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .arch-box h5 {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .arch-box p {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .arch-box.highlight p {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .arch-arrow {
+            color: #3b82f6;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Index Visual */
+        .index-visual {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        .index-visual h4 {
+            color: #1e293b;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .index-row {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            gap: 12px;
+        }
+
+        .index-keyword {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .index-arrow {
+            color: #94a3b8;
+            font-size: 1.25rem;
+        }
+
+        .index-pages {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .index-page {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: #475569;
+            transition: all 0.2s ease;
+        }
+
+        .index-page:hover {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        .index-page.target {
+            background: #ecfdf5;
+            border-color: #10b981;
+            color: #047857;
+        }
+
+        /* Interactive Demo */
+        .interactive-demo {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .interactive-demo h3 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 0.9375rem;
+            background: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-btn {
+            padding: 12px 24px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .search-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .search-results {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            display: none;
+            border: 1px solid #e2e8f0;
+        }
+
+        .search-results h4 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .result-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #3b82f6;
+            transition: all 0.2s ease;
+        }
+
+        .result-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .result-item strong {
+            color: #2563eb;
+            font-size: 0.875rem;
+        }
+
+        .result-item p {
+            color: #64748b;
+            font-size: 0.8125rem;
+            margin-top: 4px;
+        }
+
+        /* Indexation Table */
+        .indexation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.875rem;
+        }
+
+        .indexation-table th {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .indexation-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #475569;
+        }
+
+        .indexation-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        .indexation-table code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            body {
+                padding: 0;
+            }
+            .presentation-container {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+            .slide-content {
+                padding: 24px;
+            }
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+            .problem-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide slide-1 active">
+            <div class="slide-content">
+                <h1>Semantic Web Search Engine Revisited</h1>
+                <h2>Chapter 10: A Prototype System Design</h2>
+                <h3>Eng. Dr. Tiroshan Madushanka</h3>
+            </div>
+        </div>
+
+        <!-- Slide 2: Learning Objectives -->
+        <div class="slide slide-2">
+            <div class="slide-header">
+                <h1>Learning Objectives</h1>
+                <div class="subtitle">What you will learn in this chapter</div>
+            </div>
+            <div class="slide-content">
+                <div class="key-points">
+                    <h3>By the end of this lecture, you will be able to:</h3>
+                    <ul>
+                        <li>Explain why search engines are central to the Semantic Web vision</li>
+                        <li>Identify the fundamental reasons why traditional search engines fail</li>
+                        <li>Design a Semantic Web search engine prototype</li>
+                        <li>Understand vertical and horizontal indexation strategies</li>
+                        <li>Explain how semantic markup improves search performance</li>
+                        <li>Implement a basic Semantic Web search system</li>
+                    </ul>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>💭 Opening Thought</h4>
+                    <p>We've learned about semantic markup — but how do we actually USE that markup to build better search engines? This chapter brings everything together!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Why Search Engines Again? -->
+        <div class="slide slide-3">
+            <div class="slide-header">
+                <h1>Why Search Engines Again?</h1>
+                <div class="subtitle">Section 10.1: Returning to the Root Challenge</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>The Connection Problem</h3>
+                    <p>Semantic markup creates a <strong>link between two worlds</strong>. But existing applications like Swoogle and FOAF don't fully exploit this link — they focus on one end or the other.</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>What About Swoogle?</h3>
+                    <p>Swoogle searches for Semantic Web documents (ontologies, RDF files). But it <strong>completely ignores</strong> the current Web — the billions of HTML pages that humans actually read.</p>
+                </div>
+
+                <div class="content-block">
+                    <h3>What About FOAF?</h3>
+                    <p>FOAF connects personal Web pages to social semantics, but the link doesn't play a vital role. The reasoning power comes from <strong>aggregating markup files</strong>, not from the Web pages themselves.</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>The Original Motivation</h4>
+                    <p>The need for moving from the traditional Web to the Semantic Web arose mainly from the <strong>inefficiency of keyword-based search engines</strong>. Let's return to this root challenge!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Why Traditional Search Engines Fail -->
+        <div class="slide slide-4">
+            <div class="slide-header">
+                <h1>Why Traditional Search Engines Fail</h1>
+                <div class="subtitle">Section 10.2: The Two Fundamental Problems</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>The Obvious Answer</h3>
+                    <p>Web pages are created for <strong>human eyes</strong>. The machine-understandable information is just enough to <strong>display</strong> the page, not to <strong>understand</strong> it.</p>
+                </div>
+
+                <div class="problem-cards">
+                    <div class="problem-card">
+                        <div class="icon">🔀</div>
+                        <h4>Problem 1: Polysemy</h4>
+                        <p>The <strong>exact same term</strong> can have <strong>different meanings</strong></p>
+                        <p style="margin-top: 8px; font-size: 0.8rem;">"Java" → Programming language? Coffee? Island?</p>
+                    </div>
+                    <div class="problem-card">
+                        <div class="icon">🔄</div>
+                        <h4>Problem 2: Synonymy</h4>
+                        <p><strong>Different terms</strong> can mean <strong>exactly the same thing</strong></p>
+                        <p style="margin-top: 8px; font-size: 0.8rem;">"D70" = "D-70" = "Nikon D70" = "Nikon-D70"</p>
+                    </div>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>🎯 Design Goal</h4>
+                    <p>Any Semantic Web search engine design MUST address both of these difficulties explicitly. Without solving both, we won't see significant improvement!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Design Questions -->
+        <div class="slide slide-5">
+            <div class="slide-header">
+                <h1>Designing the Prototype</h1>
+                <div class="subtitle">Section 10.3: Four Key Questions to Answer</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Four Design Questions</h3>
+                    <p>To design any search engine, we must answer these fundamental questions:</p>
+                </div>
+
+                <ul class="activity-list">
+                    <li class="activity-item" onclick="toggleActivity(this)">
+                        <strong>1. Discovery Strategy</strong> — How are documents discovered?
+                        <div class="activity-details">
+                            <p>Traditional crawlers start with seed URLs and follow links. But finding semantically enhanced pages (SEPs) this way is like searching for needles in a haystack. We need a <strong>more focused approach</strong>.</p>
+                        </div>
+                    </li>
+                    <li class="activity-item" onclick="toggleActivity(this)">
+                        <strong>2. Indexation Strategy</strong> — How is the indexation done?
+                        <div class="activity-details">
+                            <p>We'll use two types of indexation: <strong>Vertical indexation</strong> (traversing the ontology hierarchy) and <strong>Horizontal indexation</strong> (scanning the markup document properties).</p>
+                        </div>
+                    </li>
+                    <li class="activity-item" onclick="toggleActivity(this)">
+                        <strong>3. Query Processing Strategy</strong> — What does the UI look like?
+                        <div class="activity-details">
+                            <p>Users should just type a few words — <strong>no Semantic Web knowledge required!</strong> The interface should feel exactly like traditional search engines.</p>
+                        </div>
+                    </li>
+                    <li class="activity-item" onclick="toggleActivity(this)">
+                        <strong>4. Result Screening Strategy</strong> — How are results sorted?
+                        <div class="activity-details">
+                            <p>Results should be <strong>HTML pages</strong> that humans can read, not RDF documents or ontology files. This is what users expect and need.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 6: User Interface Design -->
+        <div class="slide slide-6">
+            <div class="slide-header">
+                <h1>Query Processing: The User Interface</h1>
+                <div class="subtitle">Section 10.3.1: Keep it Simple!</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Two Golden Rules</h3>
+                    <p>Based on empirical research: most users type only <strong>2-3 words</strong> and rarely use advanced search options.</p>
+                </div>
+
+                <div class="comparison-container">
+                    <div class="comparison-box traditional-web">
+                        <h3>❌ Bad: Complex Query</h3>
+                        <ul>
+                            <li>Requires Semantic Web knowledge</li>
+                            <li>Scares users away</li>
+                            <li style="font-family: monospace; font-size: 0.75rem;">[foaf:knows].[foaf:name]~"Liyang Yu"</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-box semantic-web">
+                        <h3>✓ Good: Simple Query</h3>
+                        <ul>
+                            <li>Just type keywords</li>
+                            <li>Feels familiar</li>
+                            <li style="font-family: monospace; font-size: 0.75rem;">digital SLR camera review</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="key-points">
+                    <h3>Design Requirements</h3>
+                    <ul>
+                        <li>Users must be able to simply type a few words to begin a search</li>
+                        <li>Search results should be links to <strong>HTML pages</strong>, not RDF/OWL documents</li>
+                        <li>Users should NOT need to know there's a semantic layer underneath</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>The One Exception</h4>
+                    <p>Users DO need to specify the <strong>domain/ontology</strong> — typically via a dropdown menu. This defines the semantic context for the search.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Focused Crawling -->
+        <div class="slide slide-7">
+            <div class="slide-header">
+                <h1>Discovery: More Focused Crawling</h1>
+                <div class="subtitle">Section 10.3.2: Finding Semantically Enhanced Pages</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-block">
+                    <h3>The Haystack Problem</h3>
+                    <p>Google indexed 4-5 billion pages (2005), but that's only ~1% of the Web. Finding semantically enhanced pages (SEPs) through normal crawling is simply <strong>not practical</strong>.</p>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>The Solution: Reverse Discovery</h3>
+                    <p>Instead of crawling the Web to find markup, use <strong>Swoogle's APIs</strong> to find all RDF documents using a specific ontology, then trace back to their Web pages!</p>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">1</div>
+                    <h4>Query Swoogle</h4>
+                    <p>Take the domain ontology and use Swoogle's Web services to find all RDF instance documents created using this ontology.</p>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">2</div>
+                    <h4>Identify Markup Documents</h4>
+                    <p>For each RDF document, check if it's a markup document for some Web page. Look for the <code>owl:ontology</code> tag with a URL label pointing back to the original page.</p>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">3</div>
+                    <h4>Index the Web Page</h4>
+                    <p>Download the Web page and index it using the semantic information from the markup document. Repeat until all RDF documents are processed.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Markup Document Structure -->
+        <div class="slide slide-8">
+            <div class="slide-header">
+                <h1>Markup Document Requirements</h1>
+                <div class="subtitle">How the crawler finds the original Web page</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>The Key Addition</h3>
+                    <p>Markup documents must include an <code>owl:ontology</code> tag that <strong>points back</strong> to the Web page being marked up.</p>
+                </div>
+
+                <div class="code-block" data-lang="RDF/XML">
+&lt;?xml version="1.0"?&gt;
+&lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         ... other namespaces ... &gt;
+
+  &lt;owl:ontology&gt;
+    &lt;rdfs:label&gt;markup&lt;/rdfs:label&gt;
+    &lt;rdfs:label&gt;http://www.example.com/NikonD70Review.html&lt;/rdfs:label&gt;
+  &lt;/owl:ontology&gt;
+
+  ... rest of the markup document ...
+
+&lt;/rdf:RDF&gt;</div>
+
+                <div class="key-points">
+                    <h3>How the Crawler Uses This</h3>
+                    <ul>
+                        <li>Load the RDF document into memory and parse it</li>
+                        <li>Look for the "markup" label in <code>owl:ontology</code></li>
+                        <li>Extract the URL label pointing to the original Web page</li>
+                        <li>If no such labels exist, discard — it's not a markup document</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Vertical Indexation -->
+        <div class="slide slide-9">
+            <div class="slide-header">
+                <h1>Vertical Indexation</h1>
+                <div class="subtitle">Section 10.3.3.1: Traversing the Ontology Hierarchy</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Purpose</h3>
+                    <p>Vertical indexation addresses the <strong>synonymy problem</strong> — different terms meaning the same thing — by collecting all related class names from the ontology hierarchy.</p>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">1</div>
+                    <h4>Parse & Collect Instances</h4>
+                    <p>Parse the RDF markup document to create a collection of all instances described in the document.</p>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">2</div>
+                    <h4>For Each Instance, Traverse Upward</h4>
+                    <p>Find the class type → Find all superclasses → Find all equivalent classes → Find equivalent classes of superclasses → Index all these class names!</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>Example: Nikon-D70 Instance</h4>
+                    <p>Type: <code>camera:SLR</code><br>
+                    Superclasses: <code>camera:Digital</code>, <code>camera:Camera</code><br>
+                    Equivalent: <code>DigitalCamera</code>, <code>SingleLensReflex</code><br>
+                    <strong>All become index keywords!</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Vertical Indexation Visual -->
+        <div class="slide slide-10">
+            <div class="slide-header">
+                <h1>Vertical Indexation: Visual Example</h1>
+                <div class="subtitle">Building the index from ontology traversal</div>
+            </div>
+            <div class="slide-content">
+                <div class="index-visual">
+                    <h4>Index Table After Vertical Indexation</h4>
+                    <div class="index-row">
+                        <span class="index-keyword">SLR</span>
+                        <span class="index-arrow">→</span>
+                        <div class="index-pages">
+                            <span class="index-page target">D70 Review Page</span>
+                            <span class="index-page">Canon 300D Page</span>
+                            <span class="index-page">...</span>
+                        </div>
+                    </div>
+                    <div class="index-row">
+                        <span class="index-keyword">Camera</span>
+                        <span class="index-arrow">→</span>
+                        <div class="index-pages">
+                            <span class="index-page target">D70 Review Page</span>
+                            <span class="index-page">Point & Shoot Guide</span>
+                            <span class="index-page">...</span>
+                        </div>
+                    </div>
+                    <div class="index-row">
+                        <span class="index-keyword">Digital</span>
+                        <span class="index-arrow">→</span>
+                        <div class="index-pages">
+                            <span class="index-page target">D70 Review Page</span>
+                            <span class="index-page">Digital vs Film</span>
+                            <span class="index-page">...</span>
+                        </div>
+                    </div>
+                    <div class="index-row">
+                        <span class="index-keyword">Photographer</span>
+                        <span class="index-arrow">→</span>
+                        <div class="index-pages">
+                            <span class="index-page target">D70 Review Page</span>
+                            <span class="index-page">Portrait Tips</span>
+                            <span class="index-page">...</span>
+                        </div>
+                    </div>
+                    <div class="index-row">
+                        <span class="index-keyword">Person</span>
+                        <span class="index-arrow">→</span>
+                        <div class="index-pages">
+                            <span class="index-page target">D70 Review Page</span>
+                            <span class="index-page">Author Bio</span>
+                            <span class="index-page">...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>🔑 Key Insight</h4>
+                    <p>The D70 Review page is now indexed under multiple conceptually related terms — even though the original page may not contain all these words!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Horizontal Indexation -->
+        <div class="slide slide-11">
+            <div class="slide-header">
+                <h1>Horizontal Indexation</h1>
+                <div class="subtitle">Section 10.3.3.2: Scanning the Markup Document</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Purpose</h3>
+                    <p>Horizontal indexation extracts keywords from the <strong>actual content</strong> of the markup document — instance names, labels, property names, and values.</p>
+                </div>
+
+                <table class="indexation-table">
+                    <thead>
+                        <tr>
+                            <th>Step</th>
+                            <th>Action</th>
+                            <th>Example Keywords</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2.1</td>
+                            <td>Index instance local name</td>
+                            <td><code>Nikon-D70</code>, <code>LiyangYu</code></td>
+                        </tr>
+                        <tr>
+                            <td>2.2</td>
+                            <td>Index <code>rdfs:label</code> values</td>
+                            <td><code>D-70</code>, <code>Liyang Yu</code></td>
+                        </tr>
+                        <tr>
+                            <td>2.3</td>
+                            <td>Index property local names</td>
+                            <td><code>pixel</code>, <code>has_spec</code>, <code>model</code></td>
+                        </tr>
+                        <tr>
+                            <td>2.3.1</td>
+                            <td>Index string property values</td>
+                            <td><code>D70 Review</code>, <code>Liyang Yu</code></td>
+                        </tr>
+                        <tr>
+                            <td>2.3.2</td>
+                            <td>Add nested instances to queue</td>
+                            <td><code>genid:ARP4420</code> (Specifications)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="example-box">
+                    <h4>Note: Numerical Values Are Ignored</h4>
+                    <p>The value "6" for <code>camera:pixel</code> is not indexed because it's non-string (numerical). This prevents meaningless matches.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Final Index -->
+        <div class="slide slide-12">
+            <div class="slide-header">
+                <h1>The Complete Index</h1>
+                <div class="subtitle">Combining Vertical + Horizontal Indexation</div>
+            </div>
+            <div class="slide-content">
+                <div class="index-visual">
+                    <h4>Final Index Table for D70 Review Page</h4>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px;">
+                        <div class="index-keyword" style="font-size: 0.75rem;">SLR</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">Camera</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">Digital</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">Photographer</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">Person</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">Nikon-D70</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">D70</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">D-70</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">Review</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">Liyang</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">Yu</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">Pixel</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">Specification</div>
+                        <div class="index-keyword" style="font-size: 0.75rem;">Model</div>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>Why NOT Index the Original HTML Page?</h3>
+                    <ul>
+                        <li>The semantics are captured in the markup document</li>
+                        <li>Unmarked-up info is assumed unrelated to the domain semantics</li>
+                        <li>This keeps the index focused and relevant</li>
+                    </ul>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>⚠️ Critical Implication</h4>
+                    <p>This makes the markup document <strong>crucial</strong>. You must capture ALL important information carefully. If your ontology can't express vital info, choose a different ontology or create your own!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Using the Prototype -->
+        <div class="slide slide-13">
+            <div class="slide-header">
+                <h1>Using the Prototype System</h1>
+                <div class="subtitle">Section 10.4: Domain Selection and Search</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>The One User Requirement</h3>
+                    <p>Users must specify the <strong>domain/ontology</strong> before searching. This defines the semantic context and determines which index table to use.</p>
+                </div>
+
+                <div class="architecture-diagram">
+                    <h4>Multi-Domain Search Engine Architecture</h4>
+                    <div class="arch-flow">
+                        <div class="arch-box">
+                            <h5>Photography</h5>
+                            <p>Camera ontology</p>
+                        </div>
+                        <div class="arch-box">
+                            <h5>Medicine</h5>
+                            <p>Medical ontology</p>
+                        </div>
+                        <div class="arch-box">
+                            <h5>Finance</h5>
+                            <p>Finance ontology</p>
+                        </div>
+                        <div class="arch-box">
+                            <h5>Education</h5>
+                            <p>Edu ontology</p>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin: 16px 0;">
+                        <span class="arch-arrow">↓ ↓ ↓ ↓</span>
+                    </div>
+                    <div class="arch-flow">
+                        <div class="arch-box highlight">
+                            <h5>Index₀</h5>
+                            <p>Photo pages</p>
+                        </div>
+                        <div class="arch-box highlight">
+                            <h5>Index₁</h5>
+                            <p>Medical pages</p>
+                        </div>
+                        <div class="arch-box highlight">
+                            <h5>Index₂</h5>
+                            <p>Finance pages</p>
+                        </div>
+                        <div class="arch-box highlight">
+                            <h5>Index₃</h5>
+                            <p>Edu pages</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>Same Word, Different Contexts</h4>
+                    <p>"SLR" appears in both Photography and Finance indices — but with completely different meanings (camera type vs. financial instrument). Domain selection ensures the right context!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Why Better Performance -->
+        <div class="slide slide-14">
+            <div class="slide-header">
+                <h1>Why Better Performance?</h1>
+                <div class="subtitle">Section 10.5: Addressing the Two Problems</div>
+            </div>
+            <div class="slide-content">
+                <div class="comparison-container">
+                    <div class="comparison-box semantic-web">
+                        <h3>✓ Solving Problem 1: Polysemy</h3>
+                        <ul>
+                            <li>Ontology defines semantics unambiguously</li>
+                            <li>Keywords derived from ontology classes/properties</li>
+                            <li>User selects domain → context is fixed</li>
+                            <li>Same word can exist in multiple indices with different meanings</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-box semantic-web">
+                        <h3>✓ Solving Problem 2: Synonymy</h3>
+                        <ul>
+                            <li>Vertical indexation collects superclasses</li>
+                            <li><code>rdfs:label</code> captures synonyms</li>
+                            <li>Equivalent classes are indexed</li>
+                            <li>Search can find pages without exact keyword match!</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-block">
+                    <h3>The Power of rdfs:label</h3>
+                    <p>Use <code>rdfs:label</code> liberally to add synonyms! There's <strong>no limit</strong> to how many labels you can use for a single instance or class.</p>
+                </div>
+
+                <div class="code-block" data-lang="RDF/XML">
+&lt;rdf:Description rdf:about="...#someMap"&gt;
+  &lt;rdf:type rdf:resource="...#Map"/&gt;
+  &lt;rdfs:label&gt;map&lt;/rdfs:label&gt;
+  &lt;rdfs:label&gt;chart&lt;/rdfs:label&gt;
+  &lt;rdfs:label&gt;atlas&lt;/rdfs:label&gt;
+  &lt;rdfs:label&gt;drawing&lt;/rdfs:label&gt;
+  &lt;rdfs:label&gt;diagram&lt;/rdfs:label&gt;
+&lt;/rdf:Description&gt;</div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Interactive Demo -->
+        <div class="slide slide-15">
+            <div class="slide-header">
+                <h1>Interactive: Search Comparison</h1>
+                <div class="subtitle">Traditional vs. Semantic Search</div>
+            </div>
+            <div class="slide-content">
+                <div class="interactive-demo">
+                    <h3>🔍 Search for "digital camera"</h3>
+                    <p style="color: #64748b; font-size: 0.875rem; margin-bottom: 16px;">Domain: Photography (Camera Ontology)</p>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Try: 'SLR', 'digital camera', 'photographer'" value="digital camera">
+                    <button class="search-btn" onclick="performSearch()">Compare Results</button>
+                    
+                    <div class="search-results" id="searchResults">
+                        <div class="comparison-container" style="margin: 0;">
+                            <div class="comparison-box traditional-web">
+                                <h3>Traditional Search</h3>
+                                <div class="result-item">
+                                    <strong>Canon Printer Digital Interface</strong>
+                                    <p>Contains "digital" and "Canon" (camera brand)...</p>
+                                </div>
+                                <div class="result-item">
+                                    <strong>Digital Marketing Camera Ready</strong>
+                                    <p>Contains "digital" and "camera"...</p>
+                                </div>
+                                <div class="result-item">
+                                    <strong>Nikon D70 Review</strong>
+                                    <p>Contains "digital" in text...</p>
+                                </div>
+                            </div>
+                            <div class="comparison-box semantic-web">
+                                <h3>Semantic Search</h3>
+                                <div class="result-item">
+                                    <strong>Nikon D70 Review ✓</strong>
+                                    <p>Type: SLR → Digital → Camera (ontology match)</p>
+                                </div>
+                                <div class="result-item">
+                                    <strong>Canon 300D Guide ✓</strong>
+                                    <p>Type: DigitalCamera (equivalent class match)</p>
+                                </div>
+                                <div class="result-item">
+                                    <strong>Sony Alpha Tutorial ✓</strong>
+                                    <p>Type: Camera (superclass match)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>💭 Notice the Difference</h4>
+                    <p>Traditional search returns irrelevant pages containing keywords. Semantic search returns pages whose MEANING matches, even without exact keyword matches!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Implementation Suggestion -->
+        <div class="slide slide-16">
+            <div class="slide-header">
+                <h1>Implementation Exercise</h1>
+                <div class="subtitle">Section 10.6: Build Your Own!</div>
+            </div>
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <h3>Hands-On Learning</h3>
+                    <p>Build both a traditional and semantic search engine on your local machine to truly understand the difference!</p>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">1</div>
+                    <h4>Preparation</h4>
+                    <p>Create HTML documents about digital cameras on your local drive. Include both sales pages (prices, vendors) and review pages (performance, specs).</p>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">2</div>
+                    <h4>Build Traditional Search Engine</h4>
+                    <p>Write a Java crawler to traverse directories, find HTML files, and create a full-text index. Search for "SLR" — you'll see ALL camera pages returned.</p>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">3</div>
+                    <h4>Build Semantic Search Engine</h4>
+                    <p>Markup the review pages using the camera ontology. Rewrite your crawler to use Jena APIs for vertical and horizontal indexation. Search "SLR" — only relevant review pages return!</p>
+                </div>
+
+                <div class="key-points">
+                    <h3>Tools You'll Need</h3>
+                    <ul>
+                        <li><strong>Java</strong> — for the crawler and search interface</li>
+                        <li><strong>Jena APIs</strong> — for parsing RDF and reasoning</li>
+                        <li><strong>Database</strong> — for storing the index tables</li>
+                        <li><strong>Camera Ontology</strong> — your domain model</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Quiz -->
+        <div class="slide slide-17">
+            <div class="slide-header">
+                <h1>Knowledge Check</h1>
+                <div class="subtitle">Test your understanding</div>
+            </div>
+            <div class="slide-content">
+                <div class="quiz-container">
+                    <h3>Quiz: Semantic Search Engines</h3>
+                    <p class="quiz-question">Which indexation type addresses the synonymy problem (different terms, same meaning)?</p>
+                    <button class="quiz-option" onclick="checkAnswer(this, true)">A) Vertical Indexation — traverses ontology hierarchy</button>
+                    <button class="quiz-option" onclick="checkAnswer(this, false)">B) Horizontal Indexation — scans markup properties</button>
+                    <button class="quiz-option" onclick="checkAnswer(this, false)">C) Full-text Indexation — indexes all page words</button>
+                    <button class="quiz-option" onclick="checkAnswer(this, false)">D) Keyword Indexation — matches exact terms</button>
+                    <div class="feedback correct" id="correctFeedback">✓ Correct! Vertical indexation collects superclasses and equivalent classes, treating them as synonymous keywords.</div>
+                    <div class="feedback incorrect" id="incorrectFeedback">✗ Not quite. Vertical indexation addresses synonymy by traversing the ontology to find related classes (superclasses, equivalents).</div>
+                </div>
+
+                <div class="quiz-container" style="margin-top: 16px;">
+                    <p class="quiz-question">Why must users specify a domain before searching?</p>
+                    <button class="quiz-option" onclick="checkAnswer2(this, false)">A) To limit server load</button>
+                    <button class="quiz-option" onclick="checkAnswer2(this, true)">B) To establish semantic context and resolve polysemy</button>
+                    <button class="quiz-option" onclick="checkAnswer2(this, false)">C) To filter out spam results</button>
+                    <button class="quiz-option" onclick="checkAnswer2(this, false)">D) To improve page ranking</button>
+                    <div class="feedback correct" id="correctFeedback2">✓ Correct! Domain selection fixes the semantic context, ensuring keywords have unambiguous meanings within that domain's ontology.</div>
+                    <div class="feedback incorrect" id="incorrectFeedback2">✗ The domain specifies which ontology (and index table) to use, resolving the polysemy problem where the same word can have different meanings.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: Summary -->
+        <div class="slide slide-18">
+            <div class="slide-header">
+                <h1>Chapter Summary</h1>
+                <div class="subtitle">Key takeaways from Lecture 10</div>
+            </div>
+            <div class="slide-content">
+                <div class="key-points">
+                    <h3>What We Learned</h3>
+                    <ul>
+                        <li>Traditional search fails due to <strong>polysemy</strong> (same term, different meanings) and <strong>synonymy</strong> (different terms, same meaning)</li>
+                        <li><strong>Focused crawling</strong> uses Swoogle to find markup documents, then traces back to Web pages</li>
+                        <li><strong>Vertical indexation</strong> traverses the ontology hierarchy to collect synonymous class names</li>
+                        <li><strong>Horizontal indexation</strong> extracts keywords from markup content (instances, labels, properties)</li>
+                        <li>Users specify <strong>domain/ontology</strong> to establish semantic context</li>
+                        <li>The <code>rdfs:label</code> property is powerful for capturing synonyms</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>The Big Picture</h3>
+                    <p>This prototype shows how semantic markup can dramatically improve search by making <strong>meaning</strong> — not just keywords — the basis for matching queries to pages.</p>
+                </div>
+
+                <div class="discussion-prompt">
+                    <h4>📚 What's Next?</h4>
+                    <p>Part 4 begins: <strong>Semantic Web Services!</strong> We'll apply these same principles to automatically discover, invoke, and compose Web services.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" onclick="prevSlide()" disabled>←</button>
+            <button class="control-btn" id="nextBtn" onclick="nextSlide()">→</button>
+        </div>
+
+        <!-- Slide Counter -->
+        <div class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">18</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 18;
+
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index + 1 === currentSlide) {
+                    slide.classList.add('active');
+                } else if (index + 1 < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            document.getElementById('currentSlide').textContent = currentSlide;
+            document.getElementById('totalSlides').textContent = totalSlides;
+
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        function toggleReveal(id) {
+            const content = document.getElementById(id);
+            content.classList.toggle('expanded');
+        }
+
+        function toggleActivity(element) {
+            const details = element.querySelector('.activity-details');
+            details.classList.toggle('show');
+        }
+
+        function checkAnswer(button, isCorrect) {
+            const options = button.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.disabled = true;
+                opt.style.cursor = 'default';
+            });
+            
+            if (isCorrect) {
+                button.classList.add('correct');
+                document.getElementById('correctFeedback').classList.add('show');
+            } else {
+                button.classList.add('incorrect');
+                document.getElementById('incorrectFeedback').classList.add('show');
+                options[0].classList.add('correct');
+            }
+        }
+
+        function checkAnswer2(button, isCorrect) {
+            const options = button.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.disabled = true;
+                opt.style.cursor = 'default';
+            });
+            
+            if (isCorrect) {
+                button.classList.add('correct');
+                document.getElementById('correctFeedback2').classList.add('show');
+            } else {
+                button.classList.add('incorrect');
+                document.getElementById('incorrectFeedback2').classList.add('show');
+                options[1].classList.add('correct');
+            }
+        }
+
+        function performSearch() {
+            const results = document.getElementById('searchResults');
+            results.style.display = 'block';
+        }
+
+        updateSlide();
+    </script>
+</body>
+</html>
